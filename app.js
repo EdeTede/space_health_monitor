@@ -96,20 +96,91 @@ function renderAssess(){
       (r.usable?("<b>"+r.factor.toFixed(2)+"&#215;</b> the modelled burden."):"a burden the model cannot be compared against.")+noTxt;
 
   D("buys").innerHTML="";
-  D("plot").innerHTML=barPlot(r.vge,f.vge);
+  paintBar(r.vge,f.vge);
 }
-function barPlot(meas,model){
-  var W=760,H=92,L=4,w=W-8;
-  function x(v){return L+w*Math.min(100,v)/100}
-  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg">';
-  s+='<rect x="'+L+'" y="34" width="'+w+'" height="8" rx="4" fill="#171f2a"/>';
-  s+='<rect x="'+L+'" y="34" width="'+(x(meas)-L)+'" height="8" rx="4" fill="'+(meas>model?"#e0a53a":"#46c97e")+'"/>';
-  s+='<line x1="'+x(model)+'" y1="27" x2="'+x(model)+'" y2="49" stroke="#74849a" stroke-width="2"/>';
-  s+='<text x="'+x(model)+'" y="20" fill="#74849a" font-size="11" font-family="monospace" text-anchor="middle">model '+model.toFixed(0)+'</text>';
-  s+='<text x="'+x(meas)+'" y="66" fill="#e9eff6" font-size="11" font-family="monospace" text-anchor="middle">measured '+meas.toFixed(0)+'</text>';
-  s+='<text x="'+L+'" y="84" fill="#74849a" font-size="10" font-family="monospace">0</text>';
-  s+='<text x="'+(W-4)+'" y="84" fill="#74849a" font-size="10" font-family="monospace" text-anchor="end">100</text>';
-  return s+'</svg>';
+var BAR={W:760,H:100,L:4,bound:false,drag:false};
+function barX(v){return BAR.L+(BAR.W-8)*Math.min(100,Math.max(0,v))/100}
+function barV(px){return Math.min(100,Math.max(0,(px-BAR.L)/(BAR.W-8)*100))}
+function hbFac(hb){return (10.22+hb)/(1.7*hb)}
+function postFromMeasuredVge(vge){
+  var f=forward(prof());
+  var explained=K.kOx*f.H+(S.kDust||0)*(S.dust||0);
+  var residual=Math.max(0,vge)*K.kBub/100;
+  var corrected=-residual-explained;
+  var dPct=corrected/(hbFac(S.hb)/hbFac(K.hbStd));
+  return Math.max(0,S.pre*(1+dPct/100));
+}
+function ensureBar(){
+  var host=D("plot");
+  if(!host.querySelector("#vgeBar")){
+    BAR.bound=false;
+    host.innerHTML=
+      '<svg id="vgeBar" viewBox="0 0 '+BAR.W+' '+BAR.H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;touch-action:none;cursor:ew-resize">'+
+        '<rect x="'+BAR.L+'" y="38" width="'+(BAR.W-8)+'" height="10" rx="5" fill="#171f2a"/>'+
+        '<rect id="vgeFill" x="'+BAR.L+'" y="38" width="0" height="10" rx="5" fill="#46c97e" style="transition:width .35s ease,fill .35s ease"/>'+
+        '<line id="vgeModel" x1="0" y1="30" x2="0" y2="56" stroke="#74849a" stroke-width="2" style="transition:x1 .35s ease,x2 .35s ease"/>'+
+        '<text id="vgeModelLbl" x="0" y="22" fill="#74849a" font-size="11" font-family="monospace" text-anchor="middle" style="transition:x .35s ease">model 0</text>'+
+        '<g id="vgeMeasG" style="transition:transform .35s ease">'+
+          '<line x1="0" y1="36" x2="0" y2="60" stroke="#e9eff6" stroke-width="2"/>'+
+          '<circle cx="0" cy="43" r="7" fill="#0b121c" stroke="#e9eff6" stroke-width="2"/>'+
+          '<text id="vgeMeasLbl" x="0" y="76" fill="#e9eff6" font-size="11" font-family="monospace" text-anchor="middle">measured 0</text>'+
+        '</g>'+
+        '<text x="'+BAR.L+'" y="94" fill="#74849a" font-size="10" font-family="monospace">0</text>'+
+        '<text x="'+(BAR.W-4)+'" y="94" fill="#74849a" font-size="10" font-family="monospace" text-anchor="end">100 · drag measured</text>'+
+      '</svg>'+
+      '<input id="vgeScrub" type="range" min="0" max="100" step="0.5" value="0" aria-label="Measured VGE index" style="width:100%;margin-top:4px">';
+  }
+  if(BAR.bound)return;
+  BAR.bound=true;
+  var svg=host.querySelector("#vgeBar");
+  function setFromClientX(clientX){
+    var rect=svg.getBoundingClientRect();
+    var px=(clientX-rect.left)/rect.width*BAR.W;
+    var v=barV(px);
+    S.post=postFromMeasuredVge(v);
+    var postEl=D("post");if(postEl)postEl.value=S.post.toFixed(2);
+    render();
+  }
+  function onDown(e){
+    BAR.drag=true;
+    host.querySelector("#vgeMeasG").style.transition="none";
+    host.querySelector("#vgeFill").style.transition="none";
+    setFromClientX(e.touches?e.touches[0].clientX:e.clientX);
+    e.preventDefault();
+  }
+  function onMove(e){
+    if(!BAR.drag)return;
+    setFromClientX(e.touches?e.touches[0].clientX:e.clientX);
+  }
+  function onUp(){
+    if(!BAR.drag)return;
+    BAR.drag=false;
+    host.querySelector("#vgeMeasG").style.transition="transform .35s ease";
+    host.querySelector("#vgeFill").style.transition="width .35s ease,fill .35s ease";
+  }
+  svg.addEventListener("pointerdown",onDown);
+  window.addEventListener("pointermove",onMove);
+  window.addEventListener("pointerup",onUp);
+  svg.addEventListener("touchstart",onDown,{passive:false});
+  window.addEventListener("touchmove",onMove,{passive:false});
+  window.addEventListener("touchend",onUp);
+  D("vgeScrub").addEventListener("input",function(){
+    S.post=postFromMeasuredVge(parseFloat(this.value)||0);
+    var postEl=D("post");if(postEl)postEl.value=S.post.toFixed(2);
+    render();
+  });
+}
+function paintBar(meas,model){
+  ensureBar();
+  var fill=D("vgeFill"), mdl=D("vgeModel"), ml=D("vgeModelLbl"), g=D("vgeMeasG"), tl=D("vgeMeasLbl"), scrub=D("vgeScrub");
+  var xm=barX(meas), xo=barX(model);
+  fill.setAttribute("width",Math.max(0,xm-BAR.L));
+  fill.setAttribute("fill",meas>model?"#e0a53a":"#46c97e");
+  mdl.setAttribute("x1",xo);mdl.setAttribute("x2",xo);
+  ml.setAttribute("x",xo);ml.textContent="model "+model.toFixed(0);
+  g.setAttribute("transform","translate("+xm+" 0)");
+  tl.textContent="measured "+meas.toFixed(0);
+  if(scrub&&document.activeElement!==scrub)scrub.value=String(Math.round(meas*2)/2);
 }
 
 /* ---------- PLANNING ----------
