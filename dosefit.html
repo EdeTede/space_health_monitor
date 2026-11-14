@@ -1436,7 +1436,7 @@ function sync(requestApi=true){
   const d=Math.round(day);$("day").value=d;$("dayV").textContent=d;
   const dist=twinCache&&apiOnline?twinCache.distance_mkm:Math.max(0,225*(1-day/210));
   $("distV").textContent=Number(dist).toFixed(0);
-  document.querySelectorAll(".reg").forEach(el=>{
+  document.querySelectorAll("#regs .reg").forEach(el=>{
     const r=REG[+el.dataset.i];
     const twinR=twinCache?.regions?.find(x=>x.id===r.id);
     const v=twinR?twinR.density:dens(r,day,mode);
@@ -1497,9 +1497,9 @@ document.querySelectorAll(".seg button[data-scan]").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".seg button[data-scan]").forEach(x=>x.setAttribute("aria-pressed",x===b));
   fetchTwin(true).then(()=>{updateBoneLooks();if(scanRegion)updateScanHud(scanRegion,1);else startScan(true)});
 });
-document.querySelectorAll(".reg").forEach(b=>b.onclick=()=>{
+document.querySelectorAll("#regs .reg").forEach(b=>b.onclick=()=>{
   const i=+b.dataset.i;focus=focus===i?null:i;
-  document.querySelectorAll(".reg").forEach(x=>x.setAttribute("aria-pressed",focus===+x.dataset.i));
+  document.querySelectorAll("#regs .reg").forEach(x=>x.setAttribute("aria-pressed",focus===+x.dataset.i));
   if(focus!==null){scanRegion=REG[focus].id;updateScanHud(scanRegion,1);$("scanStatus").textContent="Isolated"}
   updateBoneLooks();
 });
