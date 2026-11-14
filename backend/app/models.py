@@ -1,141 +1,68 @@
-"""Pydantic request/response models for Kiwinaut API."""
+"""Pydantic request/response models for Kiwinaut decompress API."""
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import BaseModel, Field
-
-PlanMode = Literal["dose", "std"]
-ScanMode = Literal["density", "dose", "risk"]
-SenseType = Literal["load", "radiation", "hrv", "eva", "flare", "symptom"]
 
 
 class HealthOut(BaseModel):
     status: str = "ok"
-    service: str = "dosefit"
+    service: str = "kiwinaut"
 
 
-class AstronautOut(BaseModel):
+class DecompressIn(BaseModel):
+    day: float = Field(default=150, ge=0, le=210)
+    dlco_pct: float | None = Field(default=None, ge=-40, le=20)
+    dlco_pre: float | None = Field(default=None, ge=0, le=80)
+    dlco_post: float | None = Field(default=None, ge=0, le=80)
+    hb: float = Field(default=13.3, ge=5, le=25)
+    hydration: float = Field(default=70, ge=0, le=100)
+    bubble_grade: int = Field(default=0, ge=0, le=4)
+    symptoms: bool = False
+    prebreathe_min: float | None = Field(default=None, ge=0, le=600)
+    suit_p: float | None = Field(default=None, ge=2, le=15)
+
+
+class DecompressPartOut(BaseModel):
+    label: str
+    v: int
+    push: bool = False
+
+
+class DecompressCardOut(BaseModel):
     id: str
-    name: str
-    role: str
-    targets: dict[str, float]
-
-
-class MissionOut(BaseModel):
-    id: str
-    name: str
-    duration_days: int
-    earth_mars_mkm: float
-    plan_mode: PlanMode
-    day: float
-    active_scenario: str
-    astronaut_id: str
-    distance_mkm: float
-
-
-class DayIn(BaseModel):
-    day: float = Field(ge=0, le=210)
-
-
-class ModeIn(BaseModel):
-    mode: PlanMode
-
-
-class RegionTwinOut(BaseModel):
-    id: str
-    name: str
-    density: float
-    density_landing: float
-    density_alt_landing: float
-    load_gap: float
-    fracture_risk: float
-    rgb: list[int]
-    tip: str
-
-
-class TwinOut(BaseModel):
-    day: float
-    mode: PlanMode
-    distance_mkm: float
-    walkoff_readiness: float
-    walkoff_ready: bool
-    event_html: str
-    active_scenario: str
-    regions: list[RegionTwinOut]
-
-
-class SenseEventIn(BaseModel):
-    day: float | None = None
-    type: SenseType
-    payload: dict[str, Any] = Field(default_factory=dict)
-
-
-class SenseBatchIn(BaseModel):
-    events: list[SenseEventIn]
-
-
-class SenseOut(BaseModel):
-    accepted: int
-    mission_day: float
-
-
-class RegionScoreOut(BaseModel):
-    id: str
-    name: str
-    mechanical: float
-    density: float
-    load_gap: float
-    fracture_risk: float
-    target: float
-
-
-class ScoreOut(BaseModel):
-    day: float
-    mode: PlanMode
-    mechanical: list[RegionScoreOut]
-    radiation_pct: float
-    radiation_budget_pfu: float
-    readiness: float
-    resting_hr: float
-    hrv_ms: float
-
-
-class WorkoutSession(BaseModel):
+    ico: str
     title: str
-    detail: str
-    regions: str
-    priority: int = 1
-    flags: list[str] = Field(default_factory=list)
-    how: str | None = None
-    steps: list[str] = Field(default_factory=list)
+    reason: str
+    color: str
 
 
-class AdaptPlanOut(BaseModel):
-    scenario_id: str
-    scenario_name: str
-    why: str
-    sessions: list[WorkoutSession]
-
-
-class ScenarioOut(BaseModel):
-    id: str
-    name: str
-    description: str
-    active: bool = False
-
-
-class ActivateOut(BaseModel):
-    scenario: ScenarioOut
-    plan: AdaptPlanOut
-    mission: MissionOut
-
-
-class EvaPrebreatheOut(BaseModel):
+class DecompressOut(BaseModel):
     day: float
-    dcs_risk: float
-    dcs_label: Literal["LOW", "MODERATE", "HIGH"]
+    dlco_pct: float
+    dlco_pre: float | None = None
+    dlco_post: float | None = None
+    hb: float | None = None
+    hydration: float
+    bubble_grade: int
+    symptoms: bool
+    score: int
+    level: Literal["green", "yellow", "orange", "red"]
+    band: Literal["green", "yellow", "orange", "red"]
+    name: str
+    blurb: str
+    drop: int
+    parts: list[DecompressPartOut]
+    cards: list[DecompressCardOut]
+    coach: str
+    day_note: str
     rest_prebreathe_h: float
     exercise_prebreathe_h: float
-    heavy_loading_blocked: bool
-    guidance: str
+    vge: float | None = None
+    dcs: float | None = None
+    model_vge: float | None = None
+    model_dcs: float | None = None
+    personal_factor: float | None = None
+    oxygen_time_min: float | None = None
+    source: str = "eva-model"

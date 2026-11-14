@@ -1,8 +1,8 @@
 # Kiwinaut backend
 
-Python FastAPI + SQLite service for the Kiwinaut demo, built for NASA Space Apps Challenge 2026.
+FastAPI service for the Kiwinaut demo (NASA Space Apps Challenge 2026).
 
-**Sense → Score → Adapt** loop powers the bone-twin scan in `../dosefit.html`.
+Powers the **Decompression Test** on `../dosefit-future.html` using the EVA DLCO model (`model.js` → `app/engines/eva_model.py`).
 
 ## Run
 
@@ -24,16 +24,14 @@ PYTHONPATH="./.vendor:$PYTHONPATH" python3 -m uvicorn app.main:app --host 127.0.
 
 Open http://127.0.0.1:8791/
 
-## Key endpoints
+## Endpoints
 
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/api/health` | Liveness |
-| GET | `/api/twin?day=&mode=&scan=` | Bone twin snapshot for the scan HUD |
-| GET | `/api/score?day=&mode=` | Two-dose dashboard |
-| POST | `/api/sense` | Ingest wearable / dosimeter / HRV / EVA events |
-| GET | `/api/adapt/next` | Next workout plan |
-| POST | `/api/scenarios/{id}/activate` | Activate demo scenario |
-| GET | `/api/eva/prebreathe` | DCS risk + exercise prebreathe |
+| POST | `/api/decompress/test` | DLCO → VGE / DCS gate + decision cards |
+| GET | `/api/decompress/test` | Same, query-string convenience |
+
+Also serves `/`, `/eva-calc.html`, `/kiwinaut-eva.html`, `/model.js`, `/app.js`, `/DOCUMENTATION.md`, `/VARIABLE-LOG.md`, `/brand/*`, `/models/*`, `/vendor/*`.
 
 Sample data only — not clinical or operational advice.
