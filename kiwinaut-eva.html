@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
+<title>Kiwinaut · Spacewalk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>
+/* Served by the backend: use the vendored three.js (works offline).
+   Opened by double-click (file://): browsers block local module files, so fall back to the CDN. */
+(function(){
+  var local=location.protocol!=="file:";
+  var map={imports:{
+    "three":local?"./vendor/three/three.module.js":"https://unpkg.com/three@0.170.0/build/three.module.js",
+    "three/addons/":local?"./vendor/three/addons/":"https://unpkg.com/three@0.170.0/examples/jsm/"
+  }};
+  var s=document.createElement("script");s.type="importmap";s.textContent=JSON.stringify(map);
+  document.currentScript.after(s);
+})();
+</script>
+<style>
+:root{
+  --void:#03060d; --glass:rgba(8,16,26,.52); --line:rgba(142,224,79,.16); --line2:rgba(142,224,79,.3);
+  --fg:#eef6e8; --dim:#93a68f; --faint:rgba(147,166,143,.55);
+  --kiwi:#8ee04f; --kiwi-bright:#c6f27a; --kiwi-deep:#4e8a1e; --ok:#5ef0c2;
+  --amber:#ffc857; --orange:#ff8a3d; --red:#ff5d6c;
+  --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --ease:cubic-bezier(.22,.8,.24,1);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--void);color:var(--fg);font-family:var(--body);font-size:14px;overflow-x:hidden}
+button{font:inherit;color:inherit}
+.lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.num{font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* stage */
+.stage{position:fixed;inset:0;z-index:0}
+#c{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+#c:active{cursor:grabbing}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(3,6,13,.7) 100%)}
+
+/* overlay grid */
+.ui{position:fixed;inset:0;z-index:2;display:grid;grid-template-columns:minmax(0,340px) 1fr minmax(0,300px);grid-template-rows:auto 1fr auto;gap:18px;padding:22px 26px;pointer-events:none}
+.ui > *{pointer-events:auto}
+.brand{grid-column:1/3;grid-row:1;align-self:start;display:grid;gap:6px;pointer-events:none}
+.lock{display:flex;align-items:center;gap:10px}
+.lock img{width:26px;height:26px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(142,224,79,.45))}
+.lock .name{font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.04em}
+.lock .tag{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(24px,3.2vw,38px);line-height:1.04;margin:6px 0 0;letter-spacing:-.005em;text-shadow:0 0 30px rgba(3,6,13,.9)}
+.value-line{margin:0;font-family:var(--display);font-weight:600;font-size:14px;color:var(--kiwi-bright);letter-spacing:.02em;text-shadow:0 0 14px rgba(142,224,79,.3)}
+.nav{display:flex;gap:16px;margin-top:6px;pointer-events:auto}
+.nav a{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);text-decoration:none;border-bottom:1px solid transparent;transition:color .3s var(--ease),border-color .3s var(--ease)}
+.nav a:hover{color:var(--kiwi-bright);border-color:var(--line2)}
+
+/* key numbers */
+.keys{grid-column:3;grid-row:1/3;align-self:start;justify-self:end;display:grid;gap:18px;text-align:right;min-width:220px}
+.key .num{font-size:32px;line-height:1;margin-top:4px;transition:color .6s var(--ease)}
+.key .num small{font-size:.42em;color:var(--dim);margin-left:3px;letter-spacing:.06em}
+.key .sub{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:4px;font-variant-numeric:tabular-nums}
+.level{display:inline-block;margin-left:8px;font-family:var(--mono);font-size:10px;letter-spacing:.18em;padding:3px 7px;border:1px solid currentColor;border-radius:2px;vertical-align:6px;transition:color .6s var(--ease)}
+.gain{color:var(--kiwi-bright)}
+.details-btn{justify-self:end;background:none;border:0;border-bottom:1px solid var(--line2);padding:2px 0;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);transition:color .3s var(--ease)}
+.details-btn:hover,.details-btn[aria-expanded="true"]{color:var(--kiwi-bright)}
+.details{display:grid;grid-template-columns:auto auto;gap:7px 18px;justify-content:end;font-family:var(--mono);font-size:11px;color:var(--dim);max-height:0;overflow:hidden;opacity:0;transition:max-height .6s var(--ease),opacity .5s var(--ease)}
+.details.open{max-height:260px;opacity:1}
+.details b{color:var(--fg);font-weight:400;font-variant-numeric:tabular-nums;text-align:right}
+
+/* recommendations */
+.recs{grid-column:1;grid-row:2;align-self:end;display:grid;gap:10px;max-height:100%;overflow:auto;scrollbar-width:thin;transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.recs.tucked .cards,.recs.tucked .presets-wrap,.recs.tucked .recs-head,.recs.tucked .lockline{display:none}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.recs-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:0 2px}
+.recs-head button{background:none;border:0;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+.cards{display:grid;gap:6px}
+.card{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:11px 13px;cursor:pointer;text-align:left;width:100%;border:1px solid var(--line);border-radius:8px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:border-color .4s var(--ease),background .4s var(--ease),opacity .4s var(--ease)}
+.card:hover{border-color:var(--line2)}
+.card[aria-pressed="true"]{border-color:rgba(142,224,79,.55);background:rgba(142,224,79,.08)}
+.card[disabled]{cursor:default;opacity:.7}
+.card .t{font-family:var(--display);font-weight:600;font-size:13.5px;letter-spacing:.01em}
+.card .v{grid-column:1;font-family:var(--mono);font-size:10.5px;color:var(--dim);line-height:1.45}
+.card .v em{font-style:normal;color:var(--kiwi-bright)}
+.card .tick{grid-column:2;grid-row:1/3;width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:11px;color:var(--void);transition:background .35s var(--ease),border-color .35s var(--ease)}
+.card[aria-pressed="true"] .tick{background:var(--kiwi);border-color:var(--kiwi)}
+.lockline{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.06em;padding:0 2px}
+.presets-wrap{display:grid;gap:6px;padding:2px}
+.presets{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:none;border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);transition:color .3s var(--ease),border-color .3s var(--ease),background .3s var(--ease)}
+.chip:hover{border-color:var(--line2);color:var(--fg)}
+.chip[aria-pressed="true"]{color:var(--void);border-color:transparent}
+.chip[data-p="green"][aria-pressed="true"]{background:var(--ok)}
+.chip[data-p="yellow"][aria-pressed="true"]{background:var(--amber)}
+.chip[data-p="orange"][aria-pressed="true"]{background:var(--orange)}
+.chip[data-p="red"][aria-pressed="true"]{background:var(--red)}
+.pill{justify-self:start;display:none;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);transition:border-color .4s var(--ease),color .4s var(--ease)}
+.pill i{width:6px;height:6px;border-radius:50%;background:var(--kiwi);box-shadow:0 0 8px var(--kiwi)}
+.recs.tucked .pill{display:inline-flex}
+.pill.warn{border-color:rgba(255,200,87,.5);color:var(--amber)}
+.pill.warn i{background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+
+/* bottom */
+.bottom{grid-column:1/-1;grid-row:3;display:grid;gap:10px}
+.coach{justify-self:center;max-width:720px;min-height:20px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--kiwi-bright);letter-spacing:.02em;text-shadow:0 0 12px rgba(3,6,13,.95)}
+.coach .cur{display:inline-block;width:6px;height:12px;background:var(--kiwi-bright);margin-left:3px;vertical-align:-1px;opacity:.7;animation:blink 1s step-end infinite}
+.timeline{padding:12px 16px 12px}
+.tl-top{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.ctl{background:none;border:1px solid var(--line2);border-radius:999px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;color:var(--kiwi-bright);transition:background .3s var(--ease),border-color .3s var(--ease);flex:none}
+.ctl:hover{background:rgba(142,224,79,.1)}
+.ctl svg{width:12px;height:12px;fill:currentColor}
+.ctl.sm{width:28px;height:28px}
+.clock{font-family:var(--mono);font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.clock b{color:var(--fg);font-weight:400}
+.spacer{flex:1}
+.seg{display:flex;gap:2px}
+.seg button{background:none;border:0;border-bottom:1px solid transparent;padding:3px 2px;margin:0 5px;cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);transition:color .3s var(--ease),border-color .3s var(--ease)}
+.seg button[aria-pressed="true"]{color:var(--kiwi-bright);border-color:var(--kiwi-bright)}
+.track{position:relative;height:74px}
+#spark{position:absolute;inset:0 0 18px 0;width:100%;height:56px;overflow:visible}
+.phases{position:absolute;left:0;right:0;bottom:0;height:18px;display:flex}
+.phases button{flex:none;min-width:0;background:none;border:0;border-left:1px solid var(--line);padding:4px 0 0 6px;cursor:pointer;text-align:left;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:clip;transition:color .4s var(--ease)}
+.phases button.on{color:var(--kiwi-bright)}
+.phases button.abort{color:var(--red)}
+.phases button.cut{color:var(--faint);text-decoration:line-through}
+#scrub{position:absolute;left:0;right:0;top:0;bottom:18px;width:100%;height:56px;margin:0;opacity:0;cursor:pointer}
+.foot{grid-column:1/-1;font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.04em;text-align:center}
+
+/* banner */
+.banner{position:fixed;left:50%;top:22%;transform:translate(-50%,-10px);z-index:3;max-width:min(560px,calc(100% - 32px));padding:18px 22px;text-align:center;opacity:0;pointer-events:none;transition:opacity .6s var(--ease),transform .6s var(--ease);border-radius:12px;background:rgba(10,8,14,.62);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,93,108,.45);box-shadow:0 0 60px rgba(255,93,108,.18)}
+.banner.show{opacity:1;transform:translate(-50%,0)}
+.banner .h{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:.04em;color:var(--red)}
+.banner .b{font-family:var(--mono);font-size:12px;color:var(--fg);margin-top:8px;line-height:1.5}
+.banner.ok{border-color:rgba(94,240,194,.45);box-shadow:0 0 60px rgba(94,240,194,.14)}
+.banner.ok .h{color:var(--ok)}
+.banner.warn{border-color:rgba(255,200,87,.5);box-shadow:0 0 60px rgba(255,200,87,.14)}
+.banner.warn .h{color:var(--amber)}
+.loading{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);transition:opacity .8s var(--ease)}
+:focus-visible{outline:1px solid var(--amber);outline-offset:3px}
+
+/* phone / narrow */
+@media (max-width:820px){
+  .stage{position:relative;height:58vh;min-height:340px}
+  .ui{position:relative;inset:auto;display:flex;flex-direction:column;gap:16px;padding:16px;margin-top:-58vh;pointer-events:none}
+  .ui > *{min-width:0;max-width:100%}
+  .brand{min-height:calc(58vh - 32px);display:flex;flex-direction:column;gap:6px}
+  .brand .value-line{margin-top:auto}
+  .lock .tag{display:none}
+  h1{font-size:22px}
+  .tl-top{flex-wrap:wrap;row-gap:6px}
+  .coach{font-size:11px;padding:0 4px}
+  .keys .sub{overflow-wrap:anywhere}
+  .keys{order:2;justify-self:stretch;text-align:left;grid-template-columns:1fr 1fr;gap:14px 18px;min-width:0;pointer-events:auto}
+  .key .num{font-size:26px}
+  .details-btn{justify-self:start;grid-column:1/-1}
+  .details{grid-column:1/-1;justify-content:start}
+  .bottom{order:1}
+  .recs{order:3;max-height:none;overflow:visible}
+  .foot{order:4}
+  .seg button{margin:0 3px}
+  .phases button{font-size:8.5px;letter-spacing:.08em;padding-left:3px}
+  .banner{top:12vh}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <canvas id="c" aria-label="3D spacewalk: a hologram astronaut on the station truss above Earth. Drag to rotate, scroll to zoom."></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+</div>
+<div class="loading" id="loading">Calibrating crew hologram</div>
+
+<div class="ui">
+  <header class="brand">
+    <div class="lock"><img src="brand/kiwinaut-mark.png" width="26" height="26" alt="Kiwinaut logo"><span class="name">Kiwinaut</span><span class="tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
+    <h1>Spacewalk · live health risk</h1>
+    <p class="value-line">Extra safe hours outside. Work longer, smarter, safer.</p>
+    <nav class="nav" aria-label="Pages"><a href="dosefit.html">Dashboard</a><a href="dosefit-future.html">Decompression story</a></nav>
+  </header>
+
+  <section class="keys" aria-label="Key numbers" aria-live="polite">
+    <div class="key">
+      <div class="lbl">Pressure risk</div>
+      <div class="num" id="kRisk">--<span class="level" id="kLevel">--</span></div>
+      <div class="sub" id="kRiskSub">bubble / DCS score · limit 65</div>
+    </div>
+    <div class="key">
+      <div class="lbl">Safe EVA time</div>
+      <div class="num" id="kSafe">--<small>h</small></div>
+      <div class="sub"><span class="gain" id="kGain">+0.0 h</span> safe EVA time this mission</div>
+    </div>
+    <div class="key">
+      <div class="lbl">Heart rate</div>
+      <div class="num" id="kHr">--<small>bpm</small></div>
+    </div>
+    <div class="key">
+      <div class="lbl" id="kPhaseLbl">Phase</div>
+      <div class="num" id="kPhase" style="font-size:20px">--</div>
+      <div class="sub" id="kClock">--</div>
+    </div>
+    <button type="button" class="details-btn" id="detailsBtn" aria-expanded="false" aria-controls="details">Details</button>
+    <div class="details" id="details">
+      <span>Suit / airlock</span><b id="dPress">--</b>
+      <span>Oxygen</span><b id="dO2">--</b>
+      <span>DLCO vs baseline</span><b id="dDlco">--</b>
+      <span>Hydration</span><b id="dHyd">--</b>
+      <span>Bubble grade</span><b id="dBub">--</b>
+      <span>Metabolic</span><b id="dKcal">--</b>
+      <span>Prebreathe</span><b id="dPre">--</b>
+      <span>Planned safe EVA</span><b id="dPlan">--</b>
+    </div>
+  </section>
+
+  <aside class="recs" id="recs" aria-label="Recommendations">
+    <button type="button" class="pill" id="pill"><i></i><span id="pillTxt">Recommendations</span></button>
+    <div class="recs-head"><span class="lbl">Before the EVA · recommendations</span><button type="button" id="tuck">Hide</button></div>
+    <div class="cards" id="cards"></div>
+    <div class="lockline" id="lockline"></div>
+    <div class="presets-wrap">
+      <span class="lbl">Crew member today · sample</span>
+      <div class="presets" role="group" aria-label="Health preset">
+        <button type="button" class="chip" data-p="green" aria-pressed="false">Green</button>
+        <button type="button" class="chip" data-p="yellow" aria-pressed="true">Yellow · DLCO −9%</button>
+        <button type="button" class="chip" data-p="orange" aria-pressed="false">Orange</button>
+        <button type="button" class="chip" data-p="red" aria-pressed="false">Red · symptoms</button>
+      </div>
+    </div>
+  </aside>
+
+  <section class="bottom">
+    <div class="coach" aria-live="polite"><span id="coach"></span><span class="cur" aria-hidden="true"></span></div>
+    <div class="timeline glass">
+      <div class="tl-top">
+        <button type="button" class="ctl" id="play" aria-label="Play"><svg viewBox="0 0 12 12" id="playIco"><path d="M2 1l9 5-9 5z"/></svg></button>
+        <button type="button" class="ctl sm" id="restart" aria-label="Restart"><svg viewBox="0 0 12 12"><path d="M6 1.5a4.5 4.5 0 1 1-4.3 3.2h1.6A3 3 0 1 0 6 3v1.8L3 2.3 6 0z"/></svg></button>
+        <span class="clock" id="clock">T+00:00</span>
+        <span class="spacer"></span>
+        <div class="seg" role="group" aria-label="Camera">
+          <button type="button" data-cam="cine" aria-pressed="true">Cinematic</button>
+          <button type="button" data-cam="free" aria-pressed="false">Free</button>
+        </div>
+      </div>
+      <div class="track">
+        <svg id="spark" viewBox="0 0 1000 56" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="riskGrad" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0" stop-color="#5ef0c2"/><stop offset=".45" stop-color="#8ee04f"/><stop offset=".62" stop-color="#ffc857"/><stop offset=".8" stop-color="#ff8a3d"/><stop offset="1" stop-color="#ff5d6c"/>
+            </linearGradient>
+            <linearGradient id="riskFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="rgba(142,224,79,.16)"/><stop offset="1" stop-color="rgba(142,224,79,0)"/>
+            </linearGradient>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+          </defs>
+          <line id="limitLine" x1="0" x2="1000" y1="20" y2="20" stroke="rgba(255,200,87,.45)" stroke-width="1" stroke-dasharray="3 5" vector-effect="non-scaling-stroke"/>
+          <path id="ghost" fill="none" stroke="rgba(147,166,143,.45)" stroke-width="1" stroke-dasharray="2 4" vector-effect="non-scaling-stroke"/>
+          <path id="area" fill="url(#riskFill)"/>
+          <path id="line" fill="none" stroke="url(#riskGrad)" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+          <line id="head" y1="0" y2="56" stroke="rgba(198,242,122,.35)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <div id="dotWrap" style="position:absolute;inset:0 0 18px 0;pointer-events:none"><div id="dot" style="position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:#c6f27a;box-shadow:0 0 12px 3px rgba(198,242,122,.7);transition:background .5s,box-shadow .5s"></div></div>
+        <input type="range" id="scrub" min="0" max="1000" value="0" step="1" aria-label="EVA timeline">
+        <div class="phases" id="phases"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">Illustrative model, sample data. Decision support, confirmed by the crew medical officer. Not an official NASA product. Anatomy: BodyParts3D (CC BY 4.0).</footer>
+</div>
+
+<div class="banner" id="banner" role="alert"><div class="h" id="bannerH"></div><div class="b" id="bannerB"></div></div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const $=id=>document.getElementById(id);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+
+/* =====================  Health-risk model (illustrative, sample data)  ===================== */
+const PRESETS={
+  green:{dlco:-1,hyd:80,bub:0,sym:0},
+  yellow:{dlco:-9,hyd:48,bub:1,sym:0},
+  orange:{dlco:-13,hyd:40,bub:2,sym:0},
+  red:{dlco:-9,hyd:48,bub:1,sym:1}            // symptoms develop at the worksite
+};
+const RED_ONSET={dlco:-12,hyd:35,bub:3};
+const LIMIT=65, EVA_PLAN=390;                  // 6.5 h planned EVA (egress → ingress)
+const CARDS=[
+  {id:"pb",title:"Extend exercise prebreathe +45 min",why:"a timely +45 min prebreathe avoids scrubbing a 6.5 h EVA"},
+  {id:"h2o",title:"Hydrate +500 ml before the airlock",why:"good hydration lowers bubble risk and keeps the EVA on its full timeline"},
+  {id:"b-eva-pbx",title:"Exercise prebreathe · 2.0 h, not 4.3 h at rest",why:"frees 2.3 h of the EVA day"},
+  {id:"lite",title:"Lighter tasks · pause heavy ARED 24 h",why:"less load near the pressure drop keeps bubble risk down"}
+];
+let presetName="yellow", inp={...PRESETS.yellow};
+const acc=new Set();
+
+function dlcoTerm(D){return D<=0?0:D<5?D*2.2:D<=10?18+(D-5)*3.5:D<=15?40+(D-10)*4:62+(D-15)*2.5}
+function hydTerm(H){return H>=70?0:H>=45?(70-H)*.45:12+(45-H)*.7}
+function model(a=acc,i=inp){
+  const ex=a.has("b-eva-pbx"),ext=a.has("pb"),lite=a.has("lite");
+  const P=(ex?120:258)+(ext?45:0), tau=ex?51:110;          // exercise prebreathe ≈ same washout in less time
+  const res=Math.exp(-P/tau);                              // residual nitrogen fraction
+  const Heff=Math.min(100,i.hyd+(a.has("h2o")?25:0));
+  const D=Math.max(0,-i.dlco);
+  const s0=6+dlcoTerm(D)*.6+hydTerm(Heff)+i.bub*6+(lite?2:8);
+  const k=res*60*(1+D/5)*(lite?.8:1);
+  return{ex,ext,lite,P,res,Heff,D,s0,k};
+}
+function hydAt(m,te){return m.Heff-8*clamp(te/EVA_PLAN,0,1.3)}
+function scoreAt(m,te){const f=clamp(te/EVA_PLAN,0,1.3);return m.s0+m.k*Math.pow(f,.8)+(hydTerm(hydAt(m,te))-hydTerm(m.Heff))}
+function levelOf(s){return s>=85?"red":s>=LIMIT?"orange":s>=45?"yellow":"green"}
+const LEVEL_NAME={green:"GREEN",yellow:"YELLOW",orange:"ORANGE",red:"RED"};
+const LEVEL_COL={green:"#5ef0c2",yellow:"#ffc857",orange:"#ff8a3d",red:"#ff5d6c"};
+
+function buildPlan(a=acc,i=inp){
+  const m=model(a,i);
+  const scrub=!i.sym&&scoreAt(m,0)>=LIMIT;
+  let tc=null;
+  if(!scrub&&!i.sym)for(let te=0;te<=EVA_PLAN;te++){if(scoreAt(m,te)>=LIMIT){tc=te;break}}
+  const work=tc!==null?Math.max(5,tc-120):270;
+  const raw=[["pre","Prebreathe",m.P],["dep","Depress",30],["egr","Egress",15],["tra","Translate",45],["work","Work task",work],["ret",tc!==null?"Early return":"Return",45],["ing","Ingress",30]];
+  let t=0;let phases=raw.map(([k,label,d])=>{const p={k,label,d,t0:t,t1:t+d};t+=d;return p});
+  const egr0=m.P+30;
+  let abortT=null;
+  if(i.sym){
+    abortT=phases[4].t0+25;
+    phases=phases.filter(p=>p.t0<abortT).map(p=>({...p,t1:Math.min(p.t1,abortT),d:Math.min(p.t1,abortT)-p.t0}));
+    phases.push({k:"abort",label:"Abort · return",d:22,t0:abortT,t1:abortT+22});
+    phases.push({k:"aing",label:"O₂ · repress",d:25,t0:abortT+22,t1:abortT+47});
+    t=abortT+47;
+  }
+  if(scrub)phases.forEach(p=>{if(p.k!=="pre")p.cut=true});
+  const total=t;   // a scrubbed EVA keeps its planned phases on the timeline (struck through); playback stops at the no-go
+  const safeH=scrub?0:abortT!==null?(abortT-egr0)/60:tc!==null?tc/60:EVA_PLAN/60;
+  const preSafeH=i.sym?buildPlan(a,{...i,sym:0}).safeH:safeH;   // what the crew expects before symptoms appear
+  return{m,phases,total,scrub,tc,abortT,egr0,safeH,preSafeH};
+}
+function safeWith(a){return buildPlan(a).safeH+(a.has("b-eva-pbx")?2.3:0)}
+function missionGain(){return safeWith(acc)-safeWith(new Set())}
+function marginal(id){const w=new Set(acc);w.add(id);const wo=new Set(acc);wo.delete(id);return safeWith(w)-safeWith(wo)}
+/* score at sim minute t, following the plan (including RED onset and abort) */
+function scoreAtT(plan,t){
+  const m=plan.m,te=t-plan.egr0;
+  if(te<0)return m.s0;
+  let s=scoreAt(m,Math.min(te,EVA_PLAN));
+  if(plan.abortT!==null){
+    const onset=plan.abortT-12;
+    if(t>onset){const u=clamp((t-onset)/12,0,1);const mr=model(acc,{...inp,...RED_ONSET});s=lerp(s,Math.max(88,scoreAt(mr,te)+30),ease(u))}
+    if(t>plan.abortT+22){const u=clamp((t-plan.abortT-22)/25,0,1);s=lerp(Math.min(s,99),78,ease(u))}   // 100% O₂ + repress brings bubbles down
+  }
+  return clamp(s,0,99);
+}
+function phaseAt(plan,t){for(const p of plan.phases)if(t<p.t1)return p;return plan.phases[plan.phases.length-1]}
+
+/* =====================  three.js scene  ===================== */
+const stageEl=$("stage"),canvas=$("c");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:"high-performance"});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+renderer.setClearColor(0x03060d,1);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(48,1,.05,4000);
+camera.position.set(-3,2.2,9);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true;controls.dampingFactor=.07;controls.enablePan=false;
+controls.minDistance=2.2;controls.maxDistance=34;controls.rotateSpeed=.6;controls.zoomSpeed=.8;
+
+const KIWI=new THREE.Color(0x8ee04f),KIWI_B=new THREE.Color(0xc6f27a),KIWI_D=new THREE.Color(0x4e8a1e);
+const lineMat=(color,opacity,additive=true)=>new THREE.LineBasicMaterial({color,transparent:true,opacity,depthWrite:false,blending:additive?THREE.AdditiveBlending:THREE.NormalBlending});
+function segs(arr,mat){const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(arr,3));return new THREE.LineSegments(g,mat)}
+function ring(out,c,r,axis,n=32){ // push ring segments around axis ("x","y","z")
+  for(let i=0;i<n;i++){const a=i/n*Math.PI*2,b=(i+1)/n*Math.PI*2;const p=t=>axis==="z"?[c.x+r*Math.cos(t),c.y+r*Math.sin(t),c.z]:axis==="x"?[c.x,c.y+r*Math.cos(t),c.z+r*Math.sin(t)]:[c.x+r*Math.cos(t),c.y,c.z+r*Math.sin(t)];out.push(...p(a),...p(b))}
+}
+const glowTex=(()=>{const cv=document.createElement("canvas");cv.width=cv.height=128;const g=cv.getContext("2d");const gr=g.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,"rgba(255,255,255,1)");gr.addColorStop(.25,"rgba(255,255,255,.55)");gr.addColorStop(.6,"rgba(255,255,255,.12)");gr.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=gr;g.fillRect(0,0,128,128);const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;return t})();
+const glowSprite=(color,size,opacity)=>{const s=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color,transparent:true,opacity,depthWrite:false,blending:THREE.AdditiveBlending}));s.scale.setScalar(size);return s};
+
+/* stars */
+{
+  const n=2600,pos=new Float32Array(n*3),col=new Float32Array(n*3);
+  for(let i=0;i<n;i++){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,r=900+Math.random()*400,s=Math.sqrt(1-u*u);pos.set([r*s*Math.cos(a),r*u,r*s*Math.sin(a)],i*3);const b=.35+Math.random()*.65;col.set([b*.92,b,b*.88],i*3)}
+  const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(pos,3));g.setAttribute("color",new THREE.BufferAttribute(col,3));
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({size:1.6,sizeAttenuation:false,vertexColors:true,transparent:true,opacity:.85,depthWrite:false})));
+}
+/* sun */
+const sun=glowSprite(0xfff4dc,260,.55);sun.position.set(520,260,-900);scene.add(sun);
+const sunCore=glowSprite(0xffffff,70,.9);sunCore.position.copy(sun.position);scene.add(sunCore);
+
+/* Earth: point globe + graticule + atmosphere rim */
+const earth=new THREE.Group();earth.position.set(0,-560,-220);earth.rotation.z=.32;scene.add(earth);
+const R=400;
+{
+  earth.add(new THREE.Mesh(new THREE.SphereGeometry(R*.995,48,32),new THREE.MeshBasicMaterial({color:0x03070b})));
+  const n=22000,pos=new Float32Array(n*3),col=new Float32Array(n*3),ga=Math.PI*(3-Math.sqrt(5));
+  for(let i=0;i<n;i++){
+    const y=1-(i/(n-1))*2,r=Math.sqrt(1-y*y),th=ga*i,x=Math.cos(th)*r,z=Math.sin(th)*r;
+    const lat=Math.asin(y),lon=Math.atan2(z,x);
+    const land=Math.sin(lon*2.1+.6)*Math.cos(lat*2.6)+.55*Math.sin(lon*4.3-lat*3.1+1.7)+.35*Math.cos(lon*7.9+lat*5.2)-.25*Math.abs(Math.sin(lat))*1.6;
+    pos.set([x*R,y*R,z*R],i*3);
+    const c=land>.42?KIWI_B.clone().multiplyScalar(.55+.35*Math.random()):KIWI_D.clone().multiplyScalar(.28);
+    if(Math.abs(y)>.93)c.setRGB(.8,.86,.78);
+    col.set([c.r,c.g,c.b],i*3);
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.BufferAttribute(pos,3));g.setAttribute("color",new THREE.BufferAttribute(col,3));
+  earth.add(new THREE.Points(g,new THREE.PointsMaterial({size:1.7,sizeAttenuation:false,vertexColors:true,transparent:true,opacity:.95,depthWrite:false,blending:THREE.AdditiveBlending})));
+  const gr=[];for(let lat=-75;lat<=75;lat+=15){const y=Math.sin(lat*Math.PI/180)*R*1.001,r=Math.cos(lat*Math.PI/180)*R*1.001;ring(gr,V(0,y,0),r,"y",96)}
+  for(let lon=0;lon<180;lon+=15){const a=lon*Math.PI/180;for(let i=0;i<96;i++){const t0=i/96*Math.PI*2,t1=(i+1)/96*Math.PI*2;const p=t=>[Math.cos(t)*Math.cos(a)*R*1.001,Math.sin(t)*R*1.001,Math.cos(t)*Math.sin(a)*R*1.001];gr.push(...p(t0),...p(t1))}}
+  earth.add(segs(gr,lineMat(KIWI_D,.16)));
+  const atm=new THREE.Mesh(new THREE.SphereGeometry(R*1.06,64,48),new THREE.ShaderMaterial({
+    uniforms:{c:{value:new THREE.Color(0x9ff0a8)}},
+    vertexShader:"varying vec3 vN;varying vec3 vV;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}",
+    fragmentShader:"uniform vec3 c;varying vec3 vN;varying vec3 vV;void main(){float f=1.-abs(dot(vN,vV));gl_FragColor=vec4(c,pow(f,7.)*.55);}",
+    transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.FrontSide}));
+  earth.add(atm);
+}
+
+/* ISS segment: truss, handrails, airlock (Quest-style), arrays, worksite */
+const iss=new THREE.Group();scene.add(iss);
+const AIR=V(-7,0,2.0),HATCH_Z=3.1;
+let hatch;
+{
+  const L=[],x0=-9.6,x1=9.6,h=.6,bay=1.2;
+  for(let x=x0;x<=x1+1e-6;x+=bay){const c=[[x,-h,-h],[x,h,-h],[x,h,h],[x,-h,h]];for(let k=0;k<4;k++)L.push(...c[k],...c[(k+1)%4]);
+    if(x+bay<=x1+1e-6){for(const [y,z] of [[-h,-h],[h,-h],[h,h],[-h,h]])L.push(x,y,z,x+bay,y,z);
+      L.push(x,-h,h,x+bay,h,h, x,h,-h,x+bay,-h,-h, x,h,h,x+bay,h,-h, x,-h,-h,x+bay,-h,h)}}
+  iss.add(segs(L,lineMat(KIWI,.5)));
+  const HR=[];for(const y of[-.34,.34]){HR.push(-5.6,y,.78,7.4,y,.78);for(let x=-5.6;x<=7.4;x+=1.2)HR.push(x,y,.6,x,y,.78)}
+  iss.add(segs(HR,lineMat(KIWI_B,.75)));
+  // airlock: crew lock cylinder along z, equipment lock stub
+  const A=[];for(let z=.6;z<=HATCH_Z+1e-6;z+=.3125)ring(A,V(AIR.x,AIR.y,z),.95,"z",40);
+  for(let i=0;i<16;i++){const a=i/16*Math.PI*2;A.push(AIR.x+.95*Math.cos(a),AIR.y+.95*Math.sin(a),.6,AIR.x+.95*Math.cos(a),AIR.y+.95*Math.sin(a),HATCH_Z)}
+  ring(A,V(AIR.x,AIR.y,HATCH_Z),.62,"z",36);
+  for(let x=-8.6;x<=-5.4;x+=.4)ring(A,V(x,-1.55,0),.85,"x",28);
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;A.push(-8.6,-1.55+.85*Math.cos(a),.85*Math.sin(a),-5.4,-1.55+.85*Math.cos(a),.85*Math.sin(a))}
+  iss.add(segs(A,lineMat(KIWI,.38)));
+  // hatch door, hinged on its left edge
+  hatch=new THREE.Group();hatch.position.set(AIR.x-.6,AIR.y,HATCH_Z+.01);iss.add(hatch);
+  const H=[];ring(H,V(.6,0,0),.58,"z",36);H.push(.6-.58,0,0,.6+.58,0,0,.6,-.58,0,.6,.58,0);ring(H,V(.6,0,0),.18,"z",18);
+  hatch.add(segs(H,lineMat(KIWI_B,.85)));
+  // solar arrays at both truss ends
+  const S=[];for(const xs of[-1,1]){const x=xs*10.6;S.push(xs*9.6,0,0,x,0,0, x,-.15,-11,x,.15,11);
+    for(const zs of[-1,1]){const za=zs*1.4,zb=zs*11;for(let k=0;k<=12;k++){const z=lerp(za,zb,k/12);S.push(x,-2.2,z,x,2.2,z)}for(let k=0;k<=6;k++){const y=lerp(-2.2,2.2,k/6);S.push(x,y,za,x,y,zb)}}}
+  iss.add(segs(S,lineMat(KIWI_D,.55)));
+  // worksite: ORU box + foot restraint
+  const W=[],bx=5.35,by=0,bz=1.05,s=.42;const c=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]].map(([a,b,d])=>[bx+a*s,by+b*s,bz+d*s*.6]);
+  for(const [p,q] of [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]])W.push(...c[p],...c[q]);
+  ring(W,V(4.55,-.95,1.25),.28,"y",20);W.push(4.55,-.95,1.25,4.55,-.6,.78);
+  iss.add(segs(W,lineMat(KIWI_B,.8)));
+  const ws=glowSprite(0xc6f27a,1.6,.18);ws.position.set(bx,by,bz);iss.add(ws);
+}
+
+/* astronaut */
+const astro=new THREE.Group();scene.add(astro);
+const body=new THREE.Group();body.scale.setScalar(.26);astro.add(body);
+const holo=new THREE.Group();body.add(holo);
+const mats={
+  body:lineMat(KIWI,.42),shell:lineMat(KIWI_B,.06),lungs:lineMat(0x5ef0c2,.5),heart:lineMat(0xff788c,.22),air:lineMat(KIWI_B,.35),
+  helmet:lineMat(KIWI_B,.32),pack:lineMat(KIWI,.3),dots:new THREE.PointsMaterial({color:KIWI_B,size:.02,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending})
+};
+function graphLines(part,mat){
+  const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(part.nodes,3));
+  const n=part.nodes.length/3;g.setIndex(new (n>65535?THREE.Uint32BufferAttribute:THREE.Uint16BufferAttribute)(part.edges,1));
+  return new THREE.LineSegments(g,mat);
+}
+function clearHolo(){for(const o of [...holo.children]){holo.remove(o);o.geometry?.dispose()}}
+function buildHolo(data){
+  clearHolo();
+  const b=graphLines(data.body,mats.body);holo.add(b);
+  const shell=new THREE.LineSegments(b.geometry,mats.shell);shell.scale.setScalar(1.09);holo.add(shell);
+  const dp=new Float32Array(Math.ceil(data.body.nodes.length/9)*3);for(let i=0,j=0;i<data.body.nodes.length;i+=9,j+=3)dp.set(data.body.nodes.slice(i,i+3),j);
+  const dg=new THREE.BufferGeometry();dg.setAttribute("position",new THREE.BufferAttribute(dp,3));holo.add(new THREE.Points(dg,mats.dots));
+  holo.add(graphLines(data.lungs,mats.lungs));
+  if(data.heart)holo.add(graphLines(data.heart,mats.heart));
+  if(data.airways)holo.add(graphLines(data.airways,mats.air));
+}
+function buildFallback(){ // procedural wireframe body (used when the anatomy graph can't load, e.g. file://)
+  clearHolo();
+  const L=[];
+  const limb=(a,b,r)=>{const A=V(...a),B=V(...b),d=B.clone().sub(A),len=d.length();const q=new THREE.Quaternion().setFromUnitVectors(V(0,1,0),d.clone().normalize());
+    for(let k=0;k<=5;k++){const c=A.clone().addScaledVector(d,k/5);for(let i=0;i<12;i++){const t0=i/12*Math.PI*2,t1=(i+1)/12*Math.PI*2;const p=t=>V(r*Math.cos(t),0,r*Math.sin(t)).applyQuaternion(q).add(c);L.push(...p(t0).toArray(),...p(t1).toArray())}}
+    for(let i=0;i<4;i++){const t=i/4*Math.PI*2;const o=V(r*Math.cos(t),0,r*Math.sin(t)).applyQuaternion(q);L.push(...A.clone().add(o).toArray(),...B.clone().add(o).toArray())}};
+  limb([0,-.3,0],[0,2.4,0],.62);limb([0,2.45,0],[0,2.75,0],.18);
+  for(const s of[-1,1]){limb([s*.78,2.35,0],[s*1.02,1.0,0],.2);limb([s*1.02,1.0,0],[s*1.25,-.25,.1],.16);limb([s*.32,-.45,0],[s*.32,-1.7,.06],.26);limb([s*.32,-1.7,.06],[s*.34,-3.2,0],.2)}
+  const H=[];ring(H,V(0,3.1,0),.38,"y",24);ring(H,V(0,3.1,0),.38,"x",24);ring(H,V(0,3.1,0),.38,"z",24);
+  holo.add(segs(L.concat(H),mats.body));
+  const LG=[];for(const s of[-1,1])for(let k=0;k<7;k++){const y=1.45+k*.14,r=.3*Math.sin(Math.PI*(k+.5)/7);ring(LG,V(s*.24,y,0),r,"y",18)}
+  holo.add(segs(LG,mats.lungs));
+}
+buildFallback();
+/* helmet, visor and life-support pack: shared by both bodies */
+{
+  const Hm=[];for(let k=-3;k<=4;k++){const y=3.08+k*.08,r=Math.sqrt(Math.max(0,.66*.66-(k*.08)*(k*.08)));ring(Hm,V(0,y,0),r,"y",36)}
+  for(let i=0;i<10;i++){const a=i/10*Math.PI;for(let j=0;j<16;j++){const t0=j/16*Math.PI*2,t1=(j+1)/16*Math.PI*2;const p=t=>[.66*Math.sin(t)*Math.cos(a),3.08+.66*Math.cos(t),.66*Math.sin(t)*Math.sin(a)];Hm.push(...p(t0),...p(t1))}}
+  body.add(segs(Hm,mats.helmet));
+  const visor=glowSprite(0xc6f27a,.7,.12);visor.position.set(0,3.1,.55);body.add(visor);
+  const P=[],x=.62,y0=1.0,y1=2.75,z0=-.62,z1=-1.2;const c=[[-x,y0,z0],[x,y0,z0],[x,y1,z0],[-x,y1,z0],[-x,y0,z1],[x,y0,z1],[x,y1,z1],[-x,y1,z1]];
+  for(const [p,q] of [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]])P.push(...c[p],...c[q]);
+  body.add(segs(P,mats.pack));
+}
+/* risk glows: lungs + shoulders, elbows, knees */
+const lungGlow=glowSprite(0x5ef0c2,2.4,.25);lungGlow.position.set(0,1.9,.05);body.add(lungGlow);
+const JOINTS=[[-.78,2.38,0],[.78,2.38,0],[-1.02,1.0,.05],[1.02,1.0,.05],[-.32,-1.65,.12],[.32,-1.65,.12]];
+const jointGlows=JOINTS.map(p=>{const s=glowSprite(0x5ef0c2,.75,.2);s.position.set(...p);body.add(s);return s});
+const suitGlow=glowSprite(0x8ee04f,9,.05);body.add(suitGlow);
+
+/* tether */
+const TETHER_A=V(-6.35,.62,HATCH_Z+.02),TN=40;
+const tetherGeo=new THREE.BufferGeometry();tetherGeo.setAttribute("position",new THREE.BufferAttribute(new Float32Array(TN*3),3));
+const tether=new THREE.Line(tetherGeo,lineMat(0xffc857,.55));tether.frustumCulled=false;scene.add(tether);
+const hook=glowSprite(0xffc857,.25,.6);hook.position.copy(TETHER_A);scene.add(hook);
+
+fetch("models/anatomy/crew-holo-graph.json").then(r=>r.ok?r.json():Promise.reject(new Error(r.status)))
+  .then(d=>{if(d?.body?.nodes&&d?.lungs?.nodes)buildHolo(d)}).catch(()=>{/* keep the procedural fallback */})
+  .finally(()=>{const l=$("loading");l.style.opacity=0;setTimeout(()=>l.remove(),900)});
+
+/* path along the truss */
+const INSIDE=V(AIR.x,AIR.y,1.95),HATCH_OUT=V(AIR.x,AIR.y,3.85);
+const MAIN=[HATCH_OUT,V(-5.55,0,3.45),V(-5.05,0,1.42),V(4.15,0,1.42)];
+const WORK=V(4.52,-.05,1.5);
+const segLen=[];let pathLen=0;for(let i=0;i<MAIN.length-1;i++){const l=MAIN[i].distanceTo(MAIN[i+1]);segLen.push(l);pathLen+=l}
+function pathAt(u){let d=clamp(u,0,1)*pathLen;for(let i=0;i<segLen.length;i++){if(d<=segLen[i]||i===segLen.length-1){const t=segLen[i]?d/segLen[i]:0;return{p:MAIN[i].clone().lerp(MAIN[i+1],clamp(t,0,1)),dir:MAIN[i+1].clone().sub(MAIN[i]).normalize()}}d-=segLen[i]}}
+function basisQuat(head,front){
+  const y=head.clone().normalize();let z=front.clone().addScaledVector(y,-front.dot(y));
+  if(z.lengthSq()<.02){z=V(0,-1,0).addScaledVector(y,-y.y);if(z.lengthSq()<.02)z=V(-1,0,0)}
+  z.normalize();const x=new THREE.Vector3().crossVectors(y,z);
+  return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z));
+}
+const UPRIGHT_IN=basisQuat(V(0,1,0),V(0,0,1)),UPRIGHT_WORK=basisQuat(V(0,1,0),V(1,0,-.35));
+const TRUSS_FRONT=V(0,-.15,-1);
+/* pose for sim minute t: position + target orientation + whether outside */
+function poseAt(plan,t,clock){
+  const p=phaseAt(plan,t),f=p.d>0?clamp((t-p.t0)/p.d,0,1):1,bob=reduce?0:Math.sin(clock*1.3)*.03;
+  if(plan.scrub&&t>=plan.m.P)return{pos:INSIDE.clone().add(V(0,bob,0)),q:UPRIGHT_IN,out:false,hatch:0};
+  switch(p.k){
+    case"pre":{const ex=plan.m.ex;return{pos:INSIDE.clone().add(V(0,bob+(ex?Math.sin(clock*4)*.04:0),0)),q:UPRIGHT_IN,out:false,hatch:0}}
+    case"dep":return{pos:INSIDE.clone().add(V(0,bob,0)),q:UPRIGHT_IN,out:false,hatch:ease(clamp((f-.75)/.25,0,1))};
+    case"egr":{const e=ease(f);return{pos:INSIDE.clone().lerp(HATCH_OUT,e),q:basisQuat(V(0,.25,1),V(0,-1,0)),out:true,hatch:1}}
+    case"tra":case"ret":case"abort":{
+      const u=p.k==="tra"?ease(f):1-ease(f);const a=pathAt(u);const dir=p.k==="tra"?a.dir:a.dir.clone().negate();
+      const hand=reduce?0:Math.sin(clock*(p.k==="abort"?7:3.4))*.05;
+      return{pos:a.p.add(V(0,hand,0)),q:basisQuat(dir,TRUSS_FRONT),out:true,hatch:1}}
+    case"work":{const sw=reduce?0:Math.sin(clock*.9)*.05;return{pos:WORK.clone().add(V(sw,bob,sw*.5)),q:UPRIGHT_WORK,out:true,hatch:1}}
+    case"ing":case"aing":{const e=ease(clamp(f*2,0,1));return{pos:HATCH_OUT.clone().lerp(INSIDE,e),q:f<.5?basisQuat(V(0,.2,-1),V(0,-1,0)):UPRIGHT_IN,out:f<.5,hatch:f<.5?1:1-ease(clamp((f-.5)/.2,0,1))}}
+  }
+  return{pos:INSIDE.clone(),q:UPRIGHT_IN,out:false,hatch:0};
+}
+
+/* =====================  sim state, HUD, timeline  ===================== */
+let plan=buildPlan(),simT=0,playing=false,camMode=reduce?"free":"cine",lastCoachKey="",bannerKey="";
+const BASE_MIN_PER_SEC=()=>plan.total/75;      // whole sequence ≈ 75 s
+const fmtClock=m=>{m=Math.max(0,m);const h=Math.floor(m/60),mm=Math.floor(m%60);return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0")};
+const fmtH=h=>(h>=0?"+":"−")+Math.abs(h).toFixed(1)+" h";
+
+function hrAt(t){
+  const p=phaseAt(plan,t),s=scoreAtT(plan,t),n=reduce?0:Math.sin(t*.7)*2.5;
+  const base={pre:plan.m.ex?118:72,dep:84,egr:96,tra:108,work:plan.m.lite?102:116,ret:104,ing:92,abort:131,aing:112}[p.k]||80;
+  return Math.round(base+n+Math.max(0,s-45)*.25);
+}
+function kcalAt(t){
+  let k=0;for(const p of plan.phases){const ov=clamp(t,p.t0,p.t1)-p.t0;if(ov<=0)continue;const r={pre:plan.m.ex?300:90,dep:110,egr:220,tra:260,work:plan.m.lite?230:320,ret:250,ing:160,abort:340,aing:120}[p.k]||100;k+=r*ov/60}
+  return Math.round(k);
+}
+function pressAt(t){
+  const p=phaseAt(plan,t),f=p.d>0?clamp((t-p.t0)/p.d,0,1):1;
+  if(plan.scrub&&t>=plan.m.P)return"Cabin 14.7 psi · no-go";
+  if(p.k==="pre")return"Cabin 14.7 psi · O₂ mask";
+  if(p.k==="dep")return`Airlock ${(14.7*(1-f)).toFixed(1)} psi · suit 4.3`;
+  if((p.k==="ing"||p.k==="aing")&&f>.5)return`Airlock ${(14.7*clamp((f-.5)/.5,0,1)).toFixed(1)} psi`;
+  return"Suit 4.3 psi";
+}
+
+/* recommendation cards */
+function renderCards(){
+  const locked=simT>=plan.egr0-30&&!plan.scrub;   // set before depress
+  $("cards").innerHTML=CARDS.map(c=>{
+    const on=acc.has(c.id),d=marginal(c.id);
+    const v=`<em>${d>0.05?fmtH(d):"+0.0 h"}</em> safe EVA time · ${c.why}`;
+    return`<button type="button" class="card" data-id="${c.id}" aria-pressed="${on}"${locked?" disabled":""}><span class="t">${c.title}</span><span class="v">${v}</span><span class="tick" aria-hidden="true">${on?"✓":""}</span></button>`;
+  }).join("");
+  $("lockline").textContent=locked?"Locked once the airlock depresses. Restart to change the plan.":plan.scrub?"No-go at this risk. Accept recommendations to clear the EVA.":"Accept before the airlock depresses.";
+  const n=acc.size;$("pillTxt").textContent=n?`${n} recommendation${n>1?"s":""} accepted`:"Recommendations";
+}
+$("cards").addEventListener("click",e=>{
+  const b=e.target.closest(".card");if(!b||b.disabled)return;const id=b.dataset.id;
+  acc.has(id)?acc.delete(id):acc.add(id);replan();renderCards();
+  say(acc.has(id)?`Accepted: ${CARDS.find(c=>c.id===id).title.toLowerCase()} · safe EVA time ${plan.safeH.toFixed(1)} h.`:"Recommendation removed.",true);
+});
+let tucked=false,userTuck=null;
+function setTucked(v){tucked=v;$("recs").classList.toggle("tucked",v)}
+$("tuck").onclick=()=>{userTuck=true;setTucked(true)};
+$("pill").onclick=()=>{userTuck=false;setTucked(false)};
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+  presetName=b.dataset.p;inp={...PRESETS[presetName]};
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  const before=simT;replan();
+  if(presetName==="red"){const w=plan.phases.find(p=>p.k==="work");if(w&&before<w.t0)simT=w.t0+2;playing=true;setPlayIcon()}
+  else if(simT>plan.total)simT=plan.total;
+  lastCoachKey="";renderCards();
+});
+function replan(){plan=buildPlan();buildPhases();drawSpark();}
+
+/* timeline: phase labels + live risk line */
+function buildPhases(){
+  $("phases").innerHTML=plan.phases.map((p,i)=>`<button type="button" data-i="${i}" class="${p.k==="abort"||p.k==="aing"?"abort":""}${p.cut?" cut":""}" style="width:${(p.d/plan.total*100).toFixed(3)}%" title="${p.label}">${p.label}</button>`).join("");
+}
+$("phases").addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return;const p=plan.phases[+b.dataset.i];if(p.cut)return;simT=p.t0+.01;lastCoachKey=""});
+const yOf=s=>54-clamp((s-18)/72,0,1)*50;
+function sparkPath(pl,samples=220){
+  let d="";for(let i=0;i<=samples;i++){const t=i/samples*pl.total;const x=(i/samples*1000).toFixed(1),y=yOf(scoreAtT(pl,t)).toFixed(1);d+=(i?"L":"M")+x+" "+y}
+  return d;
+}
+function drawSpark(){
+  const d=sparkPath(plan);$("line").setAttribute("d",d);$("area").setAttribute("d",d+" L1000 56 L0 56 Z");
+  // faint dashed line: the same crew member with no recommendations accepted (same time axis)
+  const ghost=buildPlan(new Set()),end=Math.min(ghost.total,plan.total);
+  let g="";for(let i=0;i<=160;i++){const t=i/160*end;g+=(i?"L":"M")+(t/plan.total*1000).toFixed(1)+" "+yOf(scoreAtT(ghost,t)).toFixed(1)}
+  $("ghost").setAttribute("d",acc.size?g:"");
+  const ly=yOf(LIMIT);$("limitLine").setAttribute("y1",ly);$("limitLine").setAttribute("y2",ly);
+}
+$("scrub").addEventListener("input",e=>{simT=+e.target.value/1000*plan.total;lastCoachKey="";if(simT<plan.total-.5)hideBanner()});
+function setPlayIcon(){$("playIco").innerHTML=playing?'<path d="M2 1h3v10H2zM7 1h3v10H7z"/>':'<path d="M2 1l9 5-9 5z"/>';$("play").setAttribute("aria-label",playing?"Pause":"Play")}
+$("play").onclick=()=>{if(simT>=plan.total-.01){simT=0;hideBanner()}playing=!playing;setPlayIcon()};
+$("restart").onclick=()=>{simT=0;playing=true;hideBanner();lastCoachKey="";setPlayIcon();renderCards();if(userTuck!==true)setTucked(false)};
+document.querySelectorAll("[data-cam]").forEach(b=>b.onclick=()=>setCam(b.dataset.cam));
+function setCam(m){camMode=m;document.querySelectorAll("[data-cam]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.cam===m));if(m==="free")controls.target.copy(camTarget)}
+controls.addEventListener("start",()=>{if(camMode==="cine")setCam("free")});
+$("detailsBtn").onclick=()=>{const o=!$("details").classList.contains("open");$("details").classList.toggle("open",o);$("detailsBtn").setAttribute("aria-expanded",o)};
+
+/* coach + banner */
+let coachTimer=null;
+function say(text,force){
+  if(!force&&text===$("coach").dataset.t)return;$("coach").dataset.t=text;clearInterval(coachTimer);
+  const el=$("coach");if(reduce){el.textContent=text;return}
+  el.textContent="";let i=0;coachTimer=setInterval(()=>{el.textContent=text.slice(0,++i);if(i>=text.length)clearInterval(coachTimer)},14);
+}
+function banner(kind,h,b){const k=kind+h;if(bannerKey===k)return;bannerKey=k;const el=$("banner");el.className="banner "+kind+" show";$("bannerH").textContent=h;$("bannerB").textContent=b}
+function hideBanner(){bannerKey="";$("banner").classList.remove("show")}
+function coachFor(t,s){
+  const p=phaseAt(plan,t),m=plan.m;
+  if(plan.scrub&&t>=m.P-.5)return["scrub",`No-go: pressure risk ${Math.round(m.s0)} ≥ ${LIMIT}. EVA scrubbed. Accept recommendations or postpone 24–48 h.`];
+  switch(p.k){
+    case"pre":return["pre",m.ex?`Exercise prebreathe on the cycle · ${(m.P/60).toFixed(1)} h · nitrogen washing out.`:`Resting prebreathe · ${(m.P/60).toFixed(1)} h on 100% O₂ before the airlock.`];
+    case"dep":return["dep","Airlock depress · suit 4.3 psi · 100% O₂ · leak check good."];
+    case"egr":return["egr","Hatch open · tether hooked · egress head first."];
+    case"tra":return["tra","Translate hand over hand along the truss rails · keep heart rate under 120."];
+    case"work":{if(s>=45&&t>p.t0+20)return["work45",`Bubble risk ${Math.round(s)} and rising · slow the pace · sip water.`];return["work",m.lite?"At the worksite · lighter task list · steady pace.":"At the worksite · full task list · hydrate at the 3 h mark."]}
+    case"ret":return["ret",plan.tc!==null?`Risk ${Math.round(s)} near the limit · end the task early · return to the airlock.`:"Task complete · translate back to the airlock."];
+    case"ing":return[t>=plan.total-.5?"done":"ing",t>=plan.total-.5?`EVA complete · ${plan.safeH.toFixed(1)} h outside safely · retest DLCO at +3 h and +24 h.`:"Ingress · hatch closed · repress to 14.7 psi."];
+    case"abort":return["abort","Abort EVA · joint pain + DLCO drop · return to the airlock now."];
+    case"aing":return["aing","DCS protocol · 100% O₂ · repressurize · medical officer notified."];
+  }
+  return["",""];
+}
+
+/* =====================  frame loop  ===================== */
+const camTarget=new THREE.Vector3().copy(INSIDE);
+const prevTarget=new THREE.Vector3().copy(INSIDE);
+let theta=-.9,clockS=0,last=performance.now(),hudAt=0;
+const tmpQ=new THREE.Quaternion(),col=new THREE.Color(),waist=new THREE.Vector3(),sag=new THREE.Vector3();
+function riskColor(s,out){const stops=[[0,0x5ef0c2],[38,0x8ee04f],[55,0xffc857],[72,0xff8a3d],[88,0xff5d6c]];
+  let a=stops[0],b=stops[stops.length-1];for(let i=0;i<stops.length-1;i++)if(s<=stops[i+1][0]){a=stops[i];b=stops[i+1];break}
+  const u=clamp((s-a[0])/Math.max(1,b[0]-a[0]),0,1);return out.set(a[1]).lerp(new THREE.Color(b[1]),u)}
+function resize(){const w=stageEl.clientWidth,h=stageEl.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(1,h);camera.updateProjectionMatrix()}
+addEventListener("resize",resize);resize();
+
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;clockS+=dt;
+  if(playing){
+    simT+=dt*BASE_MIN_PER_SEC();
+    const stopAt=plan.scrub?plan.m.P+.01:plan.total;
+    if(simT>=stopAt){simT=stopAt;playing=false;setPlayIcon()}
+  }
+  const s=scoreAtT(plan,simT),lvl=plan.abortT!==null&&simT>=plan.abortT-12?"red":levelOf(s);
+  // astronaut
+  const pose=poseAt(plan,simT,clockS);
+  astro.position.lerp(pose.pos,1-Math.exp(-dt*9));
+  astro.quaternion.slerp(pose.q,1-Math.exp(-dt*3.5));
+  hatch.rotation.y=-pose.hatch*1.9;
+  // risk glows
+  riskColor(s,col);const inten=clamp((s-22)/60,0,1);
+  const pulse=reduce?.6:.5+.5*Math.sin(clockS*(2+inten*5));
+  mats.lungs.color.copy(col);mats.lungs.opacity=.35+.4*inten+.2*pulse*inten;
+  lungGlow.material.color.copy(col);lungGlow.material.opacity=.12+.5*inten*(.55+.45*pulse);lungGlow.scale.setScalar(2+inten*1.4);
+  jointGlows.forEach((j,i)=>{j.material.color.copy(col);const ph=reduce?.6:.5+.5*Math.sin(clockS*(2.4+inten*5)+i);j.material.opacity=.08+.6*inten*(.4+.6*ph);j.scale.setScalar(.5+inten*.6)});
+  suitGlow.material.color.copy(col);suitGlow.material.opacity=.03+.06*inten;
+  mats.body.color.copy(KIWI).lerp(col,inten*.35);
+  // tether
+  tether.visible=pose.out;hook.visible=pose.out;
+  if(pose.out){
+    astro.updateMatrixWorld(true);
+    waist.set(0,-.25,-.6).applyMatrix4(body.matrixWorld);
+    const pos=tetherGeo.attributes.position.array,dist=TETHER_A.distanceTo(waist);
+    sag.set(0,-1,.25).normalize().multiplyScalar(Math.min(.9,dist*.07));
+    for(let i=0;i<TN;i++){const u=i/(TN-1),w=Math.sin(Math.PI*u)*(1+(reduce?0:.18*Math.sin(clockS*1.1+u*6)));
+      pos[i*3]=lerp(TETHER_A.x,waist.x,u)+sag.x*w;pos[i*3+1]=lerp(TETHER_A.y,waist.y,u)+sag.y*w;pos[i*3+2]=lerp(TETHER_A.z,waist.z,u)+sag.z*w}
+    tetherGeo.attributes.position.needsUpdate=true;
+  }
+  // earth + sky
+  if(!reduce)earth.rotation.y+=dt*.006;
+  // camera
+  camTarget.lerp(astro.position.clone().add(V(0,.1,0)),1-Math.exp(-dt*2.5));
+  if(camMode==="cine"){
+    theta+=dt*.07;const inside=!pose.out;
+    const r=(inside?5.2:7.2)+Math.sin(clockS*.05)*1.4,h=1.4+Math.sin(clockS*.037)*1.1;
+    const want=V(camTarget.x+Math.cos(theta)*r,camTarget.y+h,camTarget.z+Math.abs(Math.sin(theta))*r*.9+1.2);
+    camera.position.lerp(want,1-Math.exp(-dt*1.2));camera.lookAt(camTarget);controls.target.copy(camTarget);
+  }else{
+    const d=camTarget.clone().sub(prevTarget);camera.position.add(d);controls.target.add(d);controls.update();
+  }
+  prevTarget.copy(camTarget);
+  renderer.render(scene,camera);
+
+  if(now-hudAt>90){hudAt=now;hud(s,lvl,pose)}
+  requestAnimationFrame(frame);
+}
+
+function hud(s,lvl,pose){
+  const t=simT,te=t-plan.egr0,p=phaseAt(plan,t);
+  $("kRisk").firstChild.nodeValue=String(Math.round(s));
+  const L=$("kLevel");L.textContent=LEVEL_NAME[lvl];L.style.color=LEVEL_COL[lvl];$("kRisk").style.color=LEVEL_COL[lvl];
+  $("kRiskSub").textContent=te<0?`pre-EVA decision score · limit ${LIMIT}`:`bubble / DCS score · limit ${LIMIT}`;
+  let rem;
+  if(plan.scrub)rem=0;else if(te<0)rem=plan.safeH;else if(plan.abortT!==null&&t>=plan.abortT-12)rem=0;else rem=Math.max(0,(plan.abortT!==null?plan.preSafeH:plan.safeH)-te/60);
+  $("kSafe").firstChild.nodeValue=rem.toFixed(1);
+  $("kSafe").style.color=plan.scrub||rem<.5&&te>=0&&t<plan.total-1?"var(--red)":"";
+  const g=missionGain();$("kGain").textContent=fmtH(g);
+  $("kHr").firstChild.nodeValue=String(hrAt(t));
+  const done=t>=plan.total-.5;
+  $("kPhase").textContent=plan.scrub&&t>=plan.m.P?"No-go":done?"Complete":p.label;
+  $("kPhase").style.color=p.k==="abort"||p.k==="aing"?"var(--red)":"";
+  $("kClock").textContent=te<0?`T+${fmtClock(t)} · EVA in ${fmtClock(-te)}`:`T+${fmtClock(t)} · EVA ${fmtClock(Math.min(te,(plan.abortT??1e9)+47-plan.egr0))} / 06:30`;
+  $("clock").innerHTML=`<b>T+${fmtClock(t)}</b> · ${plan.scrub&&t>=plan.m.P?"no-go":done?"complete":p.label.toLowerCase()}`;
+  // details
+  $("dPress").textContent=pressAt(t);
+  $("dO2").textContent=p.k==="aing"?"100% · DCS protocol":"100%";
+  $("dDlco").textContent=`${plan.abortT!==null&&t>plan.abortT-12?RED_ONSET.dlco:inp.dlco}%`;
+  const hyd=Math.round(te<0?plan.m.Heff:hydAt(plan.m,Math.min(te,EVA_PLAN)));$("dHyd").textContent=`${hyd} / 100${acc.has("h2o")?" · +500 ml":""}`;
+  $("dBub").textContent=`G${plan.abortT!==null&&t>plan.abortT-12?RED_ONSET.bub:inp.bub}`;
+  $("dKcal").textContent=`${kcalAt(t)} kcal`;
+  $("dPre").textContent=`${(plan.m.P/60).toFixed(1)} h · N₂ left ${Math.round(plan.m.res*100)}%`;
+  $("dPlan").textContent=plan.scrub?"scrubbed":`${plan.safeH.toFixed(1)} of 6.5 h`;
+  // timeline
+  const x=clamp(t/plan.total,0,1);
+  $("scrub").value=Math.round(x*1000);
+  $("head").setAttribute("x1",x*1000);$("head").setAttribute("x2",x*1000);
+  const dot=$("dot");dot.style.left=(x*100)+"%";dot.style.top=(yOf(s)/56*100)+"%";
+  const c=LEVEL_COL[lvl];dot.style.background=c;dot.style.boxShadow=`0 0 14px 4px ${c}aa`;
+  document.querySelectorAll("#phases button").forEach((b,i)=>b.classList.toggle("on",plan.phases[i]===p&&!done));
+  // recommendations: open before depress; tuck during EVA unless risk rises
+  const pre=t<plan.egr0-30||plan.scrub;
+  const pill=$("pill");pill.classList.toggle("warn",!pre&&s>=45&&!done);
+  if(userTuck===null){setTucked(!pre)}
+  else if(pre&&userTuck===false)setTucked(false);
+  if(cardsLockedKey!==(pre?"u":"l")){cardsLockedKey=pre?"u":"l";renderCards()}
+  // coach + banners
+  const [ck,ct]=coachFor(t,s);
+  if(ck!==lastCoachKey&&(playing||t>0)){lastCoachKey=ck;say(ct)}
+  if(plan.scrub&&t>=plan.m.P-.5)banner("warn","No-go · EVA scrubbed",`Pressure risk ${Math.round(plan.m.s0)} is above the limit of ${LIMIT}. Accept recommendations to bring it down, or postpone 24–48 h.`);
+  else if(plan.abortT!==null&&t>=plan.abortT&&t<plan.total-.5)banner("","ABORT EVA",p.k==="aing"?"DCS protocol: 100% O₂ · repressurize · medical officer notified.":"DCS protocol: return to airlock, 100% O₂, repressurize.");
+  else if(done&&plan.abortT===null)banner("ok","EVA complete",`${plan.safeH.toFixed(1)} h outside safely · ${fmtH(g)} safe EVA time from accepted recommendations.`);
+  else if(done&&plan.abortT!==null)banner("","Crew safe inside","100% O₂ · repressurized · DCS case contained. No EVA until DLCO is back to baseline.");
+  else if(bannerKey)hideBanner();
+}
+let cardsLockedKey="";
+
+/* start */
+const qp=new URLSearchParams(location.search).get("preset");
+if(qp&&PRESETS[qp]){presetName=qp;inp={...PRESETS[qp]};document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x.dataset.p===qp))}
+replan();renderCards();setCam(camMode);
+hud(scoreAtT(plan,0),levelOf(scoreAtT(plan,0)),poseAt(plan,0,0));
+say("Crew member today: DLCO below baseline. Review the recommendations, then press play.");
+lastCoachKey="intro";
+requestAnimationFrame(t=>{last=t;requestAnimationFrame(frame)});
+window._eva={hudNow(){const s=scoreAtT(plan,simT);const lvl=plan.abortT!==null&&simT>=plan.abortT-12?"red":levelOf(s);hud(s,lvl,poseAt(plan,simT,clockS))},get plan(){return plan},get t(){return simT},set t(v){simT=v},acc,setPlaying(v){playing=v;setPlayIcon()},scoreAtT,missionGain};
+</script>
+</body>
+</html>

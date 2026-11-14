@@ -35,6 +35,9 @@ if models_dir.is_dir():
 brand_dir = PROJECT_ROOT / "brand"
 if brand_dir.is_dir():
     app.mount("/brand", StaticFiles(directory=str(brand_dir)), name="brand")
+vendor_dir = PROJECT_ROOT / "vendor"
+if vendor_dir.is_dir():
+    app.mount("/vendor", StaticFiles(directory=str(vendor_dir)), name="vendor")
 
 
 @app.on_event("startup")
@@ -66,3 +69,8 @@ def dosefit_exercise_page() -> FileResponse:
 @app.get("/dosefit-future.html")
 def dosefit_future_page() -> FileResponse:
     return FileResponse(PROJECT_ROOT / "dosefit-future.html")
+
+
+@app.get("/kiwinaut-eva.html")
+def kiwinaut_eva_page() -> FileResponse:
+    return FileResponse(PROJECT_ROOT / "kiwinaut-eva.html")
