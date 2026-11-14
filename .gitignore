@@ -1,0 +1,9 @@
+.DS_Store
+*.mov
+*.MP4
+*.JPG
+.env
+.env.*
+node_modules/
+.venv/
+__pycache__/

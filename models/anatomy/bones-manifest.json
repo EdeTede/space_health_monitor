@@ -1,0 +1,512 @@
+{
+  "source": "BodyParts3D 4.0 with 3.0 lung lobes",
+  "license": "CC BY 4.0; lung lobes CC BY-SA 2.1 Japan",
+  "sourceToWorld": {
+    "scale": 0.004071019043529197,
+    "center": [
+      -0.6470000000000198,
+      -100.76769999999999,
+      781.6243999999999
+    ]
+  },
+  "organs": [
+    {
+      "id": "skull",
+      "name": "Skull & jaw",
+      "category": "bone",
+      "anchor": [
+        -0.00427,
+        3.01002,
+        0.32998
+      ],
+      "center": [
+        -0.00028,
+        3.0422,
+        -0.0584
+      ],
+      "bounds": [
+        [
+          -0.30794,
+          2.60512,
+          -0.48345
+        ],
+        [
+          0.30738,
+          3.47928,
+          0.36666
+        ]
+      ],
+      "triangles": 64981,
+      "structures": [
+        "Ethmoid",
+        "Frontal bone",
+        "Left inferior nasal concha",
+        "Left lacrimal bone",
+        "Left maxilla",
+        "Left nasal bone",
+        "Left palatine bone",
+        "Left parietal bone",
+        "Left temporal bone",
+        "Left zygomatic bone",
+        "Mandible",
+        "Occipital bone",
+        "Right inferior nasal concha",
+        "Right lacrimal bone",
+        "Right maxilla",
+        "Right nasal bone",
+        "Right palatine bone",
+        "Right parietal bone",
+        "Right temporal bone",
+        "Right zygomatic bone",
+        "Sphenoid bone",
+        "Vomer"
+      ]
+    },
+    {
+      "id": "teeth",
+      "name": "Teeth",
+      "category": "dental",
+      "anchor": [
+        -0.00257,
+        2.74441,
+        0.33406
+      ],
+      "center": [
+        -0.00013,
+        2.74473,
+        0.21998
+      ],
+      "bounds": [
+        [
+          -0.13386,
+          2.62791,
+          0.10383
+        ],
+        [
+          0.13361,
+          2.86155,
+          0.33612
+        ]
+      ],
+      "triangles": 21976,
+      "structures": [
+        "Left lower first secondary molar tooth",
+        "Left lower first secondary premolar tooth",
+        "Left lower second secondary molar tooth",
+        "Left lower second secondary premolar tooth",
+        "Left lower central secondary incisor tooth",
+        "Left lower lateral secondary incisor tooth",
+        "Left lower secondary canine tooth",
+        "Left upper first secondary molar tooth",
+        "Left upper first secondary premolar tooth",
+        "Left upper second secondary molar tooth",
+        "Left upper second secondary premolar tooth",
+        "Left upper central secondary incisor tooth",
+        "Left upper lateral secondary incisor tooth",
+        "Left upper secondary canine tooth",
+        "Right lower first secondary molar tooth",
+        "Right lower first secondary premolar tooth",
+        "Right lower second secondary molar tooth",
+        "Right lower second secondary premolar tooth",
+        "Right lower central secondary incisor tooth",
+        "Right lower lateral secondary incisor tooth",
+        "Right lower secondary canine tooth",
+        "Right upper second secondary molar tooth",
+        "Right upper first secondary molar tooth",
+        "Right upper first secondary premolar tooth",
+        "Right upper second secondary premolar tooth",
+        "Right upper central secondary incisor tooth",
+        "Right upper lateral secondary incisor tooth",
+        "Right upper secondary canine tooth"
+      ]
+    },
+    {
+      "id": "rib-cage",
+      "name": "Rib cage & sternum",
+      "category": "bone",
+      "anchor": [
+        0.0047,
+        1.67522,
+        0.45596
+      ],
+      "center": [
+        -0.0001,
+        1.65968,
+        0.03264
+      ],
+      "bounds": [
+        [
+          -0.55557,
+          0.92179,
+          -0.39582
+        ],
+        [
+          0.55538,
+          2.39757,
+          0.4611
+        ]
+      ],
+      "triangles": 37969,
+      "structures": [
+        "Xiphoid process",
+        "Body of sternum",
+        "Left tenth rib",
+        "Left eleventh rib",
+        "Left twelfth rib",
+        "Left first rib",
+        "Left second rib",
+        "Left third rib",
+        "Left fourth rib",
+        "Left fifth rib",
+        "Left sixth rib",
+        "Left seventh rib",
+        "Left eighth rib",
+        "Left ninth rib",
+        "Manubrium",
+        "Right tenth rib",
+        "Right eleventh rib",
+        "Right twelfth rib",
+        "Right first rib",
+        "Right second rib",
+        "Right third rib",
+        "Right fourth rib",
+        "Right fifth rib",
+        "Right sixth rib",
+        "Right seventh rib",
+        "Right eighth rib",
+        "Right ninth rib"
+      ]
+    },
+    {
+      "id": "spine",
+      "name": "Spine",
+      "category": "bone",
+      "anchor": [
+        -0.00705,
+        1.62371,
+        -0.11053
+      ],
+      "center": [
+        -0.00058,
+        1.67471,
+        -0.17552
+      ],
+      "bounds": [
+        [
+          -0.20561,
+          0.5005,
+          -0.4103
+        ],
+        [
+          0.20445,
+          2.84892,
+          0.05927
+        ]
+      ],
+      "triangles": 37977,
+      "structures": [
+        "Tenth thoracic vertebra",
+        "Eleventh thoracic vertebra",
+        "Twelfth thoracic vertebra",
+        "First lumbar vertebra",
+        "First thoracic vertebra",
+        "Second lumbar vertebra",
+        "Second thoracic vertebra",
+        "Third cervical vertebra",
+        "Third lumbar vertebra",
+        "Third thoracic vertebra",
+        "Fourth cervical vertebra",
+        "Fourth lumbar vertebra",
+        "Fourth thoracic vertebra",
+        "Fifth cervical vertebra",
+        "Fifth lumbar vertebra",
+        "Fifth thoracic vertebra",
+        "Sixth cervical vertebra",
+        "Sixth thoracic vertebra",
+        "Seventh cervical vertebra",
+        "Seventh thoracic vertebra",
+        "Eighth thoracic vertebra",
+        "Ninth thoracic vertebra",
+        "Atlas",
+        "Axis"
+      ]
+    },
+    {
+      "id": "pelvis",
+      "name": "Pelvis & sacrum",
+      "category": "bone",
+      "anchor": [
+        -0.0283,
+        0.10021,
+        0.11142
+      ],
+      "center": [
+        0.00239,
+        0.2988,
+        -0.14186
+      ],
+      "bounds": [
+        [
+          -0.58714,
+          -0.1208,
+          -0.43976
+        ],
+        [
+          0.59193,
+          0.71839,
+          0.15603
+        ]
+      ],
+      "triangles": 14628,
+      "structures": [
+        "Right hip bone",
+        "Left hip bone",
+        "Sacrum"
+      ]
+    },
+    {
+      "id": "arm-bones",
+      "name": "Shoulders & arms",
+      "category": "bone",
+      "anchor": [
+        -0.72155,
+        1.09166,
+        -0.12892
+      ],
+      "center": [
+        0.00177,
+        1.21641,
+        -0.12147
+      ],
+      "bounds": [
+        [
+          -1.13454,
+          0.09587,
+          -0.43105
+        ],
+        [
+          1.13808,
+          2.33696,
+          0.18811
+        ]
+      ],
+      "triangles": 21991,
+      "structures": [
+        "Left clavicle",
+        "Left humerus",
+        "Left radius",
+        "Left scapula",
+        "Left ulna",
+        "Right radius",
+        "Right clavicle",
+        "Right humerus",
+        "Right scapula",
+        "Right ulna"
+      ]
+    },
+    {
+      "id": "hand-bones",
+      "name": "Hand bones",
+      "category": "bone",
+      "anchor": [
+        -0.88865,
+        -0.3689,
+        0.28459
+      ],
+      "center": [
+        0.00268,
+        -0.20028,
+        0.21256
+      ],
+      "bounds": [
+        [
+          -1.31603,
+          -0.52336,
+          0.03976
+        ],
+        [
+          1.32138,
+          0.1228,
+          0.38536
+        ]
+      ],
+      "triangles": 19948,
+      "structures": [
+        "Distal phalanx of left index finger",
+        "Distal phalanx of left little finger",
+        "Distal phalanx of left middle finger",
+        "Distal phalanx of left ring finger",
+        "Distal phalanx of left thumb",
+        "Distal phalanx of right index finger",
+        "Distal phalanx of right little finger",
+        "Distal phalanx of right middle finger",
+        "Distal phalanx of right ring finger",
+        "Distal phalanx of right thumb",
+        "Left first metacarpal bone",
+        "Left second metacarpal bone",
+        "Left third metacarpal bone",
+        "Left fourth metacarpal bone",
+        "Left fifth metacarpal bone",
+        "Left capitate",
+        "Left hamate",
+        "Left lunate",
+        "Left pisiform",
+        "Left scaphoid",
+        "Left trapezium",
+        "Left trapezoid",
+        "Left triquetral",
+        "Middle phalanx of left ring finger",
+        "Middle phalanx of right ring finger",
+        "Middle phalanx of left index finger",
+        "Middle phalanx of left little finger",
+        "Middle phalanx of left middle finger",
+        "Middle phalanx of right index finger",
+        "Middle phalanx of right little finger",
+        "Middle phalanx of right middle finger",
+        "Proximal phalanx of left index finger",
+        "Proximal phalanx of left little finger",
+        "Proximal phalanx of left middle finger",
+        "Proximal phalanx of left ring finger",
+        "Proximal phalanx of left thumb",
+        "Proximal phalanx of right index finger",
+        "Proximal phalanx of right little finger",
+        "Proximal phalanx of right middle finger",
+        "Proximal phalanx of right ring finger",
+        "Proximal phalanx of right thumb",
+        "Right first metacarpal bone",
+        "Right second metacarpal bone",
+        "Right third metacarpal bone",
+        "Right fourth metacarpal bone",
+        "Right fifth metacarpal bone",
+        "Right capitate",
+        "Right hamate",
+        "Right lunate",
+        "Right pisiform",
+        "Right scaphoid",
+        "Right trapezium",
+        "Right trapezoid",
+        "Right triquetral"
+      ]
+    },
+    {
+      "id": "leg-bones",
+      "name": "Leg bones",
+      "category": "bone",
+      "anchor": [
+        0.16135,
+        -1.55354,
+        -0.03363
+      ],
+      "center": [
+        0.00284,
+        -1.53534,
+        -0.06167
+      ],
+      "bounds": [
+        [
+          -0.60856,
+          -3.28492,
+          -0.21283
+        ],
+        [
+          0.61425,
+          0.21425,
+          0.08949
+        ]
+      ],
+      "triangles": 12544,
+      "structures": [
+        "Left femur",
+        "Left fibula",
+        "Left patella",
+        "Left tibia",
+        "Right femur",
+        "Right fibula",
+        "Right patella",
+        "Right tibia"
+      ]
+    },
+    {
+      "id": "foot-bones",
+      "name": "Foot bones",
+      "category": "bone",
+      "anchor": [
+        0.35581,
+        -3.40544,
+        0.36715
+      ],
+      "center": [
+        0.0027,
+        -3.31914,
+        0.11911
+      ],
+      "bounds": [
+        [
+          -0.6867,
+          -3.46893,
+          -0.3125
+        ],
+        [
+          0.69209,
+          -3.16934,
+          0.55071
+        ]
+      ],
+      "triangles": 23953,
+      "structures": [
+        "Distal phalanx of left second toe",
+        "Distal phalanx of left third toe",
+        "Distal phalanx of left fourth toe",
+        "Distal phalanx of left big toe",
+        "Distal phalanx of left little toe",
+        "Distal phalanx of right second toe",
+        "Distal phalanx of right third toe",
+        "Distal phalanx of right fourth toe",
+        "Distal phalanx of right big toe",
+        "Distal phalanx of right little toe",
+        "Left first metatarsal bone",
+        "Left second metatarsal bone",
+        "Left third metatarsal bone",
+        "Left fourth metatarsal bone",
+        "Left fifth metatarsal bone",
+        "Left calcaneus",
+        "Left cuboid bone",
+        "Left intermediate cuneiform bone",
+        "Left lateral cuneiform bone",
+        "Left medial cuneiform bone",
+        "Left talus",
+        "Middle phalanx of left second toe",
+        "Middle phalanx of left third toe",
+        "Middle phalanx of left fourth toe",
+        "Middle phalanx of left little toe",
+        "Middle phalanx of right second toe",
+        "Middle phalanx of right third toe",
+        "Middle phalanx of right fourth toe",
+        "Middle phalanx of right little toe",
+        "Navicular bone of left foot",
+        "Navicular bone of right foot",
+        "Proximal phalanx of right big toe",
+        "Proximal phalanx of left third toe",
+        "Proximal phalanx of left fourth toe",
+        "Proximal phalanx of left little toe",
+        "Proximal phalanx of right second toe",
+        "Proximal phalanx of right third toe",
+        "Proximal phalanx of right fourth toe",
+        "Proximal phalanx of right little toe",
+        "Proximal phalanx of left second toe",
+        "Proximal phalanx of left big toe",
+        "Right first metatarsal bone",
+        "Right second metatarsal bone",
+        "Right third metatarsal bone",
+        "Right fourth metatarsal bone",
+        "Right fifth metatarsal bone",
+        "Right calcaneus",
+        "Right cuboid bone",
+        "Right intermediate cuneiform bone",
+        "Right lateral cuneiform bone",
+        "Right medial cuneiform bone",
+        "Right talus"
+      ]
+    }
+  ]
+}

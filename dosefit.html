@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DoseFit Bone Twin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cinematic stage. Real BodyParts3D skeleton center-stage, scan HUD + Mars timeline. Single dark space HUD theme. */
+:root{
+  --void:#03060d; --hud:rgba(10,22,40,.78); --edge:rgba(120,220,255,.22);
+  --fg:#e8f4ff; --dim:#7f97b5; --holo:#5ee7ff; --amber:#ffc857; --red:#ff5d6c; --mars:#ff7a45; --ok:#3ddc97;
+  --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14px;overflow-x:hidden;margin:0}
+.app{position:relative;min-height:100%;display:grid;grid-template-rows:auto 1fr auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px}
+#sky,#stage{position:fixed;inset:0;width:100%;height:100%;display:block}
+#stage{cursor:grab;touch-action:none;z-index:1}
+#stage:active{cursor:grabbing}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,rgba(94,231,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:screen;opacity:.7}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 45% 42%,transparent 35%,rgba(3,6,13,.55) 100%)}
+.top,.bottom,.side,.scan-hud,.load{position:relative;z-index:2}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;pointer-events:none}
+.brand .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--holo);text-transform:uppercase}
+.brand h1{font-family:var(--display);font-size:clamp(26px,4vw,44px);margin:2px 0 0;line-height:1.02;text-shadow:0 0 24px rgba(94,231,255,.45);text-wrap:balance;max-width:16ch}
+.verdict{text-align:right;pointer-events:none}
+.verdict .q,.verdict .tag,.brand .k{text-shadow:0 0 6px #03060d,0 0 12px #03060d}
+.verdict .q{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.verdict .big{font-family:var(--display);font-weight:700;font-size:clamp(40px,7vw,84px);line-height:.95;font-variant-numeric:tabular-nums;transition:color .4s,text-shadow .4s}
+.verdict .tag{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.12em;padding:4px 10px;border:1px solid currentColor;border-radius:3px;margin-top:6px}
+.mid{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start;min-height:360px;pointer-events:none}
+.side{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px;display:grid;gap:10px;backdrop-filter:blur(10px);justify-self:end;width:100%}
+.side h2{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--holo);margin:0;font-weight:500;text-transform:uppercase}
+.reg{display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:6px 8px;border-radius:4px;cursor:pointer;border:1px solid transparent;background:none;color:inherit;font:inherit;text-align:left;width:100%}
+.reg:hover,.reg[aria-pressed="true"]{border-color:var(--edge);background:rgba(94,231,255,.06)}
+.reg:focus-visible,.seg button:focus-visible,#play:focus-visible,#day:focus-visible,#rescan:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.reg .n{font-weight:500}
+.reg .v{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.reg .b{grid-column:1/-1;height:3px;background:rgba(255,255,255,.08);position:relative;border-radius:2px}
+.reg .b i{position:absolute;inset:0 auto 0 0;border-radius:2px}
+.reg .b s{position:absolute;top:-3px;width:2px;height:9px;background:var(--dim)}
+.reg .p{grid-column:1/-1;font-size:11px;color:var(--dim);font-family:var(--mono)}
+.legend{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.scan-hud{pointer-events:none;justify-self:start;align-self:end;max-width:min(420px,100%);display:grid;gap:8px}
+.scan-card{background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:12px 14px;backdrop-filter:blur(10px);box-shadow:0 0 40px rgba(94,231,255,.08)}
+.scan-card .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.scan-card .label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--holo)}
+.scan-card .status{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.scan-card .title{font-family:var(--display);font-size:22px;margin:2px 0 6px;text-shadow:0 0 18px rgba(94,231,255,.35)}
+.scan-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.scan-metrics div{background:rgba(94,231,255,.05);border:1px solid rgba(94,231,255,.12);border-radius:4px;padding:8px}
+.scan-metrics .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.scan-metrics .n{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums;margin-top:2px}
+.scan-metrics .hint{font-size:11px;color:var(--dim);margin-top:2px}
+.scan-bar{height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:8px}
+.scan-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--holo),var(--ok));box-shadow:0 0 12px rgba(94,231,255,.8);transition:width .12s linear}
+.scan-tip{font-size:12px;color:var(--dim);line-height:1.45}
+.bottom{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px 16px;display:grid;gap:10px;backdrop-filter:blur(10px)}
+.ctrl{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#play,#rescan{font:600 13px var(--display);letter-spacing:.1em;border:0;border-radius:4px;padding:9px 16px;cursor:pointer}
+#play{background:var(--holo);color:#02121c;min-width:96px}
+#rescan{background:transparent;color:var(--holo);border:1px solid var(--edge)}
+.seg{display:flex;border:1px solid var(--edge);border-radius:4px;overflow:hidden}
+.seg button{font:500 13px var(--body);color:var(--fg);background:transparent;border:0;padding:8px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:rgba(94,231,255,.18);color:var(--holo)}
+.seg button[data-m="std"][aria-pressed="true"]{background:rgba(255,93,108,.16);color:var(--red)}
+.readout{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.readout b{color:var(--fg);font-weight:500}
+.track{position:relative;padding-top:18px}
+.track .ev{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:10px;letter-spacing:.08em;white-space:nowrap;color:var(--dim)}
+.track .ev.storm{color:var(--amber)} .track .ev.mars{color:var(--mars);transform:translateX(-100%)} .track .ev.l{transform:none}
+#day{width:100%;accent-color:var(--holo)}
+.event{min-height:20px;font-size:13px;color:var(--fg)}
+.event b{font-family:var(--display);letter-spacing:.05em}
+.foot{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.load{position:fixed;inset:0;display:grid;place-items:center;background:rgba(3,6,13,.72);z-index:5;backdrop-filter:blur(4px)}
+.load[hidden],[hidden]{display:none!important}
+.load .box{background:var(--hud);border:1px solid var(--edge);border-radius:8px;padding:22px 28px;text-align:center;max-width:320px}
+.load .box h2{font-family:var(--display);margin:0 0 8px;font-size:22px}
+.load .box p{margin:0;color:var(--dim);font-size:13px}
+.load .pulse{width:42px;height:42px;margin:0 auto 14px;border-radius:50%;border:2px solid rgba(94,231,255,.25);border-top-color:var(--holo);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:760px){
+  .track .ev.mid{display:none}
+  .mid{grid-template-columns:1fr;min-height:0}
+  .mid .spacer{height:52vh}
+  .scan-hud{order:-1}
+  .verdict{text-align:left}
+  .readout{margin-left:0}
+  .scan-metrics{grid-template-columns:1fr 1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .scanlines,.load .pulse{display:none}
+}
+</style>
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="stage" aria-label="Interactive 3D bone twin. Drag to rotate, scroll to zoom. Colored by bone density."></canvas>
+<div class="scanlines" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="load" id="load" role="status">
+  <div class="box">
+    <div class="pulse" aria-hidden="true"></div>
+    <h2>Calibrating bone twin</h2>
+    <p id="loadMsg">Loading BodyParts3D skeleton…</p>
+  </div>
+</div>
+
+<div class="app">
+  <div class="top">
+    <div class="brand">
+      <div class="k">DoseFit · Bone twin · Transit to Mars</div>
+      <h1>Will you walk off the ship on landing day?</h1>
+    </div>
+    <div class="verdict">
+      <div class="q">Walk-off readiness · landing day 210</div>
+      <div class="big" id="ready">--</div>
+      <div class="tag" id="readyTag">--</div>
+    </div>
+  </div>
+
+  <div class="mid">
+    <div class="scan-hud" aria-live="polite">
+      <div class="scan-card">
+        <div class="row">
+          <span class="label">Live DEXA-style scan</span>
+          <span class="status" id="scanStatus">Standby</span>
+        </div>
+        <div class="title" id="scanTitle">Full-body pass</div>
+        <div class="scan-metrics">
+          <div>
+            <div class="k">Density</div>
+            <div class="n" id="scanDens">--</div>
+            <div class="hint" id="scanDensHint">vs launch</div>
+          </div>
+          <div>
+            <div class="k">Load gap</div>
+            <div class="n" id="scanGap">--</div>
+            <div class="hint" id="scanGapHint">today’s shortfall</div>
+          </div>
+          <div>
+            <div class="k">Fracture</div>
+            <div class="n" id="scanRisk">--</div>
+            <div class="hint" id="scanRiskHint">0.38 g landing</div>
+          </div>
+        </div>
+        <div class="scan-bar" aria-hidden="true"><i id="scanProg"></i></div>
+        <p class="scan-tip" id="scanTip">Press Rescan for a density sweep. Tap a region to lock the twin on that bone group.</p>
+      </div>
+    </div>
+    <aside class="side" aria-label="Bone density by region">
+      <h2>Bone density vs launch</h2>
+      <div id="regs"></div>
+      <div class="legend">Bar = today · tick = projected at Mars landing. Tap a region to isolate it.</div>
+    </aside>
+  </div>
+
+  <div class="bottom">
+    <div class="ctrl">
+      <button id="play">▶ PLAY</button>
+      <button id="rescan" type="button">⟲ RESCAN</button>
+      <div class="seg" role="group" aria-label="Training plan">
+        <button data-m="dose" aria-pressed="true">With DoseFit</button>
+        <button data-m="std" aria-pressed="false">Fixed plan</button>
+      </div>
+      <div class="seg" role="group" aria-label="Scan overlay">
+        <button data-scan="density" aria-pressed="true">Density</button>
+        <button data-scan="dose" aria-pressed="false">Load</button>
+        <button data-scan="risk" aria-pressed="false">Risk</button>
+      </div>
+      <div class="readout">Mission day <b id="dayV">0</b> / 210 · <b id="distV">0</b> M km to Mars</div>
+    </div>
+    <div class="track">
+      <span class="ev l" style="left:0">LAUNCH</span>
+      <span class="ev storm" style="left:45.7%">☀ STORM d96</span>
+      <span class="ev mid" style="left:71.4%">EVA d150</span>
+      <span class="ev mars" style="left:100%">MARS d210</span>
+      <input type="range" id="day" min="0" max="210" value="0" aria-label="Mission day">
+    </div>
+    <div class="event" id="event"></div>
+    <div class="foot">Real anatomy from BodyParts3D (CC BY 4.0). Simplified DoseFit model with sample values, not real astronaut data. Loss rates from published spaceflight averages. Porosity in the hologram is exaggerated so change is visible.</div>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+const $=id=>document.getElementById(id);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- DoseFit model ----------
+const REG=[
+ {id:"hip",name:"Hips · femoral neck",std:1.25,dose:.35,doseNeed:1},
+ {id:"spine",name:"Lumbar spine",std:.95,dose:.30,doseNeed:.9},
+ {id:"femur",name:"Thigh bones",std:.70,dose:.25,doseNeed:.85},
+ {id:"tibia",name:"Shin bones",std:.60,dose:.22,doseNeed:.8},
+ {id:"chest",name:"Ribs and chest",std:.30,dose:.15,doseNeed:.4},
+ {id:"arm",name:"Arms",std:.20,dose:.10,doseNeed:.35},
+ {id:"skull",name:"Skull",std:0,dose:0,doseNeed:0}
+];
+const RI=Object.fromEntries(REG.map((r,i)=>[r.id,i]));
+function dens(r,day,mode){
+  let loss=r[mode]*day/30;
+  if(mode==="std"&&r.id!=="skull"&&r.id!=="arm"){const sd=Math.max(0,Math.min(day,104)-96);loss+=sd*.06*(r.std/1.25)}
+  if(mode==="std"&&day>=150&&(r.id==="hip"||r.id==="femur"))loss+=.4;
+  return 100-loss;
+}
+function readiness(day,mode){
+  const h=100-dens(REG[0],day,mode),t=100-dens(REG[3],day,mode),s=100-dens(REG[1],day,mode),f=100-dens(REG[2],day,mode);
+  return Math.max(0,Math.min(100,100-h*3.2-s*1.5-f*1-t*.8));
+}
+function loadGap(r,day,mode){
+  // fraction of daily mechanical dose still missing (0 = filled)
+  if(r.doseNeed<=0)return 0;
+  const delivered=mode==="dose"?Math.min(1,.55+.35*Math.sin(day*.07+RI[r.id])):.35+.15*Math.sin(day*.05);
+  const stormCut=mode==="std"&&day>=96&&day<105?.55:0;
+  return Math.max(0,Math.min(1,1-delivered+stormCut));
+}
+function fractureRisk(r,day,mode){
+  const d=dens(r,day,mode);
+  const weight={hip:1,spine:.85,femur:.7,tibia:.55,chest:.2,arm:.15,skull:.05}[r.id]||.3;
+  return Math.max(0,Math.min(100,(100-d)*12*weight));
+}
+let mode="dose",day=0,focus=null,scanMode="density";
+
+function col(d){
+  const t=Math.max(0,Math.min(1,(100-d)/8));
+  const a=[94,231,255],b=[255,200,87],c=[255,93,108];
+  const m=t<.5?[a,b,t*2]:[b,c,(t-.5)*2];
+  return m[0].map((v,i)=>Math.round(v+(m[1][i]-v)*m[2]));
+}
+function riskCol(risk){
+  const t=Math.max(0,Math.min(1,risk/60));
+  const a=[61,220,151],b=[255,200,87],c=[255,93,108];
+  const m=t<.5?[a,b,t*2]:[b,c,(t-.5)*2];
+  return m[0].map((v,i)=>Math.round(v+(m[1][i]-v)*m[2]));
+}
+function gapCol(gap){
+  const t=Math.max(0,Math.min(1,gap));
+  const a=[94,231,255],b=[255,200,87],c=[255,93,108];
+  const m=t<.5?[a,b,t*2]:[b,c,(t-.5)*2];
+  return m[0].map((v,i)=>Math.round(v+(m[1][i]-v)*m[2]));
+}
+function regionColor(id){
+  const r=REG[RI[id]];
+  if(scanMode==="risk")return riskCol(fractureRisk(r,day,mode));
+  if(scanMode==="dose")return gapCol(loadGap(r,day,mode));
+  return col(dens(r,day,mode));
+}
+
+// ---------- sky ----------
+const sky=$("sky"),sx=sky.getContext("2d");
+let W=0,H=0,DPR=1;
+const stars=Array.from({length:260},()=>({x:Math.random(),y:Math.random(),s:Math.random()*1.4+.3,a:Math.random()}));
+function drawSky(){
+  sx.fillStyle="#03060d";sx.fillRect(0,0,W,H);
+  const g=sx.createRadialGradient(W*.42,H*.45,0,W*.42,H*.45,Math.max(W,H)*.6);
+  g.addColorStop(0,"rgba(30,70,110,.35)");g.addColorStop(1,"rgba(3,6,13,0)");
+  sx.fillStyle=g;sx.fillRect(0,0,W,H);
+  for(const s of stars){sx.globalAlpha=.25+.6*s.a;sx.fillStyle="#cfe9ff";sx.fillRect(s.x*W,s.y*H,s.s,s.s)}
+  sx.globalAlpha=1;
+  const mob=W<760,f=day/210,R=(mob?14:22)+f*f*Math.min(W,H)*(mob?.22:.34);
+  const mxp=mob?W*.8:W*(.2-.06*f),myp=mob?H*.3:H*(.58-.04*f);
+  const mg=sx.createRadialGradient(mxp-R*.35,myp-R*.35,R*.1,mxp,myp,R);
+  mg.addColorStop(0,"#ffb38a");mg.addColorStop(.55,"#d9572b");mg.addColorStop(1,"#4a1406");
+  sx.save();sx.globalAlpha=.55+.35*f;sx.fillStyle=mg;sx.beginPath();sx.arc(mxp,myp,R,0,Math.PI*2);sx.fill();
+  sx.globalAlpha=.25;sx.strokeStyle="#ff7a45";sx.lineWidth=R*.08;sx.beginPath();sx.arc(mxp,myp,R*1.04,0,Math.PI*2);sx.stroke();sx.restore();
+}
+
+// ---------- three.js bone twin ----------
+const cv=$("stage");
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,powerPreference:"high-performance"});
+renderer.setClearColor(0x000000,0);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(32,1,.1,100);
+camera.position.set(1.1,.15,10.4);
+const controls=new OrbitControls(camera,cv);
+controls.enableDamping=true;
+controls.dampingFactor=.08;
+controls.minDistance=5;
+controls.maxDistance=16;
+controls.target.set(0,-.15,0);
+controls.maxPolarAngle=Math.PI*.92;
+controls.minPolarAngle=.15;
+
+scene.add(new THREE.AmbientLight(0x6aa8ff,.55));
+const key=new THREE.DirectionalLight(0xb8ecff,1.35);key.position.set(2.5,4,3);scene.add(key);
+const rim=new THREE.DirectionalLight(0x5ee7ff,.55);rim.position.set(-3,1,-2);scene.add(rim);
+const fill=new THREE.PointLight(0xff7a45,.25,20);fill.position.set(-2,-1,3);scene.add(fill);
+
+// hologram pedestal rings
+const pedestal=new THREE.Group();
+for(let i=0;i<3;i++){
+  const ring=new THREE.Mesh(
+    new THREE.TorusGeometry(.95+i*.28,.008,8,96),
+    new THREE.MeshBasicMaterial({color:0x5ee7ff,transparent:true,opacity:.22-i*.05})
+  );
+  ring.rotation.x=Math.PI/2;
+  ring.position.y=-3.55;
+  pedestal.add(ring);
+}
+scene.add(pedestal);
+
+// scan plane
+const scanMat=new THREE.MeshBasicMaterial({
+  color:0x5ee7ff,transparent:true,opacity:.22,depthWrite:false,
+  blending:THREE.AdditiveBlending,side:THREE.DoubleSide
+});
+const scanPlane=new THREE.Mesh(new THREE.PlaneGeometry(3.4,3.4),scanMat);
+scanPlane.rotation.x=Math.PI/2;
+scanPlane.visible=false;
+scene.add(scanPlane);
+const scanGlow=new THREE.Mesh(
+  new THREE.PlaneGeometry(3.4,.08),
+  new THREE.MeshBasicMaterial({color:0xb8f7ff,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})
+);
+scanGlow.rotation.x=Math.PI/2;
+scanGlow.visible=false;
+scene.add(scanGlow);
+
+const boneRoot=new THREE.Group();
+scene.add(boneRoot);
+const boneMeshes=[]; // {mesh, region, materials:[], baseOpacity}
+
+const MESH_REGION={
+  skull:"skull",teeth:"skull",
+  "rib-cage":"chest",
+  spine:"spine",
+  pelvis:"hip",
+  "arm-bones":"arm","hand-bones":"arm",
+  "foot-bones":"tibia"
+};
+
+function makeBoneMat(rgb, opacity=.78){
+  return new THREE.MeshStandardMaterial({
+    color:new THREE.Color(rgb[0]/255,rgb[1]/255,rgb[2]/255),
+    emissive:new THREE.Color(rgb[0]/255,rgb[1]/255,rgb[2]/255),
+    emissiveIntensity:.45,
+    metalness:.08,
+    roughness:.42,
+    transparent:true,
+    opacity,
+    side:THREE.DoubleSide,
+    depthWrite:true
+  });
+}
+
+function splitLegBones(mesh){
+  // Split combined leg mesh into femur / tibia by vertex Y (knee ≈ -1.55 in this model).
+  const geo=mesh.geometry.index?mesh.geometry.toNonIndexed():mesh.geometry.clone();
+  const pos=geo.attributes.position;
+  const knee=-1.55;
+  const femurIdx=[],tibiaIdx=[];
+  for(let i=0;i<pos.count;i+=3){
+    const y=(pos.getY(i)+pos.getY(i+1)+pos.getY(i+2))/3;
+    (y>knee?femurIdx:tibiaIdx).push(i,i+1,i+2);
+  }
+  function build(indices,region){
+    if(!indices.length)return null;
+    const g=new THREE.BufferGeometry();
+    const n=indices.length;
+    const positions=new Float32Array(n*3);
+    const normals=geo.attributes.normal?new Float32Array(n*3):null;
+    for(let i=0;i<n;i++){
+      const vi=indices[i];
+      positions[i*3]=pos.getX(vi);positions[i*3+1]=pos.getY(vi);positions[i*3+2]=pos.getZ(vi);
+      if(normals){normals[i*3]=geo.attributes.normal.getX(vi);normals[i*3+1]=geo.attributes.normal.getY(vi);normals[i*3+2]=geo.attributes.normal.getZ(vi)}
+    }
+    g.setAttribute("position",new THREE.BufferAttribute(positions,3));
+    if(normals)g.setAttribute("normal",new THREE.BufferAttribute(normals,3));
+    else g.computeVertexNormals();
+    const m=new THREE.Mesh(g,makeBoneMat(regionColor(region)));
+    m.name=`leg-${region}`;
+    m.userData.region=region;
+    return m;
+  }
+  return [build(femurIdx,"femur"),build(tibiaIdx,"tibia")].filter(Boolean);
+}
+
+function registerBone(mesh,region){
+  const rgb=regionColor(region);
+  const loss=Math.max(0,(100-dens(REG[RI[region]],day,mode))/12);
+  const mat=makeBoneMat(rgb,.82-loss*.35);
+  mesh.material=mat;
+  mesh.userData.region=region;
+  mesh.renderOrder=2;
+  boneMeshes.push({mesh,region,mat});
+  boneRoot.add(mesh);
+}
+
+async function loadBones(){
+  const loader=new GLTFLoader();
+  const url="./models/anatomy/bones.glb";
+  try{
+    const gltf=await new Promise((resolve,reject)=>{
+      loader.load(
+        url,
+        resolve,
+        e=>{if(e.lengthComputable&&e.total)$("loadMsg").textContent=`Loading skeleton… ${Math.round(e.loaded/e.total*100)}%`},
+        reject
+      );
+    });
+    const root=gltf.scene||gltf.scenes?.[0];
+    if(!root)throw new Error("GLB has no scene root");
+    // Snapshot meshes first — reparenting during traverse corrupts children[].
+    const meshes=[];
+    root.traverse(obj=>{if(obj.isMesh)meshes.push(obj)});
+    const pendingMats=[];
+    for(const obj of meshes){
+      const name=obj.name;
+      if(name==="leg-bones"){
+        const parts=splitLegBones(obj);
+        parts.forEach(p=>registerBone(p,p.userData.region));
+        obj.parent?.remove(obj);
+        obj.geometry?.dispose();
+        const old=obj.material;
+        (Array.isArray(old)?old:[old]).forEach(m=>m&&pendingMats.push(m));
+        continue;
+      }
+      const region=MESH_REGION[name];
+      if(!region){
+        obj.parent?.remove(obj);
+        obj.geometry?.dispose();
+        continue;
+      }
+      const old=obj.material;
+      pendingMats.push(...(Array.isArray(old)?old:[old]));
+      registerBone(obj,region);
+    }
+    pendingMats.forEach(m=>m?.dispose?.());
+    if(!boneMeshes.length)throw new Error("No bone meshes registered from GLB");
+    // Fit and center
+    const box=new THREE.Box3().setFromObject(boneRoot);
+    const size=box.getSize(new THREE.Vector3());
+    const center=box.getCenter(new THREE.Vector3());
+    if(!isFinite(size.x)||size.x===0)throw new Error("Invalid bone bounds");
+    boneRoot.position.sub(center);
+    const scale=5.7/Math.max(size.x,size.y,size.z);
+    boneRoot.scale.setScalar(scale);
+    boneRoot.rotation.y=.42;
+    // Keep hologram rings under the feet
+    const feet=new THREE.Box3().setFromObject(boneRoot).min.y;
+    pedestal.position.y=feet+3.55+.02;
+    $("load").hidden=true;
+    startScan(true);
+  }catch(err){
+    console.error(err);
+    const hint=/Failed to fetch|NetworkError|file:|CORS/i.test(String(err?.message||err))
+      ?" Serve this folder over http (not file://)."
+      :"";
+    $("loadMsg").textContent=`Bone twin failed: ${err?.message||err}.${hint}`;
+  }
+}
+
+function updateBoneLooks(){
+  for(const b of boneMeshes){
+    const rgb=regionColor(b.region);
+    const d=dens(REG[RI[b.region]],day,mode);
+    const loss=Math.max(0,(100-d)/12);
+    const isolated=focus===null||focus===RI[b.region];
+    b.mat.color.setRGB(rgb[0]/255,rgb[1]/255,rgb[2]/255);
+    b.mat.emissive.setRGB(rgb[0]/255,rgb[1]/255,rgb[2]/255);
+    b.mat.emissiveIntensity=isolated?(.28+.25*(1-d/100)):.05;
+    b.mat.opacity=isolated?(.78-loss*.32):.08;
+    b.mesh.visible=true;
+  }
+}
+
+// ---------- scan state ----------
+let scanning=false,scanT=0,scanRegion=null,autoSpin=!reduce;
+const SCAN_ORDER=["skull","chest","spine","arm","hip","femur","tibia"];
+
+function regionAtScanY(y){
+  // model space after centering: skull top ~3.2, feet ~-3.4, scaled
+  // Use mesh world bounds for hit testing
+  let best=null,bestDist=Infinity;
+  for(const b of boneMeshes){
+    if(!b.mesh.visible)continue;
+    const box=new THREE.Box3().setFromObject(b.mesh);
+    if(y>=box.min.y-.05&&y<=box.max.y+.05){
+      const mid=(box.min.y+box.max.y)/2;
+      const dist=Math.abs(y-mid);
+      if(dist<bestDist){bestDist=dist;best=b.region}
+    }
+  }
+  return best;
+}
+
+function tipFor(region){
+  const r=REG[RI[region]];
+  const d=dens(r,day,mode);
+  const gap=loadGap(r,day,mode);
+  const risk=fractureRisk(r,day,mode);
+  if(scanMode==="dose"){
+    if(gap>.45)return `Load shortfall on ${r.name}. DoseFit would add heavy sets targeting this region.`;
+    if(gap>.2)return `${r.name} is close to today’s mechanical dose. Keep impact or load quality high.`;
+    return `${r.name} hit today’s load target.`;
+  }
+  if(scanMode==="risk"){
+    if(risk>40)return `Elevated fracture risk at ${r.name} for a 0.38 g Mars walk-off.`;
+    if(risk>18)return `Watch ${r.name}: density loss is starting to raise landing risk.`;
+    return `${r.name} looks stable for landing under current plan.`;
+  }
+  if(d<94)return `${r.name} is ${ (100-d).toFixed(1) }% below launch. Porosity exaggerated in the hologram.`;
+  return `${r.name} still near launch density.`;
+}
+
+function updateScanHud(region,prog){
+  $("scanProg").style.width=`${Math.round(prog*100)}%`;
+  if(!region){
+    $("scanStatus").textContent=scanning?"Sweeping…":"Standby";
+    $("scanTitle").textContent=scanning?"Full-body pass":"Full skeleton";
+    $("scanDens").textContent="--";
+    $("scanGap").textContent="--";
+    $("scanRisk").textContent="--";
+    $("scanDensHint").textContent="vs launch";
+    $("scanGapHint").textContent="today’s shortfall";
+    $("scanRiskHint").textContent="0.38 g landing";
+    $("scanTip").textContent=scanning?"Sweeping cranial → caudal. Values update as the beam crosses each region.":"Press Rescan for a density sweep. Tap a region to lock the twin on that bone group.";
+    return;
+  }
+  const r=REG[RI[region]];
+  const d=dens(r,day,mode);
+  const gap=loadGap(r,day,mode);
+  const risk=fractureRisk(r,day,mode);
+  const rgb=regionColor(region);
+  $("scanStatus").textContent=scanning?"Scanning":"Locked";
+  $("scanTitle").textContent=r.name;
+  $("scanDens").textContent=d.toFixed(1)+"%";
+  $("scanDens").style.color=`rgb(${rgb})`;
+  $("scanDensHint").textContent=`Δ ${(d-100).toFixed(1)}% from launch`;
+  $("scanGap").textContent=Math.round(gap*100)+"%";
+  $("scanGap").style.color=`rgb(${gapCol(gap)})`;
+  $("scanGapHint").textContent=mode==="dose"?"DoseFit session":"fixed plan session";
+  $("scanRisk").textContent=Math.round(risk);
+  $("scanRisk").style.color=`rgb(${riskCol(risk)})`;
+  $("scanRiskHint").textContent=risk>40?"HIGH":risk>18?"WATCH":"LOW";
+  $("scanTip").textContent=tipFor(region);
+}
+
+function startScan(quiet=false){
+  if(!boneMeshes.length)return;
+  scanning=true;scanT=0;scanRegion=null;
+  scanPlane.visible=!reduce;scanGlow.visible=!reduce;
+  $("rescan").textContent="Scanning…";
+  if(!quiet)updateScanHud(null,0);
+}
+
+function finishScan(){
+  scanning=false;
+  scanPlane.visible=false;scanGlow.visible=false;
+  $("rescan").textContent="⟲ RESCAN";
+  if(focus!==null){
+    const id=REG[focus].id;
+    scanRegion=id;
+    updateScanHud(id,1);
+  }else{
+    // settle on worst region for usefulness
+    const worst=[...REG].filter(r=>r.id!=="skull").sort((a,b)=>{
+      const score=r=>scanMode==="risk"?fractureRisk(r,day,mode):scanMode==="dose"?loadGap(r,day,mode)*100:100-dens(r,day,mode);
+      return score(b)-score(a);
+    })[0];
+    scanRegion=worst.id;
+    updateScanHud(worst.id,1);
+    $("scanStatus").textContent="Priority find";
+    $("scanTip").textContent=`Scan complete. Highest concern: ${worst.name}. `+tipFor(worst.id);
+  }
+}
+
+// ---------- UI ----------
+$("regs").innerHTML=REG.filter(r=>r.id!=="skull").map(r=>`<button class="reg" data-i="${RI[r.id]}" aria-pressed="false"><span class="n">${r.name}</span><span class="v"></span><span class="b"><i></i><s></s></span><span class="p"></span></button>`).join("");
+const EVENTS=[[0,"<b>LAUNCH.</b> Bone twin calibrated from pre-flight BodyParts3D scan. Targets set per region."],[30,"<b>MONTH 1.</b> Insoles catch the right hip being under-loaded. DoseFit shifts squats to right-leg-first."],[96,null],[105,"<b>STORM OVER.</b> Catch-up sessions close the loading gap."],[150,"<b>SPACEWALK WEEK.</b> Leg loading paused 24 h before the EVA, then made up after."],[185,"<b>FINAL APPROACH.</b> Training shifts to landing prep: balance, heavy squats, impact work."],[210,null]];
+function eventText(){
+  if(day>=96&&day<105)return mode==="dose"?"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter. DoseFit switches to a compact band and impact session, so no loading days are lost.":"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter, with no machines and no plan. 8 days of bone loading lost.";
+  if(day>=209.5){const r=readiness(210,mode);return r>=75?"<b style='color:var(--ok)'>MARS LANDING.</b> Hips strong enough to climb down the ladder and walk on Mars.":"<b style='color:var(--red)'>MARS LANDING.</b> Hip bone too weak for a safe first walk. High fracture risk in 0.38 g.";}
+  let t="";for(const e of EVENTS)if(day>=e[0]&&e[1])t=e[1];
+  if(mode==="std"&&day>=30&&day<96)t="<b>FIXED PLAN.</b> Same workout every day. Nobody notices the right hip is under-loaded.";
+  return t;
+}
+
+let lastSky=-1,playing=false;
+function sync(){
+  const d=Math.round(day);$("day").value=d;$("dayV").textContent=d;$("distV").textContent=(Math.max(0,225*(1-day/210))).toFixed(0);
+  document.querySelectorAll(".reg").forEach(el=>{
+    const r=REG[+el.dataset.i],v=dens(r,day,mode),end=dens(r,210,mode),c=col(v);
+    el.querySelector(".v").textContent=v.toFixed(1)+"%";el.querySelector(".v").style.color=`rgb(${c})`;
+    const scale=x=>Math.max(0,(x-85)/15*100);
+    const i=el.querySelector("i");i.style.width=scale(v)+"%";i.style.background=`rgb(${c})`;i.style.boxShadow=`0 0 8px rgb(${c})`;
+    el.querySelector("s").style.left=scale(end)+"%";
+    el.querySelector(".p").textContent=`at landing: ${end.toFixed(1)}%`+(mode==="dose"?`  ·  fixed plan ${dens(r,210,"std").toFixed(1)}%`:`  ·  with DoseFit ${dens(r,210,"dose").toFixed(1)}%`);
+  });
+  const r=readiness(210,mode);
+  $("ready").textContent=Math.round(r)+"%";
+  const ok=r>=75,colr=ok?"var(--ok)":"var(--red)";
+  $("ready").style.color=colr;$("ready").style.textShadow=`0 0 30px ${ok?"rgba(61,220,151,.5)":"rgba(255,93,108,.5)"}`;
+  $("readyTag").textContent=ok?"READY TO WALK":"FRACTURE RISK";$("readyTag").style.color=colr;
+  $("event").innerHTML=eventText();
+  if(Math.abs(day-lastSky)>.8){drawSky();lastSky=day}
+  updateBoneLooks();
+  if(scanRegion)updateScanHud(scanRegion,scanning?scanT:1);
+}
+
+function size(){
+  DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;
+  sky.width=W*DPR;sky.height=H*DPR;sx.setTransform(DPR,0,0,DPR,0,0);
+  renderer.setPixelRatio(DPR);renderer.setSize(W,H,false);
+  camera.aspect=W/H;camera.updateProjectionMatrix();
+  drawSky();
+}
+
+$("play").onclick=()=>{if(day>=210)day=0;playing=!playing;$("play").textContent=playing?"❚❚ PAUSE":"▶ PLAY"};
+$("rescan").onclick=()=>startScan();
+$("day").oninput=e=>{day=+e.target.value;playing=false;$("play").textContent="▶ PLAY";sync()};
+document.querySelectorAll(".seg button[data-m]").forEach(b=>b.onclick=()=>{
+  mode=b.dataset.m;
+  document.querySelectorAll(".seg button[data-m]").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  sync();startScan(true);
+});
+document.querySelectorAll(".seg button[data-scan]").forEach(b=>b.onclick=()=>{
+  scanMode=b.dataset.scan;
+  document.querySelectorAll(".seg button[data-scan]").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  updateBoneLooks();
+  if(scanRegion)updateScanHud(scanRegion,1);
+  else startScan(true);
+});
+document.querySelectorAll(".reg").forEach(b=>b.onclick=()=>{
+  const i=+b.dataset.i;focus=focus===i?null:i;
+  document.querySelectorAll(".reg").forEach(x=>x.setAttribute("aria-pressed",focus===+x.dataset.i));
+  if(focus!==null){scanRegion=REG[focus].id;updateScanHud(scanRegion,1);$("scanStatus").textContent="Isolated"}
+  updateBoneLooks();
+});
+
+let t0=performance.now();
+function frame(now){
+  const dt=Math.min(.05,(now-t0)/1000);t0=now;
+  if(autoSpin&&!controls.enabled){/* keep orbit user-driven */}
+  if(autoSpin)boneRoot.rotation.y+=(reduce?0:.12)*dt;
+  pedestal.rotation.y-=dt*.15;
+  pedestal.children.forEach((ring,i)=>{ring.material.opacity=.12+(.08+.04*Math.sin(now/900+i))*(scanning?1.4:1)});
+
+  if(scanning&&!reduce){
+    scanT=Math.min(1,scanT+dt*.28);
+    const y=3.35-scanT*6.9;
+    scanPlane.position.y=y;scanGlow.position.y=y;
+    scanMat.opacity=.12+.18*Math.sin(now/120);
+    const hit=regionAtScanY(y);
+    if(hit&&hit!==scanRegion){scanRegion=hit;updateScanHud(hit,scanT)}
+    else updateScanHud(scanRegion,scanT);
+    // brighten scanned region briefly
+    for(const b of boneMeshes){
+      if(b.region===hit){b.mat.emissiveIntensity=.7;b.mat.opacity=Math.min(.95,b.mat.opacity+.15)}
+    }
+    if(scanT>=1)finishScan();
+  }else if(scanning&&reduce){
+    finishScan();
+  }
+
+  if(playing){day=Math.min(210,day+dt*17);if(day>=210){playing=false;$("play").textContent="↺ REPLAY"}sync()}
+  controls.update();
+  renderer.render(scene,camera);
+  requestAnimationFrame(frame);
+}
+
+addEventListener("resize",size);
+size();sync();
+requestAnimationFrame(frame);
+loadBones();
+
+window._dosefit={set:(d,m)=>{day=d;if(m){mode=m;document.querySelectorAll(".seg button[data-m]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.m===m))}sync()}};
+</script>
+</body>
+</html>
