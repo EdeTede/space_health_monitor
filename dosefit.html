@@ -25,6 +25,7 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 .top,.bottom,.side,.scan-hud,.load{position:relative;z-index:2}
 .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;pointer-events:none}
 .brand .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--holo);text-transform:uppercase}
+#apiChip{letter-spacing:.12em;opacity:.85}#apiChip[data-on="1"]{color:var(--ok)}#apiChip[data-on="0"]{color:var(--amber)}
 .brand h1{font-family:var(--display);font-size:clamp(26px,4vw,44px);margin:2px 0 0;line-height:1.02;text-shadow:0 0 24px rgba(94,231,255,.45);text-wrap:balance;max-width:16ch}
 .verdict{text-align:right;pointer-events:none}
 .verdict .q,.verdict .tag,.brand .k{text-shadow:0 0 6px #03060d,0 0 12px #03060d}
@@ -115,7 +116,7 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 <div class="app">
   <div class="top">
     <div class="brand">
-      <div class="k">DoseFit · Bone twin · Transit to Mars</div>
+      <div class="k">DoseFit · Bone twin · Transit to Mars · <span id="apiChip" data-on="0">API · …</span></div>
       <h1>Will you walk off the ship on landing day?</h1>
     </div>
     <div class="verdict">
@@ -238,6 +239,60 @@ function fractureRisk(r,day,mode){
   return Math.max(0,Math.min(100,(100-d)*12*weight));
 }
 let mode="dose",day=0,focus=null,scanMode="density";
+let apiOnline=false,twinCache=null,twinFetchTimer=null,twinInflight=null;
+
+function densFromTwin(id){
+  if(twinCache?.regions){const hit=twinCache.regions.find(x=>x.id===id);if(hit)return hit.density}
+  return dens(REG[RI[id]],day,mode);
+}
+function gapFromTwin(id){
+  if(twinCache?.regions){const hit=twinCache.regions.find(x=>x.id===id);if(hit)return hit.load_gap}
+  return loadGap(REG[RI[id]],day,mode);
+}
+function riskFromTwin(id){
+  if(twinCache?.regions){const hit=twinCache.regions.find(x=>x.id===id);if(hit)return hit.fracture_risk}
+  return fractureRisk(REG[RI[id]],day,mode);
+}
+function tipFromTwin(id){
+  if(twinCache?.regions){const hit=twinCache.regions.find(x=>x.id===id);if(hit?.tip)return hit.tip}
+  return tipForLocal(id);
+}
+function tipForLocal(region){
+  const r=REG[RI[region]];
+  const d=dens(r,day,mode),gap=loadGap(r,day,mode),risk=fractureRisk(r,day,mode);
+  if(scanMode==="dose"){
+    if(gap>.45)return `Load shortfall on ${r.name}. DoseFit would add heavy sets targeting this region.`;
+    if(gap>.2)return `${r.name} is close to today’s mechanical dose. Keep impact or load quality high.`;
+    return `${r.name} hit today’s load target.`;
+  }
+  if(scanMode==="risk"){
+    if(risk>40)return `Elevated fracture risk at ${r.name} for a 0.38 g Mars walk-off.`;
+    if(risk>18)return `Watch ${r.name}: density loss is starting to raise landing risk.`;
+    return `${r.name} looks stable for landing under current plan.`;
+  }
+  if(d<94)return `${r.name} is ${(100-d).toFixed(1)}% below launch. Porosity exaggerated in the hologram.`;
+  return `${r.name} still near launch density.`;
+}
+async function fetchTwin(force=false){
+  const q=`/api/twin?day=${encodeURIComponent(day)}&mode=${encodeURIComponent(mode)}&scan=${encodeURIComponent(scanMode)}`;
+  if(twinInflight&&!force)return twinInflight;
+  twinInflight=fetch(q,{headers:{Accept:"application/json"}}).then(async res=>{
+    if(!res.ok)throw new Error("twin "+res.status);
+    twinCache=await res.json();
+    apiOnline=true;
+    const chip=$("apiChip");if(chip){chip.textContent="API · live";chip.dataset.on="1"}
+    return twinCache;
+  }).catch(()=>{
+    apiOnline=false;twinCache=null;
+    const chip=$("apiChip");if(chip){chip.textContent="API · offline";chip.dataset.on="0"}
+    return null;
+  }).finally(()=>{twinInflight=null});
+  return twinInflight;
+}
+function scheduleTwinFetch(){
+  clearTimeout(twinFetchTimer);
+  twinFetchTimer=setTimeout(()=>{fetchTwin().then(()=>sync(false))},playing?120:40);
+}
 
 function col(d){
   const t=Math.max(0,Math.min(1,(100-d)/8));
@@ -258,6 +313,10 @@ function gapCol(gap){
   return m[0].map((v,i)=>Math.round(v+(m[1][i]-v)*m[2]));
 }
 function regionColor(id){
+  if(twinCache?.regions){
+    const hit=twinCache.regions.find(x=>x.id===id);
+    if(hit?.rgb)return hit.rgb;
+  }
   const r=REG[RI[id]];
   if(scanMode==="risk")return riskCol(fractureRisk(r,day,mode));
   if(scanMode==="dose")return gapCol(loadGap(r,day,mode));
@@ -472,7 +531,7 @@ async function loadBones(){
 function updateBoneLooks(){
   for(const b of boneMeshes){
     const rgb=regionColor(b.region);
-    const d=dens(REG[RI[b.region]],day,mode);
+    const d=densFromTwin(b.region);
     const loss=Math.max(0,(100-d)/12);
     const isolated=focus===null||focus===RI[b.region];
     b.mat.color.setRGB(rgb[0]/255,rgb[1]/255,rgb[2]/255);
@@ -503,24 +562,7 @@ function regionAtScanY(y){
   return best;
 }
 
-function tipFor(region){
-  const r=REG[RI[region]];
-  const d=dens(r,day,mode);
-  const gap=loadGap(r,day,mode);
-  const risk=fractureRisk(r,day,mode);
-  if(scanMode==="dose"){
-    if(gap>.45)return `Load shortfall on ${r.name}. DoseFit would add heavy sets targeting this region.`;
-    if(gap>.2)return `${r.name} is close to today’s mechanical dose. Keep impact or load quality high.`;
-    return `${r.name} hit today’s load target.`;
-  }
-  if(scanMode==="risk"){
-    if(risk>40)return `Elevated fracture risk at ${r.name} for a 0.38 g Mars walk-off.`;
-    if(risk>18)return `Watch ${r.name}: density loss is starting to raise landing risk.`;
-    return `${r.name} looks stable for landing under current plan.`;
-  }
-  if(d<94)return `${r.name} is ${ (100-d).toFixed(1) }% below launch. Porosity exaggerated in the hologram.`;
-  return `${r.name} still near launch density.`;
-}
+function tipFor(region){return tipFromTwin(region)}
 
 function updateScanHud(region,prog){
   $("scanProg").style.width=`${Math.round(prog*100)}%`;
@@ -537,9 +579,9 @@ function updateScanHud(region,prog){
     return;
   }
   const r=REG[RI[region]];
-  const d=dens(r,day,mode);
-  const gap=loadGap(r,day,mode);
-  const risk=fractureRisk(r,day,mode);
+  const d=densFromTwin(region);
+  const gap=gapFromTwin(region);
+  const risk=riskFromTwin(region);
   const rgb=regionColor(region);
   $("scanStatus").textContent=scanning?"Scanning":"Locked";
   $("scanTitle").textContent=r.name;
@@ -574,7 +616,7 @@ function finishScan(){
   }else{
     // settle on worst region for usefulness
     const worst=[...REG].filter(r=>r.id!=="skull").sort((a,b)=>{
-      const score=r=>scanMode==="risk"?fractureRisk(r,day,mode):scanMode==="dose"?loadGap(r,day,mode)*100:100-dens(r,day,mode);
+      const score=r=>scanMode==="risk"?riskFromTwin(r.id):scanMode==="dose"?gapFromTwin(r.id)*100:100-densFromTwin(r.id);
       return score(b)-score(a);
     })[0];
     scanRegion=worst.id;
@@ -588,6 +630,7 @@ function finishScan(){
 $("regs").innerHTML=REG.filter(r=>r.id!=="skull").map(r=>`<button class="reg" data-i="${RI[r.id]}" aria-pressed="false"><span class="n">${r.name}</span><span class="v"></span><span class="b"><i></i><s></s></span><span class="p"></span></button>`).join("");
 const EVENTS=[[0,"<b>LAUNCH.</b> Bone twin calibrated from pre-flight BodyParts3D scan. Targets set per region."],[30,"<b>MONTH 1.</b> Insoles catch the right hip being under-loaded. DoseFit shifts squats to right-leg-first."],[96,null],[105,"<b>STORM OVER.</b> Catch-up sessions close the loading gap."],[150,"<b>SPACEWALK WEEK.</b> Leg loading paused 24 h before the EVA, then made up after."],[185,"<b>FINAL APPROACH.</b> Training shifts to landing prep: balance, heavy squats, impact work."],[210,null]];
 function eventText(){
+  if(twinCache?.event_html)return twinCache.event_html;
   if(day>=96&&day<105)return mode==="dose"?"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter. DoseFit switches to a compact band and impact session, so no loading days are lost.":"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter, with no machines and no plan. 8 days of bone loading lost.";
   if(day>=209.5){const r=readiness(210,mode);return r>=75?"<b style='color:var(--ok)'>MARS LANDING.</b> Hips strong enough to climb down the ladder and walk on Mars.":"<b style='color:var(--red)'>MARS LANDING.</b> Hip bone too weak for a safe first walk. High fracture risk in 0.38 g.";}
   let t="";for(const e of EVENTS)if(day>=e[0]&&e[1])t=e[1];
@@ -596,25 +639,34 @@ function eventText(){
 }
 
 let lastSky=-1,playing=false;
-function sync(){
-  const d=Math.round(day);$("day").value=d;$("dayV").textContent=d;$("distV").textContent=(Math.max(0,225*(1-day/210))).toFixed(0);
+function sync(requestApi=true){
+  const d=Math.round(day);$("day").value=d;$("dayV").textContent=d;
+  const dist=twinCache&&apiOnline?twinCache.distance_mkm:Math.max(0,225*(1-day/210));
+  $("distV").textContent=Number(dist).toFixed(0);
   document.querySelectorAll(".reg").forEach(el=>{
-    const r=REG[+el.dataset.i],v=dens(r,day,mode),end=dens(r,210,mode),c=col(v);
+    const r=REG[+el.dataset.i];
+    const twinR=twinCache?.regions?.find(x=>x.id===r.id);
+    const v=twinR?twinR.density:dens(r,day,mode);
+    const end=twinR?twinR.density_landing:dens(r,210,mode);
+    const alt=twinR?twinR.density_alt_landing:dens(r,210,mode==="dose"?"std":"dose");
+    const c=twinR?.rgb||col(v);
     el.querySelector(".v").textContent=v.toFixed(1)+"%";el.querySelector(".v").style.color=`rgb(${c})`;
     const scale=x=>Math.max(0,(x-85)/15*100);
     const i=el.querySelector("i");i.style.width=scale(v)+"%";i.style.background=`rgb(${c})`;i.style.boxShadow=`0 0 8px rgb(${c})`;
     el.querySelector("s").style.left=scale(end)+"%";
-    el.querySelector(".p").textContent=`at landing: ${end.toFixed(1)}%`+(mode==="dose"?`  ·  fixed plan ${dens(r,210,"std").toFixed(1)}%`:`  ·  with DoseFit ${dens(r,210,"dose").toFixed(1)}%`);
+    el.querySelector(".p").textContent=`at landing: ${end.toFixed(1)}%`+(mode==="dose"?`  ·  fixed plan ${alt.toFixed(1)}%`:`  ·  with DoseFit ${alt.toFixed(1)}%`);
   });
-  const r=readiness(210,mode);
+  const r=twinCache&&apiOnline?twinCache.walkoff_readiness:readiness(210,mode);
+  const ok=twinCache&&apiOnline?twinCache.walkoff_ready:r>=75;
   $("ready").textContent=Math.round(r)+"%";
-  const ok=r>=75,colr=ok?"var(--ok)":"var(--red)";
+  const colr=ok?"var(--ok)":"var(--red)";
   $("ready").style.color=colr;$("ready").style.textShadow=`0 0 30px ${ok?"rgba(61,220,151,.5)":"rgba(255,93,108,.5)"}`;
   $("readyTag").textContent=ok?"READY TO WALK":"FRACTURE RISK";$("readyTag").style.color=colr;
   $("event").innerHTML=eventText();
   if(Math.abs(day-lastSky)>.8){drawSky();lastSky=day}
   updateBoneLooks();
   if(scanRegion)updateScanHud(scanRegion,scanning?scanT:1);
+  if(requestApi)scheduleTwinFetch();
 }
 
 function size(){
@@ -631,14 +683,12 @@ $("day").oninput=e=>{day=+e.target.value;playing=false;$("play").textContent="�
 document.querySelectorAll(".seg button[data-m]").forEach(b=>b.onclick=()=>{
   mode=b.dataset.m;
   document.querySelectorAll(".seg button[data-m]").forEach(x=>x.setAttribute("aria-pressed",x===b));
-  sync();startScan(true);
+  twinCache=null;fetchTwin(true).then(()=>{sync(false);startScan(true)});
 });
 document.querySelectorAll(".seg button[data-scan]").forEach(b=>b.onclick=()=>{
   scanMode=b.dataset.scan;
   document.querySelectorAll(".seg button[data-scan]").forEach(x=>x.setAttribute("aria-pressed",x===b));
-  updateBoneLooks();
-  if(scanRegion)updateScanHud(scanRegion,1);
-  else startScan(true);
+  fetchTwin(true).then(()=>{updateBoneLooks();if(scanRegion)updateScanHud(scanRegion,1);else startScan(true)});
 });
 document.querySelectorAll(".reg").forEach(b=>b.onclick=()=>{
   const i=+b.dataset.i;focus=focus===i?null:i;
@@ -683,7 +733,8 @@ size();sync();
 requestAnimationFrame(frame);
 loadBones();
 
-window._dosefit={set:(d,m)=>{day=d;if(m){mode=m;document.querySelectorAll(".seg button[data-m]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.m===m))}sync()}};
+window._dosefit={set:(d,m)=>{day=d;if(m){mode=m;document.querySelectorAll(".seg button[data-m]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.m===m))}fetchTwin(true).then(()=>sync(false))}};
+fetchTwin(true).then(()=>sync(false));
 </script>
 </body>
 </html>

@@ -1,0 +1,61 @@
+{
+  "astronaut": {
+    "id": "crew-01",
+    "name": "Alex Rivera",
+    "role": "Flight engineer",
+    "targets": {
+      "hip": 1.0,
+      "spine": 0.9,
+      "femur": 0.85,
+      "tibia": 0.8,
+      "chest": 0.4,
+      "arm": 0.35,
+      "skull": 0.0
+    }
+  },
+  "mission": {
+    "id": "mars-transit-01",
+    "name": "Transit to Mars",
+    "duration_days": 210,
+    "earth_mars_mkm": 225,
+    "plan_mode": "dose",
+    "day": 0,
+    "active_scenario": "normal"
+  },
+  "regions": [
+    {"id": "hip", "name": "Hips · femoral neck", "std": 1.25, "dose": 0.35, "dose_need": 1.0},
+    {"id": "spine", "name": "Lumbar spine", "std": 0.95, "dose": 0.30, "dose_need": 0.9},
+    {"id": "femur", "name": "Thigh bones", "std": 0.70, "dose": 0.25, "dose_need": 0.85},
+    {"id": "tibia", "name": "Shin bones", "std": 0.60, "dose": 0.22, "dose_need": 0.8},
+    {"id": "chest", "name": "Ribs and chest", "std": 0.30, "dose": 0.15, "dose_need": 0.4},
+    {"id": "arm", "name": "Arms", "std": 0.20, "dose": 0.10, "dose_need": 0.35},
+    {"id": "skull", "name": "Skull", "std": 0.0, "dose": 0.0, "dose_need": 0.0}
+  ],
+  "scenarios": [
+    {
+      "id": "normal",
+      "name": "Normal day",
+      "description": "Every region on target; readiness high. Small progressive overload."
+    },
+    {
+      "id": "underload_hip",
+      "name": "Under-loaded hip",
+      "description": "Insoles detect right hip shortfall. Next workout is right-leg-first."
+    },
+    {
+      "id": "flare",
+      "name": "Solar flare",
+      "description": "Shelter session now, catch-up after all-clear. Optional BFR note."
+    },
+    {
+      "id": "low_readiness",
+      "name": "Low readiness",
+      "description": "Resting HR up, HRV down. Cut volume; keep heavy reps for bone."
+    },
+    {
+      "id": "spacewalk",
+      "name": "Spacewalk day",
+      "description": "DCS risk, exercise prebreathe, no heavy load 24 h prior, post-EVA log."
+    }
+  ]
+}
