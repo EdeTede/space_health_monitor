@@ -128,6 +128,13 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(24px,3.2vw,38px);l
 
 /* bottom */
 .bottom{grid-column:1/-1;grid-row:3;display:grid;gap:10px}
+.recall{justify-self:center;display:inline-flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--line2);border-radius:999px;padding:8px 16px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--kiwi-bright);transition:border-color .4s var(--ease),color .4s var(--ease),background .4s var(--ease),opacity .4s var(--ease)}
+.recall:hover:not([disabled]){background:rgba(142,224,79,.1)}
+.recall[hidden]{display:none}
+.recall[disabled]{cursor:default;color:var(--dim);border-color:var(--line)}
+.recall.resume{color:var(--amber);border-color:rgba(255,200,87,.5)}
+.recall kbd{font-family:var(--mono);font-size:9.5px;border:1px solid currentColor;border-radius:3px;padding:0 5px;opacity:.7}
+.recall svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.6}
 .coach{justify-self:center;max-width:760px;min-height:20px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--kiwi-bright);letter-spacing:.02em;text-shadow:0 0 12px rgba(3,6,13,.95)}
 .coach .cur{display:inline-block;width:6px;height:12px;background:var(--kiwi-bright);margin-left:3px;vertical-align:-1px;opacity:.7;animation:blink 1s step-end infinite}
 .timeline{padding:12px 16px}
@@ -207,7 +214,7 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(24px,3.2vw,38px);l
     <div class="lock"><img src="brand/kiwinaut-mark.png" width="26" height="26" alt="Kiwinaut logo"><span class="name">Kiwinaut</span><span class="tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
     <h1 id="title">Spacewalk · live health risk</h1>
     <p class="value-line">Extra safe hours outside. Work longer, smarter, safer.</p>
-    <nav class="nav" aria-label="Pages"><a href="dosefit.html">Dashboard</a><a href="dosefit-future.html">Decompression story</a></nav>
+    <nav class="nav" aria-label="Pages"><a href="dosefit.html">← Dashboard</a><a href="dosefit-future.html">Decompression story</a></nav>
   </header>
 
   <section class="keys" aria-label="Key numbers" aria-live="polite">
@@ -292,6 +299,7 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(24px,3.2vw,38px);l
   </aside>
 
   <section class="bottom">
+    <button type="button" class="recall" id="recall" hidden><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2.5 4 6l3.5 3.5"/></svg><span id="recallTxt">Return to airlock</span><kbd>R</kbd></button>
     <div class="coach" aria-live="polite"><span id="coach"></span><span class="cur" aria-hidden="true"></span></div>
     <div class="timeline glass">
       <div class="tl-top">
@@ -381,11 +389,11 @@ const ACTS={
         {k:"task",label:"Solar array",d:100,task:"solar",at:"r2"},{k:"carry",label:"Carry samples",d:80,to:"r3"},{k:"back",label:"Return",d:75,ret:1}]
 };
 const CHAPTERS=[["suit","Suit up"],["pre","Prebreathe"],["eva","EVA"],["ret","Return"],["test","DCS test"],["debrief","Debrief"]];
-const CHAP_OF={suit:"suit",pre:"pre",dep:"pre",egr:"eva",tra:"eva",work:"eva",ret:"eva",walk:"eva",task:"eva",carry:"eva",back:"eva",abort:"eva",ing:"ret",aing:"ret",doff:"ret",test:"test",debrief:"debrief"};
-const RATE={suit:.5,pre:1.6,dep:1,egr:.4,tra:.3,work:1.1,ret:.3,walk:.32,task:1,carry:.45,back:.32,abort:.4,ing:.5,aing:.7,doff:.5,test:.14,debrief:.5};
+const CHAP_OF={recall:"eva",suit:"suit",pre:"pre",dep:"pre",egr:"eva",tra:"eva",work:"eva",ret:"eva",walk:"eva",task:"eva",carry:"eva",back:"eva",abort:"eva",ing:"ret",aing:"ret",doff:"ret",test:"test",debrief:"debrief"};
+const RATE={recall:.32,suit:.5,pre:1.6,dep:1,egr:.4,tra:.3,work:1.1,ret:.3,walk:.32,task:1,carry:.45,back:.32,abort:.4,ing:.5,aing:.7,doff:.5,test:.14,debrief:.5};
 const PLAY_SECONDS=130;
 
-let loc="iss",stormOn=false,presetName="yellow",inp={...PRESETS.yellow};
+let loc="iss",stormOn=false,presetName="yellow",inp={...PRESETS.yellow},recallT=null,recallAt=0;
 const acc=new Set();
 
 function dlcoTerm(D){return D<=0?0:D<5?D*2.2:D<=10?18+(D-5)*3.5:D<=15?40+(D-10)*4:62+(D-15)*2.5}
@@ -407,46 +415,63 @@ function levelOf(s){return s>=85?"red":s>=LIMIT?"orange":s>=45?"yellow":"green"}
 const LEVEL_NAME={green:"GREEN",yellow:"YELLOW",orange:"ORANGE",red:"RED"};
 const LEVEL_COL={green:"#5ef0c2",yellow:"#ffc857",orange:"#ff8a3d",red:"#ff5d6c"};
 
-function buildPlan(a=acc,i=inp,lk=loc,storm=stormOn){
+function buildPlan(a=acc,i=inp,lk=loc,storm=stormOn,recall=recallT){
   const L=LOCS[lk],m=model(a,i,lk,storm);
   const scrub=!i.sym&&scoreAt(m,0)>=LIMIT;
   let tc=null;
   if(!scrub&&!i.sym)for(let te=0;te<=L.eva;te++){if(scoreAt(m,te)>=LIMIT){tc=te;break}}
   const phases=[];let t=0;
+  const plan={m,L,lk,phases,scrub,stopAt:1e9,abortT:null};       // filled in as we go (poseAt reads it for return paths)
   const add=(o)=>{const p={...o,t0:t,t1:t+o.d,chap:CHAP_OF[o.k]};phases.push(p);t+=o.d;return p};
+  const cutAt=(T)=>{while(phases.length&&phases[phases.length-1].t0>=T)phases.pop();const last=phases[phases.length-1];
+    if(last.t1>T){last.t1=T;last.d=T-last.t0;last.cut=true;delete last._end}t=T};
   add({k:"suit",label:"Suit up",d:45});
   add({k:"pre",label:m.ex?"Exercise prebreathe":"Prebreathe",d:m.P});
   add({k:"dep",label:"Depress",d:L.dep});
-  const egr0=t;
+  const egr0=t;plan.egr0=egr0;
   add({k:"egr",label:"Egress",d:15});
   const acts=ACTS[lk].map(x=>({...x}));const retAct=acts.pop();
+  const nominalTasks=acts.filter(x=>x.task||x.k==="carry").length;
   if(tc!==null){                                   // early return: keep only what fits before the limit
     let budget=tc-15-retAct.d-15;
     for(const a2 of acts){if(budget<=0)break;const d=Math.max(5,Math.min(a2.d,budget));budget-=d;add({...a2,d,cut:d<a2.d})}
     add({...retAct,label:"Early return"});
   }else{for(const a2 of acts)add(a2);add(retAct)}
+  // abort time is fixed by when symptoms appear (first task + 25 min), whatever else happens
   let abortT=null;
-  if(i.sym){
-    const firstTask=phases.find(p=>p.k==="work"||p.k==="task");
-    abortT=firstTask.t0+25;
-    while(phases.length&&phases[phases.length-1].t0>=abortT)phases.pop();
-    const last=phases[phases.length-1];last.t1=abortT;last.d=abortT-last.t0;t=abortT;
+  if(i.sym){const firstTask=phases.find(p=>p.k==="work"||p.k==="task");abortT=firstTask.t0+25}
+  // return to ship by choice: end the current activity and head back at a calm pace
+  let rec=null;
+  const retStart=phases[phases.length-1].t0;
+  if(recall!==null&&!scrub&&recall>egr0+.5&&recall<retStart&&!(abortT!==null&&recall>=abortT-12)){
+    cutAt(recall);
+    const from=endPos(plan,phases.length-1);
+    let d;
+    if(lk==="iss"){const atWork=Math.hypot(from.x-WORK.x,from.z-WORK.z)<.6,onRail=Math.abs(from.z-BODY_Z)<.35&&from.x>=XS-.05;
+      const dist=atWork?XE-XS:onRail?from.x-XS:from.distanceTo(RAIL_START);d=Math.max(6,45*dist/(XE-XS))+(atWork?5:0);
+      add({k:"recall",label:"Return by choice",d,recall:1})}
+    else{d=Math.max(8,from.distanceTo(V(HAB.x+3.6,0,HAB.z))*4.2);add({k:"back",label:"Return by choice",d,recall:1})}
+    rec={t:recall,h:(recall-egr0)/60};
+  }
+  if(abortT!==null&&abortT<t){
+    cutAt(abortT);
     add({k:"abort",label:"Abort · return",d:lk==="iss"?22:28});
     add({k:"aing",label:"O₂ · repress",d:25});
-  }else add({k:"ing",label:"Ingress · repress",d:30});
-  const evaEndT=t-(i.sym?25:30)+15;                // hatch closed halfway through ingress
+  }else{abortT=null;add({k:"ing",label:"Ingress · repress",d:30})}
+  const evaEndT=t-(abortT!==null?25:30)+15;          // hatch closed halfway through ingress
   add({k:"doff",label:"Helmet off · doff",d:30});
   add({k:"test",label:"DCS test",d:40});
   add({k:"debrief",label:"Debrief",d:20});
   if(scrub)phases.forEach(p=>{if(p.t0>=m.P+45+L.dep-1e-6)p.cut=true});
-  const safeH=scrub?0:abortT!==null?(abortT-egr0)/60:tc!==null?tc/60:L.eva/60;
-  const preSafeH=i.sym?buildPlan(a,{...i,sym:0},lk,storm).safeH:safeH;
-  const plan={m,L,lk,phases,total:t,scrub,tc,abortT,egr0,evaEndT,safeH,preSafeH,stopAt:scrub?45+m.P+.01:t};
+  const done=phases.filter(p=>(p.task||p.k==="carry")&&!p.cut).length;
+  if(rec)rec.deferred=nominalTasks-done;
+  const safeH=scrub?0:abortT!==null?(abortT-egr0)/60:rec?(evaEndT-egr0)/60:tc!==null?tc/60:L.eva/60;
+  const preSafeH=i.sym&&abortT!==null?buildPlan(a,{...i,sym:0},lk,storm,recall).safeH:safeH;
+  Object.assign(plan,{total:t,tc,abortT,evaEndT,safeH,preSafeH,stopAt:scrub?45+m.P+.01:t,recall:rec,tasksDone:done,tasksTotal:nominalTasks});
   // play-time axis: each phase gets screen time by its rate, so the walk and the test are not rushed
   let u=0;for(const p of phases){p.u=p.d/(RATE[p.k]||1);u+=p.u}
   const base=u/PLAY_SECONDS;let pt=0;for(const p of phases){p.p0=pt;pt+=p.u/base;p.p1=pt}
   plan.playTotal=pt;
-  // EVA peak for the post-EVA test
   let peak=0;for(let x=egr0;x<=evaEndT;x+=2)peak=Math.max(peak,scoreAtT(plan,x));plan.peak=peak;
   return plan;
 }
@@ -933,8 +958,22 @@ function poseAt(plan,t,clock,inten){
         else{const k=smooth(clamp((e-.5)/.5,0,1));P.armW=[0,1].map(i=>ahead.clone().add(V(0,sides[i]*.3,-.25)).lerp(grip(XS+.85+.36*i,sides[i]),k))}
         P.pole=[V(-1,0,-.8),V(1,0,-.8)];P.legs=[[.1,.08,.35],[.15,.08,.45]];P.hands=1;P.use=[.4,.4,.3,.3,0,0];
         return P}
-      case"tra":case"ret":case"abort":{
-        const go=p.k==="tra",urgent=p.k==="abort",L=XE-XS,tA=go?.06:.1,tB=go?.92:.94;
+      case"recall":case"abort":{
+        const from=endPos(plan,idx-1),urgent=p.k==="abort";
+        const atWork=Math.hypot(from.x-WORK.x,from.z-WORK.z)<.6,onRail=Math.abs(from.z-BODY_Z)<.35&&from.x>=XS-.05;
+        const stride=(urgent?.44:.34)*fat,D=.85,lift=(urgent?.2:.13)*fat,tA=atWork?.12:0;
+        P.out=true;P.hatch=1;P.hands=1;P.use=[.7,.7,.5,.5,.1,.1];
+        if(f<tA){const k=1-smooth(f/tA),sd=railSides(BACK);P.pos.copy(RAIL_END).lerp(WORK,k);P.q=BACK.clone().slerp(UPRIGHT_WORK,k);
+          P.armW=[grip(XE-.85,sd[0]).lerp(ORU.clone().add(V(-.45,.15,.12)),k),grip(XE-1.21,sd[1]).lerp(grip(WORK.x+.2,1),k)];
+          P.legs=[[lerp(.05,.12,k),.06,lerp(.3,.18,k)],[lerp(.05,.12,k),.06,lerp(.35,.18,k)]];return P}
+        if(atWork||onRail){const x0=atWork?XE:Math.min(XE,from.x),Lr=Math.max(0,x0-XS),g=(f-tA)/(1-tA),trav=Lr*smooth(clamp(g,0,1));
+          const G=gait(x0,-1,trav,stride,D,BACK,lift),sway=reduce?0:Math.sin(Math.PI*(trav/stride));
+          P.pos.set(x0-trav,.03*sway,BODY_Z+.02*Math.abs(sway));P.roll=.07*sway*fat;P.q=BACK;P.armW=G.hands;
+          const fl=reduce?0:Math.sin(clock*(urgent?3:1.4));P.legs=[[-.08+.08*fl,.07,.32+.1*fl],[-.06-.08*fl,.07,.36-.1*fl]];P.pole=[V(-1,0,-.7),V(1,0,-.7)];return P}
+        const k=smooth(f);P.pos.copy(from).lerp(RAIL_START,k);P.q=BACK;const sd=railSides(BACK);P.armW=[grip(XS+.3,sd[0]),grip(XS+.6,sd[1])];P.legs=[[.05,.07,.3],[.08,.07,.35]];
+        return P}
+      case"tra":case"ret":{
+        const go=p.k==="tra",urgent=false,L=XE-XS,tA=go?.06:.1,tB=go?.92:.94;
         const stride=(urgent?.44:.36)*fat,D=.85,lift=(urgent?.2:.14)*fat;
         P.out=true;P.hatch=1;P.hands=1;P.use=[.7,.7,.5,.5,.1,.1];
         if(go&&f>tB||!go&&f<tA){
@@ -1040,10 +1079,10 @@ const chapterAt=t=>phaseAt(plan,t).chap;
 
 function hrAt(t){
   const p=phaseAt(plan,t),s=scoreAtT(plan,t),n=reduce?0:Math.sin(t*.7)*2.5;
-  const base={suit:76,pre:plan.m.ex?118:72,dep:84,egr:96,tra:108,work:plan.m.lite?102:116,ret:104,walk:loc==="moon"?112:118,task:120,carry:124,back:110,ing:92,abort:131,aing:112,doff:86,test:testInputs(plan).hr,debrief:testInputs(plan).hr}[p.k]||80;
+  const base={recall:104,suit:76,pre:plan.m.ex?118:72,dep:84,egr:96,tra:108,work:plan.m.lite?102:116,ret:104,walk:loc==="moon"?112:118,task:120,carry:124,back:110,ing:92,abort:131,aing:112,doff:86,test:testInputs(plan).hr,debrief:testInputs(plan).hr}[p.k]||80;
   return Math.round(base+n+(t<plan.evaEndT?Math.max(0,s-45)*.25:0)+(loc==="mars"&&stormOn&&p.chap==="eva"?8:0));
 }
-const KCAL={suit:150,pre:0,dep:110,egr:220,tra:260,work:320,ret:250,walk:300,task:340,carry:380,back:290,ing:160,abort:340,aing:120,doff:140,test:80,debrief:80};
+const KCAL={recall:250,suit:150,pre:0,dep:110,egr:220,tra:260,work:320,ret:250,walk:300,task:340,carry:380,back:290,ing:160,abort:340,aing:120,doff:140,test:80,debrief:80};
 function kcalAt(t){let k=0;for(const p of plan.phases){const ov=clamp(t,p.t0,p.t1)-p.t0;if(ov<=0)continue;let r=KCAL[p.k]??100;if(p.k==="pre")r=plan.m.ex?300:90;if(p.k==="work"&&plan.m.lite)r=230;k+=r*ov/60}return Math.round(k)}
 function evaMinutes(t,kinds){let m=0;for(const p of plan.phases)if(kinds.includes(p.k))m+=clamp(t,p.t0,p.t1)-p.t0;return m}
 function dustAt(t){if(loc==="iss")return 0;return evaMinutes(t,["egr","walk","task","carry","back","abort"])/60*plan.m.dust*1.8}   // mg·h, illustrative
@@ -1126,6 +1165,7 @@ function debriefCards(level){
   if(level==="orange"){add("delay","+24h","Postpone the next EVA 24–48 h","turns a likely abort into a full EVA later");add("rest","REST","Rest day · retest DLCO tomorrow","recovery before suit pressure");add("mo","MO","Alert the crew medical officer","confirm before any EVA change")}
   if(level==="red"){add("o2","O₂","DCS protocol · 100% O₂ + repressurize","treat bubbles before they become injury");add("lock","LOCK","No EVA until DLCO is back to baseline","personal clearance gate");add("mo","MO","Crew medical officer now","decision support only")}
   add("dlco24","+24h","Retest DLCO at +24 h","learn this astronaut’s pattern");
+  if(plan.recall&&plan.recall.deferred>0)add("defer","PLAN",`Reschedule ${plan.recall.deferred} deferred task${plan.recall.deferred===1?"":"s"} for the next EVA`,`returned early by choice at ${plan.recall.h.toFixed(1)} h`);
   if(loc==="moon"){add("moondust","DUST",`Lunar dust: lung check + suit clean (${dustAt(plan.total).toFixed(1)} mg·h)`,"regolith is sharp and reactive");add("bone","BONE",`Bone dose credited: ${Math.round(boneAt(plan.total))}% of today’s target`,"1/6 g loping counts as partial loading")}
   if(loc==="mars")stormOn?add("storm","STORM","Dust-storm recovery: seal check, recharge, rest","storm workload raised bubble risk"):add("filters","FILT","Clean suit filters + array log","Mars dust clogs seals over time");
   return C;
@@ -1136,9 +1176,9 @@ function renderDebrief(){
   $("dbLevel").innerHTML=`<span style="color:${LEVEL_COL[r.level]}">${LEVEL_NAME[r.level]} · ${r.s}</span>`;
   $("dcards").innerHTML=C.map(c=>{const a=dAcc.has(c.id),s=dSnz.has(c.id);
     const ops=a?'<span class="done">Accepted</span>':`<button type="button" class="ok" data-act="a">Accept</button><button type="button" data-act="s">${s?"Snoozed":"Snooze"}</button>`;
-    return`<div class="card dcard${s?" snoozed":""}" data-id="${c.id}" aria-pressed="${a}"><span class="t">${esc(c.title)}</span><span class="v"><em>${c.h>0?fmtH(c.h):"safety"}</em> · ${esc(c.why)}</span><span class="ops">${ops}</span></div>`}).join("");
+    return`<div class="card dcard${s?" snoozed":""}" data-id="${c.id}" aria-pressed="${a}"><span class="t">${esc(c.title)}</span><span class="v"><em>${c.h>0?fmtH(c.h):c.id==="defer"?"plan":"safety"}</em> · ${esc(c.why)}</span><span class="ops">${ops}</span></div>`}).join("");
   const dh=[...dAcc].reduce((s,id)=>s+(DVAL[id]?.h||0),0);
-  $("dbNote").textContent=`Accepted now: ${fmtH(dh)} · total ${fmtH(totalGain())} safe EVA time this mission. Decision support, confirmed by the crew medical officer.`;
+  $("dbNote").textContent=(plan.recall?(plan.abortT!==null?`Return started by choice at ${plan.recall.h.toFixed(1)} h; symptoms then triggered the DCS abort. `:`Returned early by choice at ${plan.recall.h.toFixed(1)} h — ${plan.tasksDone} of ${plan.tasksTotal} tasks done, ${plan.recall.deferred} deferred. `):"")+`Accepted now: ${fmtH(dh)} · total ${fmtH(totalGain())} safe EVA time this mission. Decision support, confirmed by the crew medical officer.`;
 }
 $("dcards").addEventListener("click",e=>{const b=e.target.closest("button[data-act]");if(!b)return;const id=b.closest(".dcard").dataset.id;
   if(b.dataset.act==="a"){dAcc.add(id);dSnz.delete(id)}else{dSnz.has(id)?dSnz.delete(id):dSnz.add(id)}
@@ -1178,7 +1218,7 @@ function setLoc(lk,keepChapter=true){
   $("title").textContent=LOCS[lk].title;$("suitWhere").textContent=LOCS[lk].place;
   $("dDustL").textContent=lk==="moon"?"Lunar dust":"Dust exposure";
   if(!symTouched)symOn=new Set(inp.sym?["joint","fatigue"]:[]);
-  dAcc.clear();dSnz.clear();replan();
+  recallT=null;dAcc.clear();dSnz.clear();replan();
   if(keepChapter){const p=plan.phases.find(x=>x.chap===ch);simT=p?p.t0+.01:0}
   lastCoachKey="";lastPanelKey="";refreshPanels(true);hideBanner();
 }
@@ -1193,7 +1233,8 @@ document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{
   else if(simT>plan.total)simT=plan.total;
   lastCoachKey="";lastPanelKey="";refreshPanels(true);
 });
-function replan(){
+function replan(keepT){
+  if(keepT){plan=buildPlan();simT=clamp(simT,0,plan.total);buildChapters();drawSpark();lastPanelKey="";return}
   // keep the same moment (by chapter progress) when the plan changes length
   const old=plan,oldP=old?phaseAt(old,simT):null,oldF=oldP?clamp((simT-oldP.t0)/(oldP.d||1),0,1):0;
   plan=buildPlan();
@@ -1220,11 +1261,35 @@ function drawSpark(){
 $("scrub").addEventListener("input",e=>{simT=playToSim(plan,+e.target.value/1000*plan.playTotal);lastCoachKey="";if(simT<plan.total-.5)hideBanner()});
 function setPlayIcon(){$("playIco").innerHTML=playing?'<path d="M2 1h3v10H2zM7 1h3v10H7z"/>':'<path d="M2 1l9 5-9 5z"/>';$("play").setAttribute("aria-label",playing?"Pause":"Play")}
 $("play").onclick=()=>{if(simT>=plan.stopAt-.02){simT=0;hideBanner()}playing=!playing;setPlayIcon()};
-$("restart").onclick=()=>{simT=0;playing=true;hideBanner();lastCoachKey="";dAcc.clear();dSnz.clear();setPlayIcon();if(userTuck!==true)setTucked(false);refreshPanels(true)};
+$("restart").onclick=()=>{simT=0;recallT=null;replan(true);playing=true;hideBanner();lastCoachKey="";dAcc.clear();dSnz.clear();setPlayIcon();if(userTuck!==true)setTucked(false);refreshPanels(true)};
 document.querySelectorAll("[data-cam]").forEach(b=>b.onclick=()=>setCam(b.dataset.cam));
 function setCam(m){camMode=m;document.querySelectorAll("[data-cam]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.cam===m));if(m==="free")controls.target.copy(camTarget)}
 controls.addEventListener("start",()=>{if(camMode==="cine")setCam("free")});
 $("detailsBtn").onclick=()=>{const o=!$("details").classList.contains("open");$("details").classList.toggle("open",o);$("detailsBtn").setAttribute("aria-expanded",o)};
+
+/* return to ship by choice */
+const PLACE_BTN={iss:"Return to airlock",moon:"Return to habitat",mars:"Return to habitat"};
+function doRecall(){
+  if(!plan)return;const p=phaseAt(plan,simT);if(p.chap!=="eva"||plan.scrub)return;
+  if(plan.recall){if(performance.now()-recallAt<5000){recallT=null;replan(true);lastCoachKey="";say("Resuming the EVA.",true)}return}
+  if(["ret","back","abort","recall"].includes(p.k))return;
+  if(plan.abortT!==null&&simT>=plan.abortT-12)return;
+  recallT=simT;recallAt=performance.now();replan(true);
+  if(!plan.recall){recallT=null;return}
+  lastCoachKey="";if(!playing){playing=true;setPlayIcon()}
+}
+$("recall").onclick=doRecall;
+addEventListener("keydown",e=>{if((e.key==="r"||e.key==="R")&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||"")){e.preventDefault();doRecall()}});
+function recallUi(p,ch){
+  const b=$("recall"),txt=$("recallTxt");
+  const show=ch==="eva"&&!plan.scrub;b.hidden=!show;if(!show)return;
+  b.classList.remove("resume");
+  if(plan.recall){if(performance.now()-recallAt<5000&&simT<plan.evaEndT-15){b.disabled=false;b.classList.add("resume");txt.textContent=`Resume EVA · ${Math.ceil(5-(performance.now()-recallAt)/1000)} s`}
+    else{b.disabled=true;txt.textContent=`Returning to the ${loc==="iss"?"airlock":"habitat"}`}return}
+  if(p.k==="abort"||plan.abortT!==null&&simT>=plan.abortT-12){b.disabled=true;txt.textContent="Abort in progress";return}
+  if(p.k==="ret"||p.k==="back"){b.disabled=true;txt.textContent=`Returning to the ${loc==="iss"?"airlock":"habitat"}`;return}
+  b.disabled=false;txt.textContent=PLACE_BTN[loc];
+}
 
 /* coach + banner */
 let coachTimer=null;
@@ -1250,13 +1315,14 @@ function coachFor(t,s){
     case"task":{const T={sample:"Kneel · tongs to the rock · sample into the bag · knees and hands working.",core:"Driving the core tube · hammer strokes load the shoulders.",station:"Deploying the seismometer · unfold the solar panel · kneel and stand.",drill:"Rock core drill · steady pressure · shoulders and hands loaded.",solar:"Setting up the array · brushing dust off the panels."}[p.task];
       if(s>=45&&f>.3)return["task45"+p.task,`Bubble risk ${Math.round(s)} rising · slow the pace · sip water${stormNote}.`];return["task"+p.task,T+stormNote]}
     case"carry":return["carry","Carrying the sample case to the rover · heavier load, shorter steps."+stormNote];
-    case"ret":case"back":return["ret",plan.tc!==null?`Risk ${Math.round(s)} near the limit · end the task early · return to the ${loc==="iss"?"airlock":"habitat"}.`:`Tasks done · back to the ${loc==="iss"?"airlock":"habitat"}.`];
+    case"recall":return["recall","Returning by choice · calm pace · hand over hand · tether reeling in."];
+    case"ret":case"back":if(p.recall)return["recall",`Returning by choice · calm pace · ${loc==="moon"?"loping":"walking"} back to the habitat.`];return["ret",plan.tc!==null?`Risk ${Math.round(s)} near the limit · end the task early · return to the ${loc==="iss"?"airlock":"habitat"}.`:`Tasks done · back to the ${loc==="iss"?"airlock":"habitat"}.`];
     case"ing":return["ing",f<.5?(loc==="iss"?"Ingress feet first · hatch closing.":"Back through the door · airlock closing."):"Repressurize · helmet off soon."];
     case"abort":return["abort","Abort EVA · joint pain + DLCO drop · return now."];
     case"aing":return["aing","DCS protocol · 100% O₂ · repressurize · medical officer notified."];
     case"doff":return["doff",f<.2?"Helmet off · fresh air.":f<.85?"Doffing · layers off in reverse order.":"Rehydrate now · 500 ml before the DCS test."];
     case"test":{const st=testStage(f);return["test"+st,["Doppler ultrasound over the heart · counting bubbles.","DLCO breath test · inhale, hold 10 s, exhale.","Symptom check · joint pain, itch, fatigue, chokes.","Vitals · heart rate, HRV, hydration.","Decompression stress score."][st]]}
-    case"debrief":{const {r}=testNow();return["debrief"+r.level,{green:`GREEN ${r.s} · cleared · ${plan.safeH.toFixed(1)} h outside safely · retest DLCO at +3 h and +24 h.`,yellow:`YELLOW ${r.s} · next EVA: longer prebreathe, hydrate, no heavy ARED 24 h, lighter tasks.`,orange:`ORANGE ${r.s} · postpone the next EVA 24–48 h · rest · tell the medical officer.`,red:`RED ${r.s} · DCS protocol · 100% O₂ · no EVA until DLCO is back to baseline.`}[r.level]]}
+    case"debrief":{const {r}=testNow();if(plan.recall)return["debriefR"+r.level,plan.abortT!==null?`Return started by choice at ${plan.recall.h.toFixed(1)} h, then symptoms triggered the DCS abort · ${LEVEL_NAME[r.level]} ${r.s}.`:`Returned early by choice at ${plan.recall.h.toFixed(1)} h — ${plan.recall.deferred} task${plan.recall.deferred===1?"":"s"} deferred · ${LEVEL_NAME[r.level]} ${r.s}.`];return["debrief"+r.level,{green:`GREEN ${r.s} · cleared · ${plan.safeH.toFixed(1)} h outside safely · retest DLCO at +3 h and +24 h.`,yellow:`YELLOW ${r.s} · next EVA: longer prebreathe, hydrate, no heavy ARED 24 h, lighter tasks.`,orange:`ORANGE ${r.s} · postpone the next EVA 24–48 h · rest · tell the medical officer.`,red:`RED ${r.s} · DCS protocol · 100% O₂ · no EVA until DLCO is back to baseline.`}[r.level]]}
   }
   return["",""];
 }
@@ -1430,6 +1496,7 @@ function hud(r){
   const c=LEVEL_COL[lvl];dot.style.background=c;dot.style.boxShadow=`0 0 14px 4px ${c}aa`;
   document.querySelectorAll("#chapters button").forEach(b=>b.classList.toggle("on",b.dataset.ch===ch));
   $("pill").classList.toggle("warn",ch==="eva"&&s>=45);
+  recallUi(p,ch);
   refreshPanels(false);
   const [ck,ct]=coachFor(t,s);
   if(ck!==lastCoachKey&&(playing||t>0)){lastCoachKey=ck;say(ct)}
@@ -1455,7 +1522,7 @@ say("Review the recommendations, pick a location, then press play.");lastCoachKe
 requestAnimationFrame(t=>{last=t;requestAnimationFrame(frame)});
 window._eva={
   get plan(){return plan},get t(){return simT},set t(v){simT=v},acc,dAcc,dSnz,symOn,
-  setPlaying(v){playing=v;setPlayIcon()},setLoc,
+  setPlaying(v){playing=v;setPlayIcon()},setLoc,recall:doRecall,get recallT(){return recallT},
   step(n=1,dt=1/60,render=true){let r;for(let i=0;i<n;i++){r=update(dt);if(render)renderer.render(scene,camera)}hud(r);return{s:r.s,lvl:r.lvl,k:r.ph.k}},
   get ft(){return ftAvg},
   probe(){const w=v=>body.localToWorld(v.clone());const hands=[w(armH[0]),w(armH[1])];const tg=lastPose?.armW;
