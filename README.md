@@ -67,6 +67,7 @@ saved or added and in percentage points of risk removed.
 | `app.js` | The interface. |
 | `DOCUMENTATION.md` | Full specification. Every equation derived, every constant sourced. |
 | `VARIABLE-LOG.md` | Every quantity, its source, and whether it is published, derived or chosen. |
+| `SECURITY.md` | Analysis of the automated scan findings and what was changed. |
 
 ## Honesty
 

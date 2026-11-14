@@ -398,6 +398,27 @@ var S={mode:"assess",fix:"pb",
   nDays:7,gapH:24,day:{}};
 
 function D(i){return document.getElementById(i)}
+
+/* ---------------------------------------------------------------------
+   INPUT BOUNDARY
+   Every value this application holds is a finite number. Nothing else is
+   ever admitted into state, so no string of any kind can reach the DOM.
+   num() is the only way a control's value enters S. It coerces, rejects
+   anything non-finite, and clamps to the control's own declared range.
+   --------------------------------------------------------------------- */
+function num(el, fallback){
+  var v = Number(el.value);
+  if(typeof v !== "number" || !isFinite(v)) return fallback;
+  var lo = el.min===""?-Infinity:Number(el.min);
+  var hi = el.max===""? Infinity:Number(el.max);
+  if(isFinite(lo) && v<lo) v=lo;
+  if(isFinite(hi) && v>hi) v=hi;
+  return v;
+}
+/* every number this application prints goes through one of these two, so
+   what reaches innerHTML is always a formatted numeric literal. */
+function fx(v,dp){ var n=Number(v); return isFinite(n)?n.toFixed(dp||0):"0"; }
+function iv(v){ var n=Math.round(Number(v)); return isFinite(n)?String(n):"0"; }
 /* habitat atmospheres NASA has specified the xEVA system to operate from,
    EVA-EXP-0075. the exploration atmosphere is the Artemis baseline. */
 var ATMOS={
@@ -464,7 +485,7 @@ function buysBlock(nEVAs,scope){
       '<div class="v" style="color:'+(avoids?"var(--ok)":"var(--muted)")+'">'+
       (avoids?"−":"+")+Math.abs(b.dRisk).toFixed(2)+'<u>pts</u></div>'+
       '<div class="s">Flown blind, this crew member would sit at <b>'+b.actual.toFixed(2)+
-      '%</b> against the <b>'+S.tgt.toFixed(1)+'%</b> intended'+
+      '%</b> against the <b>'+fx(S.tgt,1)+'%</b> intended'+
       (avoids?'. Measuring removes that gap.':'. They were already inside it, which is where the time comes from.')+'</div></div></div>';
 }
 
@@ -493,9 +514,9 @@ function renderAssess(){
       (vc>=0?"+":"")+vc.toFixed(2)+"% capillary blood volume.";
   }
   D("note").innerHTML = r.rising
-    ? "The reading rose from <b>"+S.pre.toFixed(2)+"</b> to <b>"+S.post.toFixed(2)+"</b>. The lung does not improve across an EVA, so the earlier value understated this crew member's baseline. Carry <b>"+S.post.toFixed(2)+"</b> forward and score this EVA as zero."
-    : "Diffusing capacity fell <b>"+Math.abs(r.dPct).toFixed(2)+"%</b>, from <b>"+S.pre.toFixed(2)+
-      "</b> to <b>"+S.post.toFixed(2)+"</b>. Taking off the part explained by oxygen exposure"+
+    ? "The reading rose from <b>"+fx(S.pre,2)+"</b> to <b>"+fx(S.post,2)+"</b>. The lung does not improve across an EVA, so the earlier value understated this crew member's baseline. Carry <b>"+fx(S.post,2)+"</b> forward and score this EVA as zero."
+    : "Diffusing capacity fell <b>"+Math.abs(r.dPct).toFixed(2)+"%</b>, from <b>"+fx(S.pre,2)+
+      "</b> to <b>"+fx(S.post,2)+"</b>. Taking off the part explained by oxygen exposure"+
       (S.kDust*S.dust?", dust":"")+" and haemoglobin leaves <b>"+(-r.residual).toFixed(3)+
       "%</b> attributable to bubbles, which is an index of <b>"+r.vge.toFixed(0)+
       "</b> and a decompression sickness probability of <b>"+r.dcs.toFixed(2)+"%</b>. The protocol flown was modelled to give <b>"+
@@ -564,7 +585,7 @@ function renderPlan(){
   });
   D("fixNote").innerHTML="Holding <b style='color:var(--gas)'>"+LEV[S.fix].label.toLowerCase()+
     "</b>. Move <b>"+LEV[slide].label.toLowerCase()+"</b> and <b style='color:var(--accent)'>"+
-    LEV[drive].label.toLowerCase()+"</b> follows to keep "+S.tgt.toFixed(1)+"%.";
+    LEV[drive].label.toLowerCase()+"</b> follows to keep "+fx(S.tgt,1)+"%.";
 
   D("k1").textContent="DCS probability";
   D("v1").innerHTML=f.dcs.toFixed(2)+'<u>%</u>';
@@ -594,7 +615,7 @@ function renderPlan(){
       reason = "Exercise only speeds nitrogen clearance, so it cannot raise risk back to the target. "+
                "Lower the target or shorten the time on oxygen.";
     }
-    if(needTotal<=0) reason = "At <b>"+S.tgt.toFixed(1)+"%</b> the habitat needs no prebreathe at all, so any "+
+    if(needTotal<=0) reason = "At <b>"+fx(S.tgt,1)+"%</b> the habitat needs no prebreathe at all, so any "+
       "oxygen time at all over-protects. The lowest risk this atmosphere gives with no intervention is <b>"+
       forward(prof({prebreathe:0,decompress:0,exercise:0})).dcs.toFixed(2)+"%</b>. Lower the target to tune a protocol.";
   }
@@ -606,9 +627,9 @@ function renderPlan(){
 
   var deg=(S.fix==="ex");
   if(reason){ D("note").innerHTML="<b style='color:var(--warn)'>Why.</b> "+reason; D("buys").innerHTML=""; D("plot").innerHTML=tradeCurve(LEV[slide],LEV[drive],slide,drive); return; }
-  D("note").innerHTML="Suit at <b>"+S.sp.toFixed(1)+" psid</b>. Holding "+
+  D("note").innerHTML="Suit at <b>"+fx(S.sp,1)+" psid</b>. Holding "+
     LEV[S.fix].label.toLowerCase()+" at <b>"+S[S.fix].toFixed(LEV[S.fix].dp)+" "+LEV[S.fix].unit+
-    "</b>, the protocol that lands on <b>"+S.tgt.toFixed(1)+"%</b> is "+
+    "</b>, the protocol that lands on <b>"+fx(S.tgt,1)+"%</b> is "+
     LEV[slide].label.toLowerCase()+" <b>"+S[slide].toFixed(LEV[slide].dp)+" "+LEV[slide].unit+
     "</b> with "+LEV[drive].label.toLowerCase()+" <b>"+S[drive].toFixed(LEV[drive].dp)+" "+
     LEV[drive].unit+"</b>."+
@@ -654,7 +675,7 @@ function tradeCurve(A,B,aKey,bKey){
   s+='<circle cx="'+xv(S[aKey])+'" cy="'+yv(S[bKey])+'" r="6.5" fill="#ff9f45" stroke="#080b10" stroke-width="2"/>';
   s+='<text x="'+(L+w/2)+'" y="'+(H-10)+'" fill="#74849a" font-size="11" text-anchor="middle">'+A.label+' ('+A.unit+')</text>';
   s+='<text transform="translate(18,'+(T+h/2)+') rotate(-90)" fill="#74849a" font-size="11" text-anchor="middle">'+B.label+' ('+B.unit+')</text>';
-  s+='<text x="'+(W-R)+'" y="'+(T+12)+'" fill="#46c97e" font-size="11" font-family="monospace" text-anchor="end">shaded side is safer than '+S.tgt.toFixed(1)+'%</text>';
+  s+='<text x="'+(W-R)+'" y="'+(T+12)+'" fill="#46c97e" font-size="11" font-family="monospace" text-anchor="end">shaded side is safer than '+fx(S.tgt,1)+'%</text>';
   return s+'</svg>';
 }
 
@@ -675,7 +696,7 @@ function missionDays(){
     var rec={day:d,model:model,
              predDcs:hillDCS(R),predVge:vge,factor:factor,
              expPost:S.pre*(1+(-(K.kBub*vge/100+K.kOx*model.H))/100)};
-    var v=S.day["d"+d];
+    var v=S.day["d"+iv(d)];
     if(v!=null&&v>0){
       var r=inverse(p,{pre:S.pre,post:v,hb:S.hb,dust:S.dust,kDust:S.kDust});
       rec.post=v; rec.meas=r;
@@ -691,10 +712,10 @@ function renderCamp(){
   var breach=0; for(var i=0;i<days.length;i++) if(days[i].predDcs>K.dcsAccept){breach=days[i].day;break;}
   var fitted=days.filter(function(d){return d.meas&&d.meas.usable}).length;
 
-  D("k1").textContent="Days inside "+S.lim.toFixed(1)+"%";
+  D("k1").textContent="Days inside "+fx(S.lim,1)+"%";
   D("v1").innerHTML=(breach===1?"0":breach?String(breach-1):String(S.nDays)+"+")+'<u>days</u>';
   D("v1").style.color=breach===1?"var(--crit)":breach?"var(--warn)":"var(--ok)";
-  D("k2").textContent="Day "+S.nDays+" DCS";
+  D("k2").textContent="Day "+iv(S.nDays)+" DCS";
   D("v2").textContent=last.predDcs.toFixed(2)+"%"; D("v2").style.color=col(last.predDcs);
   D("k3").textContent="Calibrated on";
   D("v3").textContent=fitted; D("v3").style.color="var(--muted)";
@@ -703,7 +724,7 @@ function renderCamp(){
   D("verdictTxt").textContent=breach===1?"Over 15% on the first day"
     :breach?"Over 15% from day "+breach:"Inside 15% for the whole mission";
 
-  D("note").innerHTML="The same protocol flown "+S.nDays+" days running, "+S.gapH+
+  D("note").innerHTML="The same protocol flown "+iv(S.nDays)+" days running, "+iv(S.gapH)+
     " hours apart. Carryover from the bubble nuclei left by each EVA reaches <b>"+
     last.model.Reff.toFixed(3)+"</b> on the tissue ratio by the last day, against <b>"+
     days[0].model.Reff.toFixed(3)+"</b> on the first."+
@@ -716,7 +737,7 @@ function renderCamp(){
     rows+="<tr"+(d.meas?" class='has'":"")+"><td>"+d.day+"</td>"+
       "<td style='color:"+col(d.predDcs)+"'>"+d.predDcs.toFixed(2)+"%</td>"+
       "<td>"+d.expPost.toFixed(2)+"</td>"+
-      "<td><input type='number' step='0.01' data-day='"+d.day+"' value='"+(d.post!=null?d.post:"")+"' placeholder='"+d.expPost.toFixed(2)+"'></td>"+
+      "<td><input type='number' step='0.01' data-day='"+d.day+"' value='"+(d.post!=null?fx(d.post,2):"")+"' placeholder='"+fx(d.expPost,2)+"'></td>"+
       "<td>"+(d.meas?"<span style='color:"+col(d.meas.dcs)+"'>"+d.meas.dcs.toFixed(2)+"%</span>":"—")+"</td></tr>";
   });
   D("buys").innerHTML=buysBlock(S.nDays);
@@ -728,8 +749,8 @@ function renderCamp(){
 
   Array.prototype.forEach.call(D("plot").querySelectorAll("input[data-day]"),function(el){
     el.addEventListener("change",function(){
-      var v=parseFloat(this.value);
-      if(isFinite(v)&&v>0) S.day["d"+this.dataset.day]=v; else delete S.day["d"+this.dataset.day];
+      var v=num(this,NaN), d=iv(this.dataset.day);
+      if(isFinite(v)&&v>0) S.day["d"+d]=v; else delete S.day["d"+d];
       render();
     });
   });
@@ -767,7 +788,7 @@ function syncAtm(){
   Array.prototype.forEach.call(D("atmSel").querySelectorAll("button"),function(b){
     b.setAttribute("aria-pressed",String(b.dataset.a===hit)); });
   var R=forward(prof()).Rrest;
-  D("atmNote").innerHTML = "Tissue nitrogen at equilibrium <b>"+(S.habP*(1-S.habFO2)).toFixed(2)+
+  D("atmNote").innerHTML = "Tissue nitrogen at equilibrium <b>"+fx(S.habP*(1-S.habFO2),2)+
     " psi</b>. NASA gives 5.4 psi for 8.2 at 34% and 11.6 psi for 14.7 at 21%."+
     (hit?"":" Custom, edit in Advanced.")+
     (R>1.6?" <b style='color:var(--warn)'>Ratio "+R.toFixed(2)+" is far outside the 1.22 to 1.49 band the risk fits were checked against. This atmosphere needs hours of prebreathe, not minutes, and the number shown is not trustworthy until it does.</b>":"");
@@ -797,7 +818,7 @@ function render(){
 }
 function br(id,out,key,unit,dp){
   var el=D(id),o=D(out);
-  function u(){S[key]=parseFloat(el.value);
+  function u(){S[key]=num(el,S[key]);
     if(key==="pb"||key==="ex"||key==="dc") LAST=key;
     o.innerHTML=(dp!=null?S[key].toFixed(dp):S[key])+(unit?' <span>'+unit+'</span>':'');render()}
   el.addEventListener("input",u);u();
@@ -808,17 +829,18 @@ br("out","oOUT","out","min"); br("tgt","oTgt","tgt","% DCS",1);
 br("nDays","oNDays","nDays","days"); br("gapH","oGapH","gapH","hours");
 br("lim","oLim","lim","% DCS",1);
 ["pre","post","noPre","noPost","hb","dust","kDust","habP","habFO2","oxThr","ambWalk","ambMicro","prior","gap"]
- .forEach(function(k){D(k).addEventListener("input",function(){S[k]=parseFloat(this.value)||0;render()})});
+ .forEach(function(k){D(k).addEventListener("input",function(){S[k]=num(this,S[k]);render()})});
 function seg(id,fn){D(id).addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
   this.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});
   fn(b);render()})}
-seg("gravSel",function(b){S.walking=(b.dataset.g==="1")});
-seg("atmSel",function(b){ var A=ATMOS[b.dataset.a];
+seg("gravSel",function(b){S.walking=(b.dataset.g==="1")});   /* boolean, not a string */
+seg("atmSel",function(b){ var A=ATMOS[b.dataset.a];      /* key must exist in ATMOS */
+  if(!A) return;
   S.habP=A.p; S.habFO2=A.f; D("habP").value=A.p; D("habFO2").value=A.f; });
-seg("fixSel",function(b){S.fix=b.dataset.f;
+seg("fixSel",function(b){ if(!LEV[b.dataset.f]) return; S.fix=b.dataset.f;
   LAST=["pb","ex","dc"].filter(function(k){return k!==S.fix})[0];});
-seg("modes",function(b){S.mode=b.dataset.m});
+seg("modes",function(b){ if(["assess","plan","camp"].indexOf(b.dataset.m)<0) return; S.mode=b.dataset.m});
 try{if(window.claude&&window.claude.hot)window.claude.hot.snapshot(function(){return S})}catch(e){}
 render();
 })();
