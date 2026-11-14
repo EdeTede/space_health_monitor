@@ -12,7 +12,7 @@ from app.db import PROJECT_ROOT, init_db
 from app.models import HealthOut
 from app.routers import adapt, crew, mission, scenarios, sense, score, twin
 
-app = FastAPI(title="DoseFit", version="1.0.0", description="Adaptive exercise & health monitor for astronauts")
+app = FastAPI(title="Kiwinaut", version="1.0.0", description="AI health & exercise monitor — NASA Space Apps Challenge")
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,6 +32,9 @@ app.include_router(scenarios.router)
 models_dir = PROJECT_ROOT / "models"
 if models_dir.is_dir():
     app.mount("/models", StaticFiles(directory=str(models_dir)), name="models")
+brand_dir = PROJECT_ROOT / "brand"
+if brand_dir.is_dir():
+    app.mount("/brand", StaticFiles(directory=str(brand_dir)), name="brand")
 
 
 @app.on_event("startup")
@@ -46,9 +49,20 @@ def health() -> HealthOut:
 
 @app.get("/")
 def index() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "dosefit.html")
+    """Prime Space Apps experience: DLCO-driven decompression stress."""
+    return FileResponse(PROJECT_ROOT / "dosefit-future.html")
 
 
 @app.get("/dosefit.html")
 def dosefit_page() -> FileResponse:
     return FileResponse(PROJECT_ROOT / "dosefit.html")
+
+
+@app.get("/dosefit-exercise.html")
+def dosefit_exercise_page() -> FileResponse:
+    return FileResponse(PROJECT_ROOT / "dosefit-exercise.html")
+
+
+@app.get("/dosefit-future.html")
+def dosefit_future_page() -> FileResponse:
+    return FileResponse(PROJECT_ROOT / "dosefit-future.html")

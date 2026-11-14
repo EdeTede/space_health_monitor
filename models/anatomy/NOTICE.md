@@ -33,3 +33,9 @@ The reproducible conversion script is `tools/build-atlas-anatomy.py`.
 The model is an illustrative reference anatomy. Condition markers indicate
 associations with a region, not a precise lesion or patient-specific finding.
 No endorsement by the original authors is implied.
+
+## DoseFit crew hologram (`crew-holo-graph.json`)
+
+Downsampled surface + lung/airway/heart graphs derived from the same BodyParts3D
+pipeline used in hack-nation7 (`organs-graph.json` / `surface.json`). See notices
+above for CC BY 4.0 and lung lobe CC BY-SA 2.1 Japan attribution.

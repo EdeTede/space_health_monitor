@@ -107,6 +107,8 @@ class WorkoutSession(BaseModel):
     regions: str
     priority: int = 1
     flags: list[str] = Field(default_factory=list)
+    how: str | None = None
+    steps: list[str] = Field(default_factory=list)
 
 
 class AdaptPlanOut(BaseModel):

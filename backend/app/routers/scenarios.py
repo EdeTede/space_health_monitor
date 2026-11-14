@@ -42,22 +42,11 @@ def activate_scenario(scenario_id: str) -> ActivateOut:
             raise HTTPException(404, f"Unknown scenario: {scenario_id}")
         m = get_mission(conn)
         plan = adapt_engine.plan_for(scenario_id)
+        # Scenario follows mission day in the UI; activating only stores the adapted plan.
         conn.execute(
             "UPDATE missions SET active_scenario = ? WHERE id = ?",
             (scenario_id, m["id"]),
         )
-        # Scenario day nudges for demo clarity
-        day_nudge = {
-            "flare": 98.0,
-            "spacewalk": 150.0,
-            "underload_hip": 30.0,
-            "low_readiness": 60.0,
-        }
-        if scenario_id in day_nudge:
-            conn.execute(
-                "UPDATE missions SET day = ? WHERE id = ?",
-                (day_nudge[scenario_id], m["id"]),
-            )
         conn.execute(
             "INSERT INTO workout_plans (mission_id, scenario_id, plan_json) VALUES (?, ?, ?)",
             (m["id"], scenario_id, json.dumps(plan)),
