@@ -84,7 +84,7 @@ def sample_vitals(day: float, mode: PlanMode, scenario: str) -> tuple[float, flo
 
 def rgb_density(d: float) -> list[int]:
     t = max(0.0, min(1.0, (100.0 - d) / 8.0))
-    a, b, c = [94, 231, 255], [255, 200, 87], [255, 93, 108]
+    a, b, c = [142, 224, 79], [255, 200, 87], [255, 93, 108]
     if t < 0.5:
         u = t * 2
         src, dst = a, b
@@ -96,7 +96,7 @@ def rgb_density(d: float) -> list[int]:
 
 def rgb_gap(gap: float) -> list[int]:
     t = max(0.0, min(1.0, gap))
-    a, b, c = [94, 231, 255], [255, 200, 87], [255, 93, 108]
+    a, b, c = [142, 224, 79], [255, 200, 87], [255, 93, 108]
     if t < 0.5:
         u = t * 2
         src, dst = a, b
@@ -108,7 +108,7 @@ def rgb_gap(gap: float) -> list[int]:
 
 def rgb_risk(risk: float) -> list[int]:
     t = max(0.0, min(1.0, risk / 60.0))
-    a, b, c = [61, 220, 151], [255, 200, 87], [255, 93, 108]
+    a, b, c = [94, 240, 194], [255, 200, 87], [255, 93, 108]
     if t < 0.5:
         u = t * 2
         src, dst = a, b

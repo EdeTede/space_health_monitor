@@ -7,11 +7,11 @@
 <title>Kiwinaut · Exercise sim</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-.kn-lock{display:flex;align-items:center;gap:10px;margin-bottom:6px}.kn-lock img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(94,231,255,.5))}.kn-lock .kn-name{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.02em;color:#dff8fa;text-shadow:0 0 14px rgba(94,231,255,.45)}.kn-lock .kn-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.kn-lock{display:flex;align-items:center;gap:10px;margin-bottom:6px}.kn-lock img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(142,224,79,.5))}.kn-lock .kn-name{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.02em;color:#eefbe0;text-shadow:0 0 14px rgba(142,224,79,.45)}.kn-lock .kn-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
 /* Layout: hologram training bay. Astronaut + machine wireframe on a full-screen stage, exercise tabs on top, live loading readouts on the right, a force trace along the bottom. Same single dark HUD theme as the Bone Twin demo. */
 :root{
-  --void:#03060d; --hud:rgba(10,22,40,.74); --edge:rgba(120,220,255,.22);
-  --fg:#e8f4ff; --dim:#7f97b5; --holo:#5ee7ff; --amber:#ffc857; --hot:#ff8a3d; --ok:#3ddc97;
+  --void:#03060d; --hud:rgba(10,22,40,.74); --edge:rgba(142,224,79,.22);
+  --fg:#eef6e8; --dim:#93a68f; --holo:#8ee04f; --amber:#ffc857; --hot:#ff8a3d; --ok:#5ef0c2;
   --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:dark;
 }
@@ -20,15 +20,15 @@ html,body{height:100%}
 body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14px;overflow-x:hidden}
 #stage{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
 #stage:active{cursor:grabbing}
-.scan{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(94,231,255,.035) 0 1px,transparent 1px 3px)}
+.scan{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(142,224,79,.035) 0 1px,transparent 1px 3px)}
 .app{position:relative;z-index:2;min-height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:14px;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
 .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
 .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--holo);text-transform:uppercase;text-shadow:0 0 8px var(--void)}
-h1{font-family:var(--display);font-size:clamp(24px,3.6vw,40px);margin:2px 0 0;line-height:1.04;text-shadow:0 0 24px rgba(94,231,255,.4);text-wrap:balance;max-width:20ch}
+h1{font-family:var(--display);font-size:clamp(24px,3.6vw,40px);margin:2px 0 0;line-height:1.04;text-shadow:0 0 24px rgba(142,224,79,.4);text-wrap:balance;max-width:20ch}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;pointer-events:auto}
 .tabs button{font:600 13px var(--display);letter-spacing:.06em;color:var(--fg);background:var(--hud);border:1px solid var(--edge);border-radius:4px;padding:9px 14px;cursor:pointer;text-align:left}
 .tabs button small{display:block;font:400 11px var(--mono);color:var(--dim);letter-spacing:.04em}
-.tabs button[aria-pressed="true"]{border-color:var(--holo);background:rgba(94,231,255,.16);color:var(--holo);box-shadow:0 0 18px rgba(94,231,255,.25)}
+.tabs button[aria-pressed="true"]{border-color:var(--holo);background:rgba(142,224,79,.16);color:var(--holo);box-shadow:0 0 18px rgba(142,224,79,.25)}
 button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .mid{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
 .side{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px;display:grid;gap:12px;backdrop-filter:blur(6px)}
@@ -52,7 +52,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 #play{font:600 13px var(--display);letter-spacing:.1em;background:var(--holo);color:#02121c;border:0;border-radius:4px;padding:8px 14px;cursor:pointer;min-width:92px}
 #trace{width:100%;height:64px;display:block}
 .legend{font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-.legend i{display:inline-block;width:26px;height:6px;border-radius:3px;background:linear-gradient(90deg,#1f6f8b,var(--holo),var(--amber),var(--hot));margin-right:6px;vertical-align:1px}
+.legend i{display:inline-block;width:26px;height:6px;border-radius:3px;background:linear-gradient(90deg,#4e8a1e,var(--holo),var(--amber),var(--hot));margin-right:6px;vertical-align:1px}
 .foot{font-size:11px;color:var(--dim);font-family:var(--mono)}
 @media (max-width:820px){.mid{grid-template-columns:1fr}.mid .spacer{height:52vh}}
 body.embed .top h1{font-size:clamp(18px,3vw,26px);max-width:28ch}
@@ -174,12 +174,12 @@ function size(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c
   const r=tr.getBoundingClientRect();tr.width=r.width*DPR;tr.height=r.height*DPR;tg.setTransform(DPR,0,0,DPR,0,0)}
 let view;
 function proj(x,y,z){const cy=Math.cos(rotY),sy=Math.sin(rotY);let X=x*cy-z*sy,Z=x*sy+z*cy;const cx=Math.cos(rotX),sx=Math.sin(rotX);const Y=(y-.8)*cx-Z*sx;Z=(y-.8)*sx+Z*cx;const p=3.2/(3.2+Z);return[view.cx+X*view.s*p,view.cy-Y*view.s*p,p]}
-function heat(k){k=Math.max(0,Math.min(1,k));const s=[[31,111,139],[94,231,255],[255,200,87],[255,138,61]];const f=k*3,i=Math.min(2,Math.floor(f)),u=f-i;return s[i].map((v,j)=>Math.round(v+(s[i+1][j]-v)*u))}
+function heat(k){k=Math.max(0,Math.min(1,k));const s=[[78,138,30],[142,224,79],[255,200,87],[255,138,61]];const f=k*3,i=Math.min(2,Math.floor(f)),u=f-i;return s[i].map((v,j)=>Math.round(v+(s[i+1][j]-v)*u))}
 function seg(a,b,z1,z2,k,w){const A=proj(a[0],a[1],z1),B=proj(b[0],b[1],z2),c=heat(k);
   g.strokeStyle=`rgba(${c},.95)`;g.shadowColor=`rgb(${c})`;g.shadowBlur=8+k*22;g.lineWidth=w*(A[2]+B[2])/2;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.stroke();
   // particle shimmer
   g.shadowBlur=0;g.fillStyle=`rgba(${c},.55)`;for(let i=0;i<6;i++){const u=((i*.173+t*.6*(1+k))%1),j=Math.sin(i*91.7+t*3)*3;g.fillRect(A[0]+(B[0]-A[0])*u+j,A[1]+(B[1]-A[1])*u-j*.5,1.6,1.6)}}
-function wire(pts,alpha=.45,close=false){g.strokeStyle=`rgba(94,231,255,${alpha})`;g.shadowBlur=0;g.lineWidth=1.2;g.beginPath();pts.forEach((p,i)=>{const q=proj(...p);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});if(close)g.closePath();g.stroke()}
+function wire(pts,alpha=.45,close=false){g.strokeStyle=`rgba(142,224,79,${alpha})`;g.shadowBlur=0;g.lineWidth=1.2;g.beginPath();pts.forEach((p,i)=>{const q=proj(...p);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});if(close)g.closePath();g.stroke()}
 function circle3(c,r,z,n=40,alpha=.45){const pts=[];for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;pts.push([c[0]+r*Math.cos(a),c[1]+r*Math.sin(a),z])}wire(pts,alpha)}
 function box(x0,x1,y0,y1,z0,z1,a=.4){wire([[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],a,true);wire([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],a,true);for(const[x,z]of[[x0,z0],[x1,z0],[x1,z1],[x0,z1]])wire([[x,y0,z],[x,y1,z]],a)}
 function equipment(P){
@@ -204,7 +204,7 @@ function equipment(P){
     label(proj(-.62,.4,.62),"vacuum cylinders");
   }
 }
-function label(p,s){g.shadowBlur=0;g.fillStyle="rgba(127,151,181,.95)";g.font="11px 'IBM Plex Mono',monospace";g.fillText(s,p[0]+6,p[1]-4)}
+function label(p,s){g.shadowBlur=0;g.fillStyle="rgba(147,166,143,.95)";g.font="11px 'IBM Plex Mono',monospace";g.fillText(s,p[0]+6,p[1]-4)}
 const hist=[];
 function frame(now){
   const dt=frame.last?Math.min(.05,(now-frame.last)/1000):0;frame.last=now;
@@ -215,7 +215,7 @@ function frame(now){
   if(playing)for(const r of REG)dose[ex][r]=Math.min(1,dose[ex][r]+E.dose[r]*P.load[r]*dt*6);
   const mob=W<820;view={cx:mob?W/2:W*.42,cy:mob?H*.34:H*.43,s:Math.min(H*(mob?.27:.33),W*(mob?.7:.42))};
   g.clearRect(0,0,W,H);g.fillStyle="#03060d";g.fillRect(0,0,W,H);
-  for(const s of stars){g.globalAlpha=.2+.5*s[3];g.fillStyle="#cfe9ff";g.fillRect(s[0]*W,s[1]*H,s[2],s[2])}g.globalAlpha=1;
+  for(const s of stars){g.globalAlpha=.2+.5*s[3];g.fillStyle="#e4f2d6";g.fillRect(s[0]*W,s[1]*H,s[2],s[2])}g.globalAlpha=1;
   g.save();g.lineCap="round";
   // floor grid
   for(let i=-4;i<=4;i++){wire([[i*.25,-.06,-1],[i*.25,-.06,1]],.06);wire([[-1,-.06,i*.25],[1,-.06,i*.25]],.06)}
@@ -231,7 +231,7 @@ function frame(now){
   seg([P.hip[0],P.hip[1]],[P.hip[0],P.hip[1]],-.12,.12,P.load.hips,9);
   seg(P.hip,P.mid,0,0,P.load.spine,8);seg(P.mid,P.neck,0,0,P.load.spine*.7,7);
   seg(P.neck,P.neck,-.19,.19,.2,5);
-  const hd=proj(P.head[0],P.head[1],0);g.shadowColor="rgb(94,231,255)";g.shadowBlur=18;g.strokeStyle="rgba(94,231,255,.9)";g.lineWidth=2;g.beginPath();g.arc(hd[0],hd[1],.1*view.s*hd[2],0,Math.PI*2);g.stroke();
+  const hd=proj(P.head[0],P.head[1],0);g.shadowColor="rgb(142,224,79)";g.shadowBlur=18;g.strokeStyle="rgba(142,224,79,.9)";g.lineWidth=2;g.beginPath();g.arc(hd[0],hd[1],.1*view.s*hd[2],0,Math.PI*2);g.stroke();
   draw(near);
   g.restore();
   // HUD values
@@ -242,10 +242,10 @@ function frame(now){
   for(const r of REG){const v=dose[ex][r];$("d-"+r).style.width=(v*100)+"%";$("p-"+r).textContent=Math.round(v*100)+"%"}
   // trace
   const tw=tr.width/DPR,th=tr.height/DPR;tg.clearRect(0,0,tw,th);
-  tg.strokeStyle="rgba(127,151,181,.25)";tg.setLineDash([3,4]);for(const v of[1,2]){const y=th-6-(v/2.4)*(th-12);tg.beginPath();tg.moveTo(0,y);tg.lineTo(tw,y);tg.stroke();tg.fillStyle="rgba(127,151,181,.8)";tg.font="10px 'IBM Plex Mono',monospace";tg.fillText(v+"× BW",4,y-3)}
+  tg.strokeStyle="rgba(147,166,143,.25)";tg.setLineDash([3,4]);for(const v of[1,2]){const y=th-6-(v/2.4)*(th-12);tg.beginPath();tg.moveTo(0,y);tg.lineTo(tw,y);tg.stroke();tg.fillStyle="rgba(147,166,143,.8)";tg.font="10px 'IBM Plex Mono',monospace";tg.fillText(v+"× BW",4,y-3)}
   tg.setLineDash([]);
-  const grad=tg.createLinearGradient(0,th,0,0);grad.addColorStop(0,"#5ee7ff");grad.addColorStop(.6,"#ffc857");grad.addColorStop(1,"#ff8a3d");
-  tg.strokeStyle=grad;tg.lineWidth=2;tg.shadowColor="#5ee7ff";tg.shadowBlur=8;tg.beginPath();
+  const grad=tg.createLinearGradient(0,th,0,0);grad.addColorStop(0,"#8ee04f");grad.addColorStop(.6,"#ffc857");grad.addColorStop(1,"#ff8a3d");
+  tg.strokeStyle=grad;tg.lineWidth=2;tg.shadowColor="#8ee04f";tg.shadowBlur=8;tg.beginPath();
   hist.forEach((v,i)=>{const x=tw-(hist.length-1-i)*(tw/360),y=th-6-(v/2.4)*(th-12);i?tg.lineTo(x,y):tg.moveTo(x,y)});tg.stroke();tg.shadowBlur=0;
   requestAnimationFrame(frame);
 }

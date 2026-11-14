@@ -7,11 +7,11 @@
 <title>Kiwinaut · Bone twin</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-.kn-lock{display:flex;align-items:center;gap:10px;margin-bottom:6px}.kn-lock img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(94,231,255,.5))}.kn-lock .kn-name{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.02em;color:#dff8fa;text-shadow:0 0 14px rgba(94,231,255,.45)}.kn-lock .kn-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.kn-lock{display:flex;align-items:center;gap:10px;margin-bottom:6px}.kn-lock img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(142,224,79,.5))}.kn-lock .kn-name{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.02em;color:#eefbe0;text-shadow:0 0 14px rgba(142,224,79,.45)}.kn-lock .kn-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
 /* Layout: cinematic stage. Real BodyParts3D skeleton center-stage, scan HUD + Mars timeline. Single dark space HUD theme. */
 :root{
-  --void:#03060d; --hud:rgba(10,22,40,.78); --edge:rgba(120,220,255,.22);
-  --fg:#e8f4ff; --dim:#7f97b5; --holo:#5ee7ff; --amber:#ffc857; --red:#ff5d6c; --mars:#ff7a45; --ok:#3ddc97;
+  --void:#03060d; --hud:rgba(10,22,40,.78); --edge:rgba(142,224,79,.22);
+  --fg:#eef6e8; --dim:#93a68f; --holo:#8ee04f; --amber:#ffc857; --red:#ff5d6c; --mars:#ff7a45; --ok:#5ef0c2; --kiwi-bright:#c6f27a; --kiwi-deep:#4e8a1e;
   --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:dark;
 }
@@ -22,13 +22,13 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 #sky,#stage{position:fixed;inset:0;width:100%;height:100%;display:block}
 #stage{cursor:grab;touch-action:none;z-index:1}
 #stage:active{cursor:grabbing}
-.scanlines{position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,rgba(94,231,255,.03) 0 1px,transparent 1px 3px);mix-blend-mode:screen;opacity:.7}
+.scanlines{position:fixed;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,rgba(142,224,79,.03) 0 1px,transparent 1px 3px);mix-blend-mode:screen;opacity:.7}
 .vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at 45% 42%,transparent 35%,rgba(3,6,13,.55) 100%)}
 .top,.bottom,.side,.scan-hud,.load{position:relative;z-index:2}
 .top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start;pointer-events:none}
 .brand .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--holo);text-transform:uppercase}
 #apiChip{letter-spacing:.12em;opacity:.85}#apiChip[data-on="1"]{color:var(--ok)}#apiChip[data-on="0"]{color:var(--amber)}
-.brand h1{font-family:var(--display);font-size:clamp(26px,4vw,44px);margin:2px 0 0;line-height:1.02;text-shadow:0 0 24px rgba(94,231,255,.45);text-wrap:balance;max-width:16ch}
+.brand h1{font-family:var(--display);font-size:clamp(26px,4vw,44px);margin:2px 0 0;line-height:1.02;text-shadow:0 0 24px rgba(142,224,79,.45);text-wrap:balance;max-width:16ch}
 .verdict{text-align:right;pointer-events:none}
 .verdict .q,.verdict .tag,.brand .k{text-shadow:0 0 6px #03060d,0 0 12px #03060d}
 .verdict .q{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
@@ -38,7 +38,7 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 .side{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px;display:grid;gap:10px;backdrop-filter:blur(10px);justify-self:end;width:100%}
 .side h2{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--holo);margin:0;font-weight:500;text-transform:uppercase}
 .reg{display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:6px 8px;border-radius:4px;cursor:pointer;border:1px solid transparent;background:none;color:inherit;font:inherit;text-align:left;width:100%}
-.reg:hover,.reg[aria-pressed="true"]{border-color:var(--edge);background:rgba(94,231,255,.06)}
+.reg:hover,.reg[aria-pressed="true"]{border-color:var(--edge);background:rgba(142,224,79,.06)}
 .reg:focus-visible,.seg button:focus-visible,#play:focus-visible,#day:focus-visible,#dayPrev:focus-visible,#dayNext:focus-visible,#rescan:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .reg .n{font-weight:500}
 .reg .v{font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -48,18 +48,18 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 .reg .p{grid-column:1/-1;font-size:11px;color:var(--dim);font-family:var(--mono)}
 .legend{font-size:11px;color:var(--dim);font-family:var(--mono)}
 .scan-hud{pointer-events:none;justify-self:start;align-self:end;max-width:min(420px,100%);display:grid;gap:8px}
-.scan-card{background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:12px 14px;backdrop-filter:blur(10px);box-shadow:0 0 40px rgba(94,231,255,.08)}
+.scan-card{background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:12px 14px;backdrop-filter:blur(10px);box-shadow:0 0 40px rgba(142,224,79,.08)}
 .scan-card .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
 .scan-card .label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--holo)}
 .scan-card .status{font-family:var(--mono);font-size:11px;color:var(--dim)}
-.scan-card .title{font-family:var(--display);font-size:22px;margin:2px 0 6px;text-shadow:0 0 18px rgba(94,231,255,.35)}
+.scan-card .title{font-family:var(--display);font-size:22px;margin:2px 0 6px;text-shadow:0 0 18px rgba(142,224,79,.35)}
 .scan-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.scan-metrics div{background:rgba(94,231,255,.05);border:1px solid rgba(94,231,255,.12);border-radius:4px;padding:8px}
+.scan-metrics div{background:rgba(142,224,79,.05);border:1px solid rgba(142,224,79,.12);border-radius:4px;padding:8px}
 .scan-metrics .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
 .scan-metrics .n{font-family:var(--display);font-size:20px;font-variant-numeric:tabular-nums;margin-top:2px}
 .scan-metrics .hint{font-size:11px;color:var(--dim);margin-top:2px}
 .scan-bar{height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:8px}
-.scan-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--holo),var(--ok));box-shadow:0 0 12px rgba(94,231,255,.8);transition:width .12s linear}
+.scan-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--holo),var(--ok));box-shadow:0 0 12px rgba(142,224,79,.8);transition:width .12s linear}
 .scan-tip{font-size:12px;color:var(--dim);line-height:1.45}
 .bottom{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px 16px;display:grid;gap:12px;backdrop-filter:blur(10px)}
 .workout{display:grid;gap:12px}
@@ -71,9 +71,9 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 .workout .doses span{display:grid;gap:1px}
 .workout .doses b{color:var(--fg);font-weight:500;font-size:13px}
 .scen-auto{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.scen-auto .badge{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--holo);border:1px solid rgba(94,231,255,.35);padding:5px 10px;border-radius:3px;background:rgba(94,231,255,.08)}
+.scen-auto .badge{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--holo);border:1px solid rgba(142,224,79,.35);padding:5px 10px;border-radius:3px;background:rgba(142,224,79,.08)}
 .scen-auto .hint{font-size:12px;color:var(--dim)}
-.daybox{display:grid;gap:8px;padding:12px 14px;border:1px solid rgba(94,231,255,.28);border-radius:6px;background:rgba(94,231,255,.06)}
+.daybox{display:grid;gap:8px;padding:12px 14px;border:1px solid rgba(142,224,79,.28);border-radius:6px;background:rgba(142,224,79,.06)}
 .daybox .toprow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .daybox .label{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--holo)}
 .daybox .day-read{display:flex;align-items:baseline;gap:8px}
@@ -88,12 +88,12 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 .track .ev{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:10px;letter-spacing:.08em;white-space:nowrap;color:var(--dim)}
 .track .ev.storm{color:var(--amber)} .track .ev.mars{color:var(--mars);transform:translateX(-100%)} .track .ev.l{transform:none}
 #day{width:100%;height:28px;accent-color:var(--holo);cursor:pointer}
-.sessions{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid rgba(94,231,255,.14)}
-.session{border-bottom:1px solid rgba(94,231,255,.1);padding:0}
+.sessions{list-style:none;margin:0;padding:0;display:grid;gap:0;border-top:1px solid rgba(142,224,79,.14)}
+.session{border-bottom:1px solid rgba(142,224,79,.1);padding:0}
 .session > button{width:100%;display:grid;grid-template-columns:36px 1fr auto;gap:10px 14px;align-items:start;padding:12px 4px;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.session > button:hover{background:rgba(94,231,255,.05)}
+.session > button:hover{background:rgba(142,224,79,.05)}
 .session > button:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
-.session[open] > button{background:rgba(94,231,255,.07)}
+.session[open] > button{background:rgba(142,224,79,.07)}
 .session .n{font-family:var(--mono);font-size:11px;color:var(--holo);letter-spacing:.08em;padding-top:3px}
 .session .t{font-family:var(--display);font-size:16px;line-height:1.2}
 .session .d{font-size:13px;color:var(--dim);line-height:1.4;margin-top:3px}
@@ -109,7 +109,7 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 .ctrl{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .seg{display:flex;border:1px solid var(--edge);border-radius:4px;overflow:hidden}
 .seg button{font:500 13px var(--body);color:var(--fg);background:transparent;border:0;padding:8px 12px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:rgba(94,231,255,.18);color:var(--holo)}
+.seg button[aria-pressed="true"]{background:rgba(142,224,79,.18);color:var(--holo)}
 .seg button[data-m="std"][aria-pressed="true"]{background:rgba(255,93,108,.16);color:var(--red)}
 .readout{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
 .readout b{color:var(--fg);font-weight:500}
@@ -118,17 +118,17 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 .foot{font-size:11px;color:var(--dim);font-family:var(--mono)}
 .view-nav{display:flex;gap:6px;pointer-events:auto;margin-top:10px}
 .view-nav button{font:600 13px var(--display);letter-spacing:.08em;color:var(--fg);background:var(--hud);border:1px solid var(--edge);border-radius:4px;padding:8px 14px;cursor:pointer}
-.view-nav button[aria-pressed="true"]{border-color:var(--holo);background:rgba(94,231,255,.16);color:var(--holo);box-shadow:0 0 16px rgba(94,231,255,.2)}
+.view-nav button[aria-pressed="true"]{border-color:var(--holo);background:rgba(142,224,79,.16);color:var(--holo);box-shadow:0 0 16px rgba(142,224,79,.2)}
 .view-nav button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.bay-view{position:relative;z-index:2;min-height:min(82vh,900px);border:1px solid var(--edge);border-radius:6px;overflow:hidden;background:#03060d;box-shadow:0 0 40px rgba(94,231,255,.08)}
+.bay-view{position:relative;z-index:2;min-height:min(82vh,900px);border:1px solid var(--edge);border-radius:6px;overflow:hidden;background:#03060d;box-shadow:0 0 40px rgba(142,224,79,.08)}
 #bayStage{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none;z-index:0}
 #bayStage:active{cursor:grabbing}
-.bay-scan{position:absolute;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,rgba(94,231,255,.035) 0 1px,transparent 1px 3px)}
+.bay-scan{position:absolute;inset:0;pointer-events:none;z-index:1;background:repeating-linear-gradient(0deg,rgba(142,224,79,.035) 0 1px,transparent 1px 3px)}
 .bay-ui{position:relative;z-index:2;min-height:min(82vh,900px);display:grid;grid-template-rows:auto 1fr auto;gap:12px;padding:14px;pointer-events:none}
 .bay-tabs{display:flex;gap:6px;flex-wrap:wrap;pointer-events:auto}
 .bay-tabs button{font:600 13px var(--display);letter-spacing:.06em;color:var(--fg);background:var(--hud);border:1px solid var(--edge);border-radius:4px;padding:9px 14px;cursor:pointer;text-align:left}
 .bay-tabs button small{display:block;font:400 11px var(--mono);color:var(--dim);letter-spacing:.04em}
-.bay-tabs button[aria-pressed="true"]{border-color:var(--holo);background:rgba(94,231,255,.16);color:var(--holo);box-shadow:0 0 18px rgba(94,231,255,.25)}
+.bay-tabs button[aria-pressed="true"]{border-color:var(--holo);background:rgba(142,224,79,.16);color:var(--holo);box-shadow:0 0 18px rgba(142,224,79,.25)}
 .bay-mid{display:grid;grid-template-columns:1fr min(300px,100%);gap:16px;align-items:start;min-height:280px}
 .bay-side{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px;display:grid;gap:12px;backdrop-filter:blur(6px);justify-self:end;width:100%}
 .bay-side h2{font-family:var(--display);font-size:18px;margin:0}
@@ -151,7 +151,7 @@ body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14
 #bayPlay{font:600 13px var(--display);letter-spacing:.1em;background:var(--holo);color:#02121c;border:0;border-radius:4px;padding:8px 14px;cursor:pointer;min-width:92px}
 #bayTrace{width:100%;height:64px;display:block}
 .bay-legend{font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-.bay-legend i{display:inline-block;width:26px;height:6px;border-radius:3px;background:linear-gradient(90deg,#1f6f8b,var(--holo),var(--amber),#ff8a3d);margin-right:6px;vertical-align:1px}
+.bay-legend i{display:inline-block;width:26px;height:6px;border-radius:3px;background:linear-gradient(90deg,#4e8a1e,var(--holo),var(--amber),#ff8a3d);margin-right:6px;vertical-align:1px}
 .bay-launch{display:inline-flex;align-items:center;gap:8px;margin-top:4px;font:600 12px var(--display);letter-spacing:.06em;color:#02121c;background:var(--holo);border:0;border-radius:4px;padding:8px 12px;cursor:pointer}
 .bay-launch:hover{filter:brightness(1.08)}
 .session .howto .bay-launch{justify-self:start}
@@ -162,17 +162,17 @@ body[data-view="bay"] .verdict,body[data-view="dcs"] .verdict{display:none}
 body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
 .dcs-view{position:relative;z-index:2;display:grid;grid-template-columns:minmax(240px,360px) 1fr;gap:14px;align-items:start}
 @media (max-width:980px){.dcs-view{grid-template-columns:1fr}}
-.dcs-stage{position:relative;min-height:420px;border:1px solid var(--edge);border-radius:6px;overflow:hidden;background:#03060d;box-shadow:0 0 40px rgba(94,231,255,.08)}
+.dcs-stage{position:relative;min-height:420px;border:1px solid var(--edge);border-radius:6px;overflow:hidden;background:#03060d;box-shadow:0 0 40px rgba(142,224,79,.08)}
 #dcsBody{display:block;width:100%;height:420px}
 .dcs-right{display:grid;gap:12px}
 .dcs-panel{background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px;backdrop-filter:blur(10px)}
 .dcs-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--holo);text-transform:uppercase;margin:0 0 8px}
 .dial-wrap{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
 .dial{width:148px;height:148px}
-.dial svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 12px rgba(94,231,255,.25))}
+.dial svg{width:100%;height:100%;display:block;filter:drop-shadow(0 0 12px rgba(142,224,79,.25))}
 .level-chip{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;padding:5px 10px;border-radius:3px;border:1px solid currentColor;margin-top:6px}
 .level-chip.green{color:var(--ok)}.level-chip.yellow{color:var(--amber)}.level-chip.orange{color:#ff8a3d}.level-chip.red{color:var(--red)}
-.dcs-coach{font-family:var(--mono);font-size:13px;line-height:1.5;min-height:3.2em;border:1px solid rgba(94,231,255,.2);border-radius:4px;padding:10px 12px;background:rgba(0,0,0,.35);color:var(--holo);margin-top:10px}
+.dcs-coach{font-family:var(--mono);font-size:13px;line-height:1.5;min-height:3.2em;border:1px solid rgba(142,224,79,.2);border-radius:4px;padding:10px 12px;background:rgba(0,0,0,.35);color:var(--holo);margin-top:10px}
 .dcs-coach .cursor{display:inline-block;width:8px;height:1.1em;background:var(--holo);margin-left:2px;vertical-align:-2px;animation:blink 1s step-end infinite}
 @keyframes blink{50%{opacity:0}}
 .dcs-demo label{display:grid;grid-template-columns:1fr auto;gap:6px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em;margin-bottom:8px}
@@ -180,13 +180,13 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
 .dcs-demo .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
 .dcs-demo .row button{font:600 12px var(--display);letter-spacing:.06em;padding:7px 10px;border-radius:4px;border:1px solid var(--edge);background:transparent;color:var(--holo);cursor:pointer}
 .why-box{display:grid;gap:6px}
-.why-box .hit{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:6px 8px;border-radius:4px;background:rgba(94,231,255,.05);border:1px solid rgba(94,231,255,.1)}
+.why-box .hit{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:6px 8px;border-radius:4px;background:rgba(142,224,79,.05);border:1px solid rgba(142,224,79,.1)}
 .why-box .hit b{font-family:var(--mono);font-weight:500}
 .why-box .hit.push{border-color:rgba(255,200,87,.35);background:rgba(255,200,87,.07)}
 .dcs-cards{display:grid;gap:8px;min-height:80px}
 .acard{display:grid;grid-template-columns:36px 1fr auto;gap:10px;align-items:start;padding:12px;border:1px solid var(--edge);border-radius:6px;background:rgba(10,22,40,.9);transform:translateX(20px);opacity:0;transition:transform .4s ease,opacity .4s ease,border-color .3s}
 .acard.in{transform:none;opacity:1}
-.acard.accepted{border-color:var(--ok);background:rgba(61,220,151,.08)}
+.acard.accepted{border-color:var(--ok);background:rgba(94,240,194,.08)}
 .acard .ico{width:32px;height:32px;border-radius:4px;display:grid;place-items:center;font-family:var(--mono);font-size:10px;border:1px solid currentColor}
 .acard .t{font-family:var(--display);font-size:15px;line-height:1.2}
 .acard .r{font-size:12px;color:var(--dim);margin-top:3px}
@@ -197,6 +197,38 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
 .dcs-disc b{color:var(--amber);font-family:var(--display);letter-spacing:.05em}
 .dcs-timeline{font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
 .dcs-timeline b{color:var(--fg);font-weight:500}
+.value-line{font-family:var(--display);font-weight:600;font-size:clamp(14px,1.6vw,17px);letter-spacing:.02em;color:var(--kiwi-bright);margin:8px 0 0;text-shadow:0 0 14px rgba(142,224,79,.35),0 0 6px #03060d}
+.eva-pill{pointer-events:auto;display:inline-flex;align-items:baseline;gap:6px;margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);background:var(--hud);border:1px solid rgba(142,224,79,.35);border-radius:4px;padding:6px 10px;cursor:pointer}
+.eva-pill b{font-family:var(--display);font-size:16px;letter-spacing:0;color:var(--kiwi-bright);text-transform:none}
+.eva-pill:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.recs{position:relative;z-index:2;pointer-events:auto;margin:14px 0;background:var(--hud);border:1px solid rgba(142,224,79,.38);border-radius:6px;padding:14px 16px;display:grid;gap:12px;backdrop-filter:blur(10px);box-shadow:0 0 44px rgba(142,224,79,.12);scroll-margin-top:12px}
+.recs-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 20px;align-items:end}
+.recs-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--holo)}
+.recs-title{font-family:var(--display);font-size:clamp(20px,2.6vw,28px);margin:4px 0 0;line-height:1.08}
+.recs-sub{margin:6px 0 0;color:var(--dim);font-size:13px;line-height:1.45;max-width:70ch}
+.recs-metric{text-align:right;border:1px solid rgba(142,224,79,.3);border-radius:6px;padding:10px 14px;background:rgba(142,224,79,.07);min-width:220px}
+.recs-metric .big{font-family:var(--display);font-weight:700;font-size:clamp(34px,5vw,48px);line-height:1;color:var(--kiwi-bright);font-variant-numeric:tabular-nums;text-shadow:0 0 22px rgba(142,224,79,.45)}
+.recs-metric .big small{font-size:.45em;color:var(--holo)}
+.recs-metric .cap{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg);margin-top:4px}
+.recs-metric .mini{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:6px}
+.recs-metric .mini b{color:var(--fg);font-weight:500}
+.recs-metric.bump .big{animation:bump .6s ease}
+@keyframes bump{30%{transform:scale(1.08)}}
+.recs-coach{margin-top:0}
+.recs-note{border-left:2px solid var(--red);padding:6px 10px;background:rgba(255,93,108,.08);font-size:12px;color:var(--fg)}
+.recs-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:8px}
+.acard .src{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-bottom:3px}
+.acard .val{font-family:var(--mono);font-size:11px;color:var(--kiwi-bright);margin-top:5px;line-height:1.4}
+.recs-how{display:grid;gap:4px;font-size:12px;color:var(--dim);border-top:1px solid rgba(142,224,79,.14);padding-top:10px}
+.recs-how .row{display:grid;grid-template-columns:62px 1fr;gap:8px}
+.recs-how .row b{font-family:var(--mono);font-weight:500;color:var(--kiwi-bright);text-align:right}
+.recs-foot{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.recs-foot button{font:600 11px var(--display);letter-spacing:.06em;padding:5px 9px;border-radius:3px;cursor:pointer;border:1px solid var(--edge);background:transparent;color:var(--holo)}
+.session.rec-added .n{color:var(--kiwi-bright)}
+.session.rec-added > button{background:rgba(142,224,79,.06)}
+.acc-marks{position:relative;height:8px;margin-top:-2px}
+.acc-marks i{position:absolute;top:0;width:6px;height:6px;border-radius:50%;background:var(--kiwi-bright);box-shadow:0 0 8px rgba(142,224,79,.8);transform:translateX(-50%)}
+@media (max-width:760px){.recs-head{grid-template-columns:1fr}.recs-metric{text-align:left;min-width:0}.recs-metric .mini{justify-content:flex-start}}
 @media (prefers-reduced-motion:reduce){.acard{transition:none}.dcs-coach .cursor{animation:none}}
 @media (max-width:820px){
   .bay-view,.bay-ui{min-height:70vh}
@@ -209,7 +241,7 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
 .load .box{background:var(--hud);border:1px solid var(--edge);border-radius:8px;padding:22px 28px;text-align:center;max-width:320px}
 .load .box h2{font-family:var(--display);margin:0 0 8px;font-size:22px}
 .load .box p{margin:0;color:var(--dim);font-size:13px}
-.load .pulse{width:42px;height:42px;margin:0 auto 14px;border-radius:50%;border:2px solid rgba(94,231,255,.25);border-top-color:var(--holo);animation:spin 1s linear infinite}
+.load .pulse{width:42px;height:42px;margin:0 auto 14px;border-radius:50%;border:2px solid rgba(142,224,79,.25);border-top-color:var(--holo);animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:760px){
   .track .ev.mid{display:none}
@@ -251,6 +283,7 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
       <div class="kn-lock"><img src="brand/kiwinaut-mark.png" width="30" height="30" alt="Kiwinaut logo"><span class="kn-name">Kiwinaut</span><span class="kn-tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
       <div class="k"><span id="viewLabel">Bone twin</span> · Transit to Mars · <span id="apiChip" data-on="0">API · …</span></div>
       <h1 id="viewHeadline">Will you walk off the ship on landing day?</h1>
+      <p class="value-line">Extra safe hours outside. Work longer, smarter, safer.</p>
       <div class="view-nav" role="tablist" aria-label="App view">
         <button type="button" data-view="twin" aria-pressed="true">Bone twin</button>
         <button type="button" data-view="bay" aria-pressed="false">Training bay</button>
@@ -261,6 +294,7 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
       <div class="q">Walk-off readiness · landing day 210</div>
       <div class="big" id="ready">--</div>
       <div class="tag" id="readyTag">--</div>
+      <div><button type="button" class="eva-pill" id="evaPill" aria-label="Jump to recommendations"><b id="evaPillV">+0.0 h</b> safe EVA time</button></div>
     </div>
   </div>
 
@@ -274,16 +308,16 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
         <div class="dial-wrap">
           <div class="dial" aria-hidden="true">
             <svg viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(94,231,255,.12)" stroke-width="10"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(142,224,79,.12)" stroke-width="10"/>
               <circle id="dialArc" cx="60" cy="60" r="48" fill="none" stroke="url(#dialGradMain)" stroke-width="10" stroke-linecap="round"
                 stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 60 60)"/>
               <defs>
                 <linearGradient id="dialGradMain" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#3ddc97"/><stop offset="45%" stop-color="#ffc857"/><stop offset="75%" stop-color="#ff8a3d"/><stop offset="100%" stop-color="#ff5d6c"/>
+                  <stop offset="0%" stop-color="#5ef0c2"/><stop offset="45%" stop-color="#ffc857"/><stop offset="75%" stop-color="#ff8a3d"/><stop offset="100%" stop-color="#ff5d6c"/>
                 </linearGradient>
               </defs>
-              <text x="60" y="58" text-anchor="middle" fill="#e8f4ff" font-family="Chakra Petch,sans-serif" font-size="28" font-weight="700" id="dialScore">0</text>
-              <text x="60" y="76" text-anchor="middle" fill="#7f97b5" font-family="IBM Plex Mono,monospace" font-size="8" letter-spacing="1">PRESSURE RISK</text>
+              <text x="60" y="58" text-anchor="middle" fill="#eef6e8" font-family="Chakra Petch,sans-serif" font-size="28" font-weight="700" id="dialScore">0</text>
+              <text x="60" y="76" text-anchor="middle" fill="#93a68f" font-family="IBM Plex Mono,monospace" font-size="8" letter-spacing="1">PRESSURE RISK</text>
             </svg>
           </div>
           <div>
@@ -399,6 +433,26 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
     </aside>
   </div>
 
+  <section class="recs" id="recsHub" aria-label="Recommendations">
+    <div class="recs-head">
+      <div>
+        <div class="recs-lbl">Recommendations · <span id="recsCtx">mission day 0</span></div>
+        <h2 class="recs-title">Extra safe hours outside.</h2>
+        <p class="recs-sub">Kiwinaut gives astronauts extra safe hours outside: it protects their health so they can work longer, smarter and safer on EVA. Accept a card to put it in today’s plan.</p>
+      </div>
+      <div class="recs-metric" id="recsMetric" aria-live="polite">
+        <div class="big"><span id="evaHours">+0.0</span><small> h</small></div>
+        <div class="cap">safe EVA time this mission</div>
+        <div class="mini"><span><b id="evaScrubs">0</b> scrubbed EVAs avoided</span><span><b id="evaAcc">0</b> accepted</span></div>
+      </div>
+    </div>
+    <div class="dcs-coach recs-coach" aria-live="polite"><span id="recsCoachText"></span><span class="cursor" aria-hidden="true"></span></div>
+    <div class="recs-note" id="recsNote" hidden></div>
+    <div class="recs-cards" id="recsCards"></div>
+    <div class="recs-how" id="recsHow"></div>
+    <div class="recs-foot"><span>Illustrative model, sample data. Decision support, confirmed by the crew medical officer.</span><button type="button" id="recsReset">Reset demo</button></div>
+  </section>
+
   <div class="bottom">
     <section class="daybox" aria-label="Mission day control">
       <div class="toprow">
@@ -419,6 +473,7 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
         <span class="ev mid" style="left:71.4%">EVA d150</span>
         <span class="ev mars" style="left:100%">MARS d210</span>
         <input type="range" id="day" min="0" max="210" value="0" aria-label="Drag to set mission day">
+        <div class="acc-marks" id="accMarks" aria-hidden="true"></div>
       </div>
       <div class="event" id="event"></div>
     </section>
@@ -543,6 +598,50 @@ const OFFLINE_PLANS={
   ]}
 };
 
+
+/* ---------- Recommendation state shared by the hub and the Decompress view ---------- */
+let recsHook=null,recsDayHook=null;
+const RECS={log:new Map(),snoozed:new Map()};   // id -> {title,h,scrub,why,day} / id -> day snoozed
+const SNOOZE_DAYS=3;
+// Illustrative value model (sample data): hours of safe EVA time each accepted action protects.
+const REC_VALUE={
+  go:{h:.5,why:"standard prebreathe on schedule, so no EVA time is lost waiting"},
+  dlco3:{h:.5,why:"each retest sharpens the personal DLCO baseline for faster go / no-go calls"},
+  dlco24:{h:.5,why:"each retest sharpens the personal DLCO baseline for faster go / no-go calls"},
+  pb:{h:6.5,scrub:true,why:"a timely +45 min prebreathe avoids scrubbing a 6.5 h EVA"},
+  h2o:{h:1,why:"good hydration lowers bubble risk and keeps the EVA on its full timeline"},
+  ared:{h:1,why:"no heavy loading near the pressure drop keeps bubble risk down for the whole EVA"},
+  lite:{h:2,why:"lighter tasks keep the crew outside instead of ending the EVA early"},
+  delay:{h:6.5,scrub:true,why:"moving the EVA 24–48 h turns a likely abort into a full 6.5 h EVA later"},
+  mo:{h:.5,why:"medical confirms early, before the airlock schedule slips"},
+  rest:{h:1,why:"recovery today protects tomorrow’s EVA window"},
+  stop:{h:0,why:"protects health first: no hours, but a DCS case avoided"},
+  o2:{h:0,why:"protects health first: treats bubbles before they become injury"},
+  lock:{h:0,why:"personal clearance gate: no EVA until lungs are back to baseline"},
+  "b-normal-ared":{h:1,why:"strong hips and spine sustain long suited work"},
+  "b-normal-t2":{h:.5,why:"aerobic base for long EVAs"},
+  "b-hip-right":{h:2,why:"closing the right-hip gap keeps full EVA and Mars-walk capacity"},
+  "b-hip-heel":{h:.5,why:"impact keeps the femoral neck responding"},
+  "b-flare-shelter":{h:1.5,why:"no lost loading days during the storm"},
+  "b-flare-catch":{h:1,why:"closes the storm gap before it becomes bone loss"},
+  "b-low-heavy":{h:1,why:"keeps bone dose while HRV recovers"},
+  "b-low-defer":{h:.5,why:"avoids overreaching that would cost EVA readiness"},
+  "b-eva-pbx":{h:2.3,why:"exercise prebreathe (~2.0 h vs 4.3 h resting) frees 2.3 h of the EVA day"},
+  "b-eva-log":{h:.5,why:"early symptom flags protect the next EVA"}
+};
+const fmtH=h=>(h>=0?"+":"")+h.toFixed(1)+" h";
+function recAccepted(id){return RECS.log.has(id)}
+function recSnoozed(id){const d=RECS.snoozed.get(id);return d!==undefined&&Math.round(day)-d<SNOOZE_DAYS}
+function recValueLine(id){const v=REC_VALUE[id];if(!v)return "";return (v.h>0?fmtH(v.h)+" · ":"Safety · ")+v.why}
+function recAct(id,act,title){
+  if(act==="accept"){
+    const v=REC_VALUE[id]||{h:0};
+    RECS.log.set(id,{title:title||id,h:v.h,scrub:!!v.scrub,why:v.why||"",day:Math.round(day)});
+    RECS.snoozed.delete(id);
+  }else{RECS.snoozed.set(id,Math.round(day))}
+  if(recsDayHook)recsDayHook(true);
+}
+
 let activeScenario="normal";
 let planSyncTimer=null;
 
@@ -619,6 +718,7 @@ function renderPlan(plan){
       </li>`;
     }).join("")
     :`<li class="session"><div style="padding:12px 4px"><div class="t">No sessions</div><div class="d">Advance the mission day to adapt the next workout.</div></div></li>`;
+  if(recsHook)recsHook();
 }
 $("sessions").addEventListener("click",e=>{
   const dcsBtn=e.target.closest("button[data-dcs]");
@@ -710,14 +810,14 @@ const BaySim=(()=>{
     P.load=load;P.force=force;P.lean=lean;return P;
   }
   function proj(x,y,z){const cy=Math.cos(rotY),sy=Math.sin(rotY);let X=x*cy-z*sy,Z=x*sy+z*cy;const cx=Math.cos(rotX),sx=Math.sin(rotX);const Y=(y-.8)*cx-Z*sx;Z=(y-.8)*sx+Z*cx;const p=3.2/(3.2+Z);return[view.cx+X*view.s*p,view.cy-Y*view.s*p,p]}
-  function heat(k){k=Math.max(0,Math.min(1,k));const s=[[31,111,139],[94,231,255],[255,200,87],[255,138,61]];const f=k*3,i=Math.min(2,Math.floor(f)),u=f-i;return s[i].map((v,j)=>Math.round(v+(s[i+1][j]-v)*u))}
+  function heat(k){k=Math.max(0,Math.min(1,k));const s=[[78,138,30],[142,224,79],[255,200,87],[255,138,61]];const f=k*3,i=Math.min(2,Math.floor(f)),u=f-i;return s[i].map((v,j)=>Math.round(v+(s[i+1][j]-v)*u))}
   function seg(a,b,z1,z2,k,w){const A=proj(a[0],a[1],z1),B=proj(b[0],b[1],z2),c=heat(k);
     g.strokeStyle=`rgba(${c},.95)`;g.shadowColor=`rgb(${c})`;g.shadowBlur=8+k*22;g.lineWidth=w*(A[2]+B[2])/2;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.stroke();
     g.shadowBlur=0;g.fillStyle=`rgba(${c},.55)`;for(let i=0;i<6;i++){const u=((i*.173+t*.6*(1+k))%1),j=Math.sin(i*91.7+t*3)*3;g.fillRect(A[0]+(B[0]-A[0])*u+j,A[1]+(B[1]-A[1])*u-j*.5,1.6,1.6)}}
-  function wire(pts,alpha=.45,close=false){g.strokeStyle=`rgba(94,231,255,${alpha})`;g.shadowBlur=0;g.lineWidth=1.2;g.beginPath();pts.forEach((p,i)=>{const q=proj(...p);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});if(close)g.closePath();g.stroke()}
+  function wire(pts,alpha=.45,close=false){g.strokeStyle=`rgba(142,224,79,${alpha})`;g.shadowBlur=0;g.lineWidth=1.2;g.beginPath();pts.forEach((p,i)=>{const q=proj(...p);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});if(close)g.closePath();g.stroke()}
   function circle3(c,r,z,n=40,alpha=.45){const pts=[];for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;pts.push([c[0]+r*Math.cos(a),c[1]+r*Math.sin(a),z])}wire(pts,alpha)}
   function box(x0,x1,y0,y1,z0,z1,a=.4){wire([[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],a,true);wire([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],a,true);for(const[x,z]of[[x0,z0],[x1,z0],[x1,z1],[x0,z1]])wire([[x,y0,z],[x,y1,z]],a)}
-  function label(p,s){g.shadowBlur=0;g.fillStyle="rgba(127,151,181,.95)";g.font="11px 'IBM Plex Mono',monospace";g.fillText(s,p[0]+6,p[1]-4)}
+  function label(p,s){g.shadowBlur=0;g.fillStyle="rgba(147,166,143,.95)";g.font="11px 'IBM Plex Mono',monospace";g.fillText(s,p[0]+6,p[1]-4)}
   function equipment(P){
     if(ex==="run"){
       box(-.75,.75,-.06,0,-.32,.32,.5);
@@ -761,7 +861,7 @@ const BaySim=(()=>{
     if(bayPlaying)for(const r of REG)doseAcc[ex][r]=Math.min(1,doseAcc[ex][r]+E.dose[r]*P.load[r]*dt*6);
     const mob=W<820;view={cx:mob?W/2:W*.42,cy:mob?H*.34:H*.40,s:Math.min(H*(mob?.26:.30),W*(mob?.65:.38))};
     g.clearRect(0,0,W,H);g.fillStyle="#03060d";g.fillRect(0,0,W,H);
-    for(const s of stars){g.globalAlpha=.2+.5*s[3];g.fillStyle="#cfe9ff";g.fillRect(s[0]*W,s[1]*H,s[2],s[2])}g.globalAlpha=1;
+    for(const s of stars){g.globalAlpha=.2+.5*s[3];g.fillStyle="#e4f2d6";g.fillRect(s[0]*W,s[1]*H,s[2],s[2])}g.globalAlpha=1;
     g.save();g.lineCap="round";
     for(let i=-4;i<=4;i++){wire([[i*.25,-.06,-1],[i*.25,-.06,1]],.06);wire([[-1,-.06,i*.25],[1,-.06,i*.25]],.06)}
     equipment(P);
@@ -775,7 +875,7 @@ const BaySim=(()=>{
     seg([P.hip[0],P.hip[1]],[P.hip[0],P.hip[1]],-.12,.12,P.load.hips,9);
     seg(P.hip,P.mid,0,0,P.load.spine,8);seg(P.mid,P.neck,0,0,P.load.spine*.7,7);
     seg(P.neck,P.neck,-.19,.19,.2,5);
-    const hd=proj(P.head[0],P.head[1],0);g.shadowColor="rgb(94,231,255)";g.shadowBlur=18;g.strokeStyle="rgba(94,231,255,.9)";g.lineWidth=2;g.beginPath();g.arc(hd[0],hd[1],.1*view.s*hd[2],0,Math.PI*2);g.stroke();
+    const hd=proj(P.head[0],P.head[1],0);g.shadowColor="rgb(142,224,79)";g.shadowBlur=18;g.strokeStyle="rgba(142,224,79,.9)";g.lineWidth=2;g.beginPath();g.arc(hd[0],hd[1],.1*view.s*hd[2],0,Math.PI*2);g.stroke();
     draw(near);g.restore();
     hist.push(P.force);if(hist.length>360)hist.shift();
     $("fV").innerHTML=P.force.toFixed(1)+"<small>×</small>";
@@ -783,10 +883,10 @@ const BaySim=(()=>{
     $("cV").textContent=count;
     for(const r of REG){const v=doseAcc[ex][r];$("bd-"+r).style.width=(v*100)+"%";$("bp-"+r).textContent=Math.round(v*100)+"%"}
     const tw=tr.width/DPR,th=tr.height/DPR;tg.clearRect(0,0,tw,th);
-    tg.strokeStyle="rgba(127,151,181,.25)";tg.setLineDash([3,4]);for(const v of[1,2]){const y=th-6-(v/2.4)*(th-12);tg.beginPath();tg.moveTo(0,y);tg.lineTo(tw,y);tg.stroke();tg.fillStyle="rgba(127,151,181,.8)";tg.font="10px 'IBM Plex Mono',monospace";tg.fillText(v+"× BW",4,y-3)}
+    tg.strokeStyle="rgba(147,166,143,.25)";tg.setLineDash([3,4]);for(const v of[1,2]){const y=th-6-(v/2.4)*(th-12);tg.beginPath();tg.moveTo(0,y);tg.lineTo(tw,y);tg.stroke();tg.fillStyle="rgba(147,166,143,.8)";tg.font="10px 'IBM Plex Mono',monospace";tg.fillText(v+"× BW",4,y-3)}
     tg.setLineDash([]);
-    const grad=tg.createLinearGradient(0,th,0,0);grad.addColorStop(0,"#5ee7ff");grad.addColorStop(.6,"#ffc857");grad.addColorStop(1,"#ff8a3d");
-    tg.strokeStyle=grad;tg.lineWidth=2;tg.shadowColor="#5ee7ff";tg.shadowBlur=8;tg.beginPath();
+    const grad=tg.createLinearGradient(0,th,0,0);grad.addColorStop(0,"#8ee04f");grad.addColorStop(.6,"#ffc857");grad.addColorStop(1,"#ff8a3d");
+    tg.strokeStyle=grad;tg.lineWidth=2;tg.shadowColor="#8ee04f";tg.shadowBlur=8;tg.beginPath();
     hist.forEach((v,i)=>{const x=tw-(hist.length-1-i)*(tw/360),y=th-6-(v/2.4)*(th-12);i?tg.lineTo(x,y):tg.moveTo(x,y)});tg.stroke();tg.shadowBlur=0;
     raf=requestAnimationFrame(tick);
   }
@@ -848,7 +948,7 @@ BaySim.init();
 /* ---------- Decompression Stress module ---------- */
 const DcsMod=(()=>{
   let dlco=-2,hyd=70,bub=0,sym=0,active=false,raf=0;
-  let accepted=new Set(),snoozed=new Set(),coachTimer=null,cardTimers=[];
+  let coachTimer=null,cardTimers=[],userTouched=false,evaWin=null;
   let risk={level:"green",s:0};
   const cv=()=>$("dcsBody");
   function size(){
@@ -883,7 +983,7 @@ const DcsMod=(()=>{
     return{s,level,name,blurb,parts,dlcoDrop:drop};
   }
   function cards(res){
-    const out=[];const push=(id,ico,title,reason,color)=>{if(!snoozed.has(id))out.push({id,ico,title,reason,color,accepted:accepted.has(id)})};
+    const out=[];const push=(id,ico,title,reason,color)=>{if(!recSnoozed(id))out.push({id,ico,title,reason,color,accepted:recAccepted(id),src:"Decompress"})};
     if(res.level==="green"){push("go","GO","Proceed with standard exercise prebreathe","because score "+res.s+" · GREEN","var(--ok)");push("dlco3","+3h","Schedule DLCO retest +3 h post-EVA","because personal pattern learning","var(--holo)")}
     if(res.level!=="green"){
       if(res.dlcoDrop>=5)push("pb","+45","Extend exercise prebreathe +45 min","because DLCO −"+res.dlcoDrop+"%","var(--amber)");
@@ -923,18 +1023,12 @@ const DcsMod=(()=>{
       const el=document.createElement("div");
       el.className="acard"+(c.accepted?" accepted in":"");el.dataset.id=c.id;
       const ops=c.accepted?'<span class="r">Accepted</span>':'<button type="button" class="ok" data-act="accept">Accept</button><button type="button" data-act="snooze">Snooze</button>';
-      el.innerHTML=`<div class="ico" style="color:${c.color}">${c.ico}</div><div><div class="t">${c.title}</div><div class="r">${c.reason}</div></div><div class="ops">${ops}</div>`;
+      el.innerHTML=`<div class="ico" style="color:${c.color}">${c.ico}</div><div><div class="t">${c.title}</div><div class="r">${c.reason}</div><div class="val">${recValueLine(c.id)}</div></div><div class="ops">${ops}</div>`;
       box.appendChild(el);
       if(!c.accepted)cardTimers.push(setTimeout(()=>el.classList.add("in"),reduce?0:100+i*120));
     });
   }
-  function applyAcceptedToPlan(res){
-    if(!accepted.size||!planCache)return;
-    const notes=[...accepted].map(id=>({pb:"prebreathe +45",h2o:"hydrate +500 ml",ared:"ARED hold",delay:"EVA +24–48 h",stop:"EVA abort",o2:"DCS O₂ protocol",lite:"lighter EVA"}[id]||id));
-    const why=(planCache.why||"")+" · DCS accepts: "+notes.join(", ");
-    $("planWhy").textContent=why;
-    if($("scenBadge"))$("scenBadge").textContent=`Auto · ${planCache.scenario_name||"plan"} · DCS`;
-  }
+  function applyAcceptedToPlan(res){if(recsHook)recsHook()}
   function refresh(animate){
     const res=score();risk=res;
     $("levelChip").className="level-chip "+res.level;$("levelChip").textContent=res.name;
@@ -949,10 +1043,10 @@ const DcsMod=(()=>{
     if(!active){raf=0;return}
     const c=cv(),g=c.getContext("2d");const W=c.width/(Math.min(devicePixelRatio||1,2)),H=420;
     g.clearRect(0,0,W,H);g.fillStyle="#03060d";g.fillRect(0,0,W,H);
-    for(let i=0;i<36;i++){g.globalAlpha=.15;g.fillStyle="#cfe9ff";g.fillRect((i*41%W),(i*59%H),1.2,1.2)}g.globalAlpha=1;
+    for(let i=0;i<36;i++){g.globalAlpha=.15;g.fillStyle="#e4f2d6";g.fillRect((i*41%W),(i*59%H),1.2,1.2)}g.globalAlpha=1;
     const cx=W*.5,cy=H*.48,s=Math.min(W,H)*.26,pulse=.55+.45*Math.sin(now/380);
-    const col={green:"#3ddc97",yellow:"#ffc857",orange:"#ff8a3d",red:"#ff5d6c"}[risk.level]||"#5ee7ff";
-    g.lineCap="round";g.strokeStyle="#5ee7ff";g.shadowColor="#5ee7ff";g.shadowBlur=12;g.lineWidth=6;
+    const col={green:"#5ef0c2",yellow:"#ffc857",orange:"#ff8a3d",red:"#ff5d6c"}[risk.level]||"#8ee04f";
+    g.lineCap="round";g.strokeStyle="#8ee04f";g.shadowColor="#8ee04f";g.shadowBlur=12;g.lineWidth=6;
     const hip=[cx,cy+.15*s],neck=[cx,cy-.95*s],head=[cx,cy-1.2*s];
     g.beginPath();g.moveTo(hip[0],hip[1]);g.lineTo(neck[0],neck[1]);g.stroke();
     g.beginPath();g.arc(head[0],head[1],.16*s,0,Math.PI*2);g.stroke();
@@ -968,7 +1062,7 @@ const DcsMod=(()=>{
       [[cx-.55*s,cy-.45*s],[cx+.55*s,cy-.45*s],[cx-.35*s,cy+.85*s],[cx+.35*s,cy+.85*s],[cx-.72*s,cy-.1*s],[cx+.72*s,cy-.1*s]].forEach(([x,y])=>{g.beginPath();g.arc(x,y,5+pulse*3,0,Math.PI*2);g.stroke()});
       g.globalAlpha=1;
     }
-    g.shadowBlur=0;g.fillStyle="rgba(127,151,181,.95)";g.font="11px IBM Plex Mono,monospace";
+    g.shadowBlur=0;g.fillStyle="rgba(147,166,143,.95)";g.font="11px IBM Plex Mono,monospace";
     g.fillText("lungs + joints · sample risk map",12,H-16);
     g.fillStyle=col;g.fillText(risk.level.toUpperCase()+"  "+risk.s,12,28);
     raf=requestAnimationFrame(frame);
@@ -979,11 +1073,10 @@ const DcsMod=(()=>{
     $("dcsCards").addEventListener("click",e=>{
       const btn=e.target.closest("button[data-act]");if(!btn)return;
       const card=btn.closest(".acard");if(!card)return;
-      if(btn.dataset.act==="accept"){accepted.add(card.dataset.id);snoozed.delete(card.dataset.id)}
-      else{snoozed.add(card.dataset.id);accepted.delete(card.dataset.id)}
+      recAct(card.dataset.id,btn.dataset.act,card.querySelector(".t")?.textContent);
       refresh(true);
     });
-    const bind=(id,fn)=>{$(id).oninput=e=>{fn(e.target.value);refresh(true)};fn($(id).value)};
+    const bind=(id,fn)=>{$(id).oninput=e=>{userTouched=true;fn(e.target.value);refresh(true);if(recsDayHook)recsDayHook(true)};fn($(id).value)};
     bind("dlco",v=>{dlco=+v;$("dlcoV").textContent=(dlco>0?"+"+dlco:dlco)+"%"});
     bind("hyd",v=>{hyd=+v;$("hydV").textContent=hyd>=70?"adequate":hyd>=45?"low":"critical"});
     bind("bub",v=>{bub=+v;$("bubV").textContent=bub});
@@ -994,16 +1087,138 @@ const DcsMod=(()=>{
       $("dlco").value=dlco;$("hyd").value=hyd;$("bub").value=bub;$("sym").value=sym;
       $("dlcoV").textContent=(dlco>0?"+"+dlco:dlco)+"%";$("hydV").textContent=hyd>=70?"adequate":hyd>=45?"low":"critical";
       $("bubV").textContent=bub;$("symV").textContent=sym?"YES":"no";
-      accepted.clear();snoozed.clear();refresh(true);
+      userTouched=true;
+      for(const k of [...RECS.snoozed.keys()])if(!k.startsWith("b-"))RECS.snoozed.delete(k);
+      refresh(true);if(recsDayHook)recsDayHook(true);
     });
+    risk=score();
+  }
+  function setInputs(v){
+    dlco=v.dlco;hyd=v.hyd;$("dlco").value=dlco;$("hyd").value=hyd;
+    $("dlcoV").textContent=(dlco>0?"+"+dlco:dlco)+"%";$("hydV").textContent=hyd>=70?"adequate":hyd>=45?"low":"critical";
   }
   function onDay(){
-    // Nudge sample inputs toward EVA risk during spacewalk window
-    if(day>=145&&day<=160&&hyd>65){hyd=60;$("hyd").value=hyd;$("hydV").textContent="low"}
+    // Sample story: around the EVA (d145–160) the crew member's DLCO dips and hydration runs low,
+    // so the score moves to YELLOW. Only while the judge hasn't set the sliders by hand.
+    const inWin=day>=145&&day<=160;
+    if(inWin===evaWin)return;
+    evaWin=inWin;
+    if(!userTouched)setInputs(inWin?{dlco:-7,hyd:55}:{dlco:-2,hyd:70});
+    if(document.body.dataset.view==="dcs")refresh(true);else risk=score();
   }
-  return{init,start,stop,size,refresh,onDay};
+  const evaWindow=()=>day>=140&&day<=160;
+  return{init,start,stop,size,refresh,onDay,
+    current:()=>cards(risk),coachLine:()=>coach(risk),level:()=>risk,
+    relevant:()=>evaWindow()||userTouched&&risk.level!=="green"};
 })();
 DcsMod.init();
+
+/* ---------- Recommendations hub (main dashboard) ---------- */
+const RecsHub=(()=>{
+  const BONE={
+    normal:{coach:"CDR Lee: all regions on target · ARED +5% today · treadmill intervals with harness.",cards:[
+      ["b-normal-ared","ARED","Progressive ARED squat + deadlift (+5%)","because every region hit its target and bone needs rising load","var(--holo)"],
+      ["b-normal-t2","T2","Treadmill intervals with harness load","because shins and heart need impact and aerobic work","var(--holo)"]]},
+    underload_hip:{coach:"CDR Lee: right hip under-loaded · right-leg-first squats · heel drops · watch insole force.",cards:[
+      ["b-hip-right","HIP","Load the right hip first: right-leg-first squats 5×5","because insoles show the right hip under-loaded","var(--amber)"],
+      ["b-hip-heel","IMP","Heel drops + band rows","because the femoral neck responds to impact","var(--holo)"]]},
+    flare:{coach:"CDR Lee: stay in the shelter · band session now · catch-up ARED after all-clear.",cards:[
+      ["b-flare-shelter","SHLT","Shelter workout now: band squats, heel drops, rows","because the solar storm cut today’s session short","var(--amber)"],
+      ["b-flare-catch","+10%","Catch-up ARED after all-clear (+10% sets)","because the storm left a loading gap","var(--holo)"]]},
+    low_readiness:{coach:"CDR Lee: HRV down · heavy singles only · CEVIS intervals move to tomorrow.",cards:[
+      ["b-low-heavy","3×3","Heavy ARED singles, low volume","because bone needs load size, not long sessions","var(--holo)"],
+      ["b-low-defer","DEFER","Move CEVIS intervals to tomorrow","because resting HR is up and HRV is down","var(--amber)"]]},
+    spacewalk:{coach:"CDR Lee: EVA day · exercise prebreathe · heavy ARED moves to tomorrow · log symptoms after ingress.",cards:[
+      ["b-eva-pbx","2.0h","Exercise prebreathe ~2.0 h instead of 4.3 h at rest","because guided exercise clears nitrogen faster","var(--holo)"],
+      ["ared","MOVE","Move heavy ARED to the day after the EVA","because loading near the pressure drop raises bubble risk","#ff8a3d"],
+      ["b-eva-log","LOG","Post-EVA symptom log within 1 h","because joint pain or skin mottling must reach medical fast","var(--holo)"]]}
+  };
+  let lastKey="",coachTimer=null,cardTimers=[],shown=[];
+  function list(){
+    const scen=scenarioForDay(day,mode),b=BONE[scen]||BONE.normal,out=[],seen=new Set();
+    const add=c=>{if(seen.has(c.id)||recSnoozed(c.id))return;seen.add(c.id);out.push(c)};
+    if(DcsMod.relevant())DcsMod.current().slice(0,4).forEach(add);
+    if(mode==="dose")b.cards.forEach(([id,ico,title,reason,color])=>add({id,ico,title,reason,color,accepted:recAccepted(id),src:"Bone · exercise"}));
+    return{scen,cards:out.slice(0,7),coach:mode!=="dose"?"Fixed plan: the same workout every day. No adaptive recommendations.":DcsMod.relevant()?DcsMod.coachLine():b.coach};
+  }
+  function typeCoach(text){
+    clearInterval(coachTimer);const el=$("recsCoachText");if(el.dataset.text===text)return;el.dataset.text=text;el.textContent="";
+    if(reduce){el.textContent=text;return}
+    let i=0;coachTimer=setInterval(()=>{el.textContent=text.slice(0,++i);if(i>=text.length)clearInterval(coachTimer)},16);
+  }
+  function scrubDup(id){const v=RECS.log.get(id);if(!v||!v.scrub)return false;for(const [k,w] of RECS.log)if(k!==id&&w.scrub&&w.day===v.day&&(w.h>v.h||w.h===v.h&&k<id))return true;return false}
+  function totals(){let h=0;const days=new Set();for(const [id,v] of RECS.log){if(v.scrub){if(scrubDup(id))continue;days.add(v.day)}h+=v.h}return{h,scr:days.size,n:RECS.log.size}}
+  function renderMetric(bump){
+    const t=totals();
+    $("evaHours").textContent=fmtH(t.h).replace(" h","");$("evaScrubs").textContent=t.scr;$("evaAcc").textContent=t.n;
+    $("evaPillV").textContent=fmtH(t.h);
+    if(bump&&!reduce){const m=$("recsMetric");m.classList.remove("bump");void m.offsetWidth;m.classList.add("bump")}
+    const rows=[...RECS.log.entries()].sort((a,b)=>b[1].h-a[1].h);
+    $("recsHow").innerHTML=rows.length
+      ?`<div class="recs-lbl" style="margin-bottom:4px">How the hours add up</div>`+rows.map(([id,v])=>`<div class="row"><b>${scrubDup(id)?"same EVA":v.h>0?fmtH(v.h):"safety"}</b><span><span style="color:var(--fg)">${esc(v.title)}</span> · d${v.day} · ${esc(scrubDup(id)?"protects the same EVA as another accepted card, so its hours are counted once":v.why)}</span></div>`).join("")
+      :`<div class="recs-lbl" style="margin-bottom:4px">How the hours add up</div><div>Nothing accepted yet. Each card shows the safe EVA time it protects; accepted cards add up here for the whole mission.</div>`;
+    $("accMarks").innerHTML=rows.map(([,v])=>`<i style="left:${(v.day/210*100).toFixed(2)}%" title="${esc(v.title)}"></i>`).join("");
+  }
+  function renderCards(L){
+    cardTimers.forEach(clearTimeout);cardTimers=[];
+    const box=$("recsCards");box.innerHTML="";shown=L.cards;
+    if(!L.cards.length){box.innerHTML=`<div class="recs-how" style="border:0;padding:0">${mode==="dose"?"All of today’s recommendations are accepted or snoozed.":"Switch to “With Kiwinaut” to see adaptive recommendations."}</div>`;return}
+    L.cards.forEach((c,i)=>{
+      const acc=recAccepted(c.id);
+      const el=document.createElement("div");
+      el.className="acard"+(acc?" accepted in":"");el.dataset.id=c.id;
+      const ops=acc?'<span class="r">Accepted</span>':'<button type="button" class="ok" data-act="accept">Accept</button><button type="button" data-act="snooze">Snooze</button>';
+      el.innerHTML=`<div class="ico" style="color:${c.color}">${c.ico}</div><div><div class="src">${c.src||""}</div><div class="t">${c.title}</div><div class="r">${c.reason}</div><div class="val">${recValueLine(c.id)}</div></div><div class="ops">${ops}</div>`;
+      box.appendChild(el);
+      if(!acc)cardTimers.push(setTimeout(()=>el.classList.add("in"),reduce?0:60+i*90));
+    });
+  }
+  function render(force){
+    const L=list();
+    const key=[L.scen,mode,L.cards.map(c=>c.id+(recAccepted(c.id)?"+":"")).join(",")].join("|");
+    $("recsCtx").textContent=`mission day ${Math.round(day)} · ${(OFFLINE_PLANS[L.scen]||{}).scenario_name||L.scen}`;
+    if(!force&&key===lastKey)return;
+    lastKey=key;
+    $("recsNote").hidden=mode==="dose";
+    $("recsNote").textContent="Fixed plan selected: nobody adapts the plan, so these safe hours are not protected.";
+    renderCards(L);typeCoach(L.coach);renderMetric(false);applyToPlan();
+  }
+  function applyToPlan(){
+    if(!planCache)return;
+    const scen=planCache.scenario_id||activeScenario;
+    const today=(shown||[]).filter(c=>recAccepted(c.id));
+    const snoozedToday=[...RECS.snoozed.keys()].filter(recSnoozed).map(id=>({id,title:(REC_TITLES[id]||id)}));
+    let why=planCache.why||"";
+    if(today.length)why+=" · Accepted today: "+today.map(c=>c.title).join("; ")+".";
+    if(snoozedToday.length)why+=" · Snoozed (back in "+SNOOZE_DAYS+" days): "+snoozedToday.map(c=>c.title).join("; ")+".";
+    $("planWhy").textContent=why;
+    if($("scenBadge"))$("scenBadge").textContent=`Auto · ${planCache.scenario_name||scen}`+(today.length?` · +${today.length} accepted`:"");
+    const ol=$("sessions");ol.querySelectorAll(".rec-added").forEach(x=>x.remove());
+    today.slice().reverse().forEach(c=>{
+      const v=RECS.log.get(c.id)||{};
+      const li=document.createElement("li");li.className="session rec-added";
+      li.innerHTML=`<button type="button" data-session aria-expanded="false"><span class="n">✓</span><div><div class="t">${esc(c.title)}</div><div class="d">Accepted recommendation · ${esc(v.h>0?fmtH(v.h)+" safe EVA time":"safety action")}</div></div><div><div class="reg">${esc(c.src||"")}</div><div class="chev" aria-hidden="true">▼</div></div></button><div class="howto"><h4>Why</h4><ol><li>${esc(c.reason)}</li><li>${esc(v.why||"")}</li><li>Crew medical officer confirms before EVA or protocol changes.</li></ol></div>`;
+      ol.prepend(li);
+    });
+  }
+  const REC_TITLES={};
+  function remember(){(shown||[]).forEach(c=>REC_TITLES[c.id]=c.title)}
+  function init(){
+    $("recsCards").addEventListener("click",e=>{
+      const btn=e.target.closest("button[data-act]");if(!btn)return;
+      const card=btn.closest(".acard");if(!card)return;
+      remember();
+      recAct(card.dataset.id,btn.dataset.act,card.querySelector(".t")?.textContent);
+      renderMetric(btn.dataset.act==="accept");
+    });
+    $("evaPill").onclick=()=>{if(document.body.dataset.view!=="twin")setAppView("twin");$("recsHub").scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"})};
+    $("recsReset").onclick=()=>{RECS.log.clear();RECS.snoozed.clear();render(true);renderMetric(false);DcsMod.refresh(true)};
+    recsHook=()=>{remember();applyToPlan()};
+    recsDayHook=force=>{render(!!force);if(force&&document.body.dataset.view==="dcs")DcsMod.refresh(true)};
+    render(true);
+  }
+  return{init,render};
+})();
 addEventListener("resize",()=>{
   if(document.body.dataset.view==="bay")BaySim.size();
   if(document.body.dataset.view==="dcs")DcsMod.size();
@@ -1089,19 +1304,19 @@ function scheduleTwinFetch(){
 
 function col(d){
   const t=Math.max(0,Math.min(1,(100-d)/8));
-  const a=[94,231,255],b=[255,200,87],c=[255,93,108];
+  const a=[142,224,79],b=[255,200,87],c=[255,93,108];
   const m=t<.5?[a,b,t*2]:[b,c,(t-.5)*2];
   return m[0].map((v,i)=>Math.round(v+(m[1][i]-v)*m[2]));
 }
 function riskCol(risk){
   const t=Math.max(0,Math.min(1,risk/60));
-  const a=[61,220,151],b=[255,200,87],c=[255,93,108];
+  const a=[94,240,194],b=[255,200,87],c=[255,93,108];
   const m=t<.5?[a,b,t*2]:[b,c,(t-.5)*2];
   return m[0].map((v,i)=>Math.round(v+(m[1][i]-v)*m[2]));
 }
 function gapCol(gap){
   const t=Math.max(0,Math.min(1,gap));
-  const a=[94,231,255],b=[255,200,87],c=[255,93,108];
+  const a=[142,224,79],b=[255,200,87],c=[255,93,108];
   const m=t<.5?[a,b,t*2]:[b,c,(t-.5)*2];
   return m[0].map((v,i)=>Math.round(v+(m[1][i]-v)*m[2]));
 }
@@ -1123,9 +1338,9 @@ const stars=Array.from({length:260},()=>({x:Math.random(),y:Math.random(),s:Math
 function drawSky(){
   sx.fillStyle="#03060d";sx.fillRect(0,0,W,H);
   const g=sx.createRadialGradient(W*.42,H*.45,0,W*.42,H*.45,Math.max(W,H)*.6);
-  g.addColorStop(0,"rgba(30,70,110,.35)");g.addColorStop(1,"rgba(3,6,13,0)");
+  g.addColorStop(0,"rgba(40,78,22,.35)");g.addColorStop(1,"rgba(3,6,13,0)");
   sx.fillStyle=g;sx.fillRect(0,0,W,H);
-  for(const s of stars){sx.globalAlpha=.25+.6*s.a;sx.fillStyle="#cfe9ff";sx.fillRect(s.x*W,s.y*H,s.s,s.s)}
+  for(const s of stars){sx.globalAlpha=.25+.6*s.a;sx.fillStyle="#e4f2d6";sx.fillRect(s.x*W,s.y*H,s.s,s.s)}
   sx.globalAlpha=1;
   const mob=W<760,f=day/210,R=(mob?14:22)+f*f*Math.min(W,H)*(mob?.22:.34);
   const mxp=mob?W*.8:W*(.2-.06*f),myp=mob?H*.3:H*(.58-.04*f);
@@ -1152,9 +1367,9 @@ controls.target.set(0,-.15,0);
 controls.maxPolarAngle=Math.PI*.92;
 controls.minPolarAngle=.15;
 
-scene.add(new THREE.AmbientLight(0x6aa8ff,.55));
-const key=new THREE.DirectionalLight(0xb8ecff,1.35);key.position.set(2.5,4,3);scene.add(key);
-const rim=new THREE.DirectionalLight(0x5ee7ff,.55);rim.position.set(-3,1,-2);scene.add(rim);
+scene.add(new THREE.AmbientLight(0x7fa86a,.55));
+const key=new THREE.DirectionalLight(0xe6f7cf,1.35);key.position.set(2.5,4,3);scene.add(key);
+const rim=new THREE.DirectionalLight(0x8ee04f,.55);rim.position.set(-3,1,-2);scene.add(rim);
 const fill=new THREE.PointLight(0xff7a45,.25,20);fill.position.set(-2,-1,3);scene.add(fill);
 
 // hologram pedestal rings
@@ -1162,7 +1377,7 @@ const pedestal=new THREE.Group();
 for(let i=0;i<3;i++){
   const ring=new THREE.Mesh(
     new THREE.TorusGeometry(.95+i*.28,.008,8,96),
-    new THREE.MeshBasicMaterial({color:0x5ee7ff,transparent:true,opacity:.22-i*.05})
+    new THREE.MeshBasicMaterial({color:0x8ee04f,transparent:true,opacity:.22-i*.05})
   );
   ring.rotation.x=Math.PI/2;
   ring.position.y=-3.55;
@@ -1172,7 +1387,7 @@ scene.add(pedestal);
 
 // scan plane
 const scanMat=new THREE.MeshBasicMaterial({
-  color:0x5ee7ff,transparent:true,opacity:.22,depthWrite:false,
+  color:0x8ee04f,transparent:true,opacity:.22,depthWrite:false,
   blending:THREE.AdditiveBlending,side:THREE.DoubleSide
 });
 const scanPlane=new THREE.Mesh(new THREE.PlaneGeometry(3.4,3.4),scanMat);
@@ -1181,7 +1396,7 @@ scanPlane.visible=false;
 scene.add(scanPlane);
 const scanGlow=new THREE.Mesh(
   new THREE.PlaneGeometry(3.4,.08),
-  new THREE.MeshBasicMaterial({color:0xb8f7ff,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})
+  new THREE.MeshBasicMaterial({color:0xc6f27a,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})
 );
 scanGlow.rotation.x=Math.PI/2;
 scanGlow.visible=false;
@@ -1453,7 +1668,7 @@ function sync(requestApi=true){
   const ok=twinCache&&apiOnline?twinCache.walkoff_ready:r>=75;
   $("ready").textContent=Math.round(r)+"%";
   const colr=ok?"var(--ok)":"var(--red)";
-  $("ready").style.color=colr;$("ready").style.textShadow=`0 0 30px ${ok?"rgba(61,220,151,.5)":"rgba(255,93,108,.5)"}`;
+  $("ready").style.color=colr;$("ready").style.textShadow=`0 0 30px ${ok?"rgba(94,240,194,.5)":"rgba(255,93,108,.5)"}`;
   $("readyTag").textContent=ok?"READY TO WALK":"FRACTURE RISK";$("readyTag").style.color=colr;
   $("event").innerHTML=eventText();
   if(Math.abs(day-lastSky)>.8){drawSky();lastSky=day}
@@ -1461,6 +1676,7 @@ function sync(requestApi=true){
   if(scanRegion)updateScanHud(scanRegion,scanning?scanT:1);
   applyPlanForDay(false);
   if(typeof DcsMod!=="undefined")DcsMod.onDay();
+  if(recsDayHook)recsDayHook(false);
   if(requestApi){scheduleTwinFetch();scheduleScoreFetch()}
 }
 let scoreFetchTimer=null;
@@ -1542,6 +1758,7 @@ loadBones();
 
 window._dosefit={set:(d,m)=>{day=d;if(m){mode=m;document.querySelectorAll(".seg button[data-m]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.m===m))}applyPlanForDay(true);Promise.all([fetchTwin(true),fetchScore()]).then(()=>sync(false))}};
 applyPlanForDay(true);
+RecsHub.init();
 Promise.all([fetchTwin(true),fetchScore()]).then(()=>sync(false));
 </script>
 </body>
