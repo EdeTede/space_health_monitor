@@ -1,4 +1,4 @@
-"""Pydantic request/response models for DoseFit API."""
+"""Pydantic request/response models for Kiwinaut API."""
 from __future__ import annotations
 
 from typing import Any, Literal

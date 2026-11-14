@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DoseFit Exercise Sim</title>
+<link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
+<title>Kiwinaut · Exercise sim</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+.kn-lock{display:flex;align-items:center;gap:10px;margin-bottom:6px}.kn-lock img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(94,231,255,.5))}.kn-lock .kn-name{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.02em;color:#dff8fa;text-shadow:0 0 14px rgba(94,231,255,.45)}.kn-lock .kn-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
 /* Layout: hologram training bay. Astronaut + machine wireframe on a full-screen stage, exercise tabs on top, live loading readouts on the right, a force trace along the bottom. Same single dark HUD theme as the Bone Twin demo. */
 :root{
   --void:#03060d; --hud:rgba(10,22,40,.74); --edge:rgba(120,220,255,.22);
@@ -66,7 +68,8 @@ body.embed .top .k{opacity:.7}
 <div class="app">
   <div class="top">
     <div>
-      <div class="k">DoseFit · Training bay simulation</div>
+      <div class="kn-lock"><img src="brand/kiwinaut-mark.png" width="30" height="30" alt="Kiwinaut logo"><span class="kn-name">Kiwinaut</span><span class="kn-tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
+      <div class="k">Training bay simulation</div>
       <h1>Three machines. Very different bone doses.</h1>
     </div>
     <div class="tabs" role="group" aria-label="Choose an exercise">
@@ -97,7 +100,7 @@ body.embed .top .k{opacity:.7}
       <span class="legend"><span><i></i>glow = load on that bone right now</span><span>drag to rotate</span></span>
     </div>
     <canvas id="trace" aria-label="Foot force over time"></canvas>
-    <div class="foot">Simplified motion and sample values for illustration, not real crew data. Machine names are the real ISS devices: T2 treadmill, CEVIS cycle ergometer, ARED resistive exercise device. EVA week: open <a href="/dosefit.html" style="color:var(--holo)">Decompress</a> in the main app for DLCO / bubble decision support (sample thresholds; confirmed by the crew medical officer).</div>
+    <div class="foot">Simplified motion and sample values for illustration, not real crew data. Machine names are the real ISS devices: T2 treadmill, CEVIS cycle ergometer, ARED resistive exercise device. EVA week: open <a href="dosefit.html" style="color:var(--holo)">Decompress</a> in the main app for DLCO / bubble decision support (sample thresholds; confirmed by the crew medical officer).</div>
   </div>
 </div>
 
@@ -108,13 +111,13 @@ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const EX={
  run:{name:"Treadmill run",dev:"T2 treadmill. Bungee harness pulls the runner down at ~70% body weight so each step loads the bones.",
    cyc:1.4,peak:1.6,hr:152,count:"Steps",perCyc:2,dose:{hips:.0065,spine:.003,thighs:.006,shins:.009},
-   tip:"<b>DOSEFIT</b> Good for shins and hips. If the insoles see one foot landing softer, it raises harness load or cues the stride."},
+   tip:"<b>KIWINAUT</b> Good for shins and hips. If the insoles see one foot landing softer, it raises harness load or cues the stride."},
  bike:{name:"Seatless cycling",dev:"CEVIS cycle ergometer. No seat in microgravity: feet clip into pedals and a belt holds the waist.",
    cyc:1.25,peak:.35,hr:141,count:"Pedal turns",perCyc:1,dose:{hips:.0006,spine:0,thighs:.001,shins:.0008},
-   tip:"<b>DOSEFIT</b> Great for the heart, almost nothing for bone. DoseFit pairs it with heavy squats on the same day."},
+   tip:"<b>KIWINAUT</b> Great for the heart, almost nothing for bone. Kiwinaut pairs it with heavy squats on the same day."},
  squat:{name:"Heavy squat",dev:"ARED. Vacuum cylinders give up to ~2,700 N of resistance, standing in for gravity and weights.",
    cyc:3.2,peak:2.2,hr:118,count:"Reps",perCyc:1,dose:{hips:.07,spine:.06,thighs:.055,shins:.02},
-   tip:"<b>DOSEFIT</b> Fewest reps, biggest bone dose. A few heavy reps beat many light ones. Watch for breath-holding (eye-pressure guard)."}
+   tip:"<b>KIWINAUT</b> Fewest reps, biggest bone dose. A few heavy reps beat many light ones. Watch for breath-holding (eye-pressure guard)."}
 };
 const REG=["hips","spine","thighs","shins"],RN={hips:"Hips",spine:"Spine",thighs:"Thighs",shins:"Shins"};
 let ex="run",t=0,playing=true,count=0,lastCyc=0;

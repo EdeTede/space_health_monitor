@@ -1,4 +1,4 @@
-"""SQLite bootstrap and helpers for DoseFit."""
+"""SQLite bootstrap and helpers for Kiwinaut."""
 from __future__ import annotations
 
 import json

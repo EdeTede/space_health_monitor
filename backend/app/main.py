@@ -1,4 +1,4 @@
-"""DoseFit API — Sense → Score → Adapt + bone twin for the scan HUD."""
+"""Kiwinaut API — Sense → Score → Adapt + bone twin for the scan HUD."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -12,7 +12,7 @@ from app.db import PROJECT_ROOT, init_db
 from app.models import HealthOut
 from app.routers import adapt, crew, mission, scenarios, sense, score, twin
 
-app = FastAPI(title="Kiwinaut", version="1.0.0", description="AI health & exercise monitor — NASA Space Apps Challenge")
+app = FastAPI(title="Kiwinaut", version="1.0.0", description="AI health & exercise monitor — for NASA Space Apps Challenge 2026")
 
 app.add_middleware(
     CORSMiddleware,

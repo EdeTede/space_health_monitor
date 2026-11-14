@@ -1,6 +1,6 @@
-# DoseFit backend
+# Kiwinaut backend
 
-Python FastAPI + SQLite service for the NASA Space Apps DoseFit demo.
+Python FastAPI + SQLite service for the Kiwinaut demo, built for NASA Space Apps Challenge 2026.
 
 **Sense → Score → Adapt** loop powers the bone-twin scan in `../dosefit.html`.
 

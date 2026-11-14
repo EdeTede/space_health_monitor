@@ -81,7 +81,7 @@ def _normal() -> dict[str, Any]:
 
 def _underload_hip() -> dict[str, Any]:
     return {
-        "why": "Smart insoles show the right hip under-loaded. DoseFit shifts squats to right-leg-first and adds single-leg work.",
+        "why": "Smart insoles show the right hip under-loaded. Kiwinaut shifts squats to right-leg-first and adds single-leg work.",
         "sessions": [
             {
                 "title": "Right-leg-first ARED squats",
@@ -198,7 +198,7 @@ def _flare() -> dict[str, Any]:
 
 def _low_readiness() -> dict[str, Any]:
     return {
-        "why": "Resting heart rate is up and HRV is down. DoseFit cuts total volume but keeps a few heavy reps, because bone needs load size, not long sessions.",
+        "why": "Resting heart rate is up and HRV is down. Kiwinaut cuts total volume but keeps a few heavy reps, because bone needs load size, not long sessions.",
         "sessions": [
             {
                 "title": "Heavy ARED singles",

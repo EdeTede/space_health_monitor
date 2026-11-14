@@ -133,7 +133,7 @@ def tip_for(region: dict[str, Any], day: float, mode: PlanMode, index: int, scan
     name = region["name"]
     if scan == "dose":
         if gap > 0.45:
-            return f"Load shortfall on {name}. DoseFit would add heavy sets targeting this region."
+            return f"Load shortfall on {name}. Kiwinaut would add heavy sets targeting this region."
         if gap > 0.2:
             return f"{name} is close to today's mechanical dose. Keep impact or load quality high."
         return f"{name} hit today's load target."
@@ -153,7 +153,7 @@ def event_html(day: float, mode: PlanMode, regions: list[dict[str, Any]]) -> str
         if mode == "dose":
             return (
                 "<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter. "
-                "DoseFit switches to a compact band and impact session, so no loading days are lost."
+                "Kiwinaut switches to a compact band and impact session, so no loading days are lost."
             )
         return (
             "<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter, with no machines "
@@ -172,7 +172,7 @@ def event_html(day: float, mode: PlanMode, regions: list[dict[str, Any]]) -> str
         )
     events = [
         (0, "<b>LAUNCH.</b> Bone twin calibrated from pre-flight BodyParts3D scan. Targets set per region."),
-        (30, "<b>MONTH 1.</b> Insoles catch the right hip being under-loaded. DoseFit shifts squats to right-leg-first."),
+        (30, "<b>MONTH 1.</b> Insoles catch the right hip being under-loaded. Kiwinaut shifts squats to right-leg-first."),
         (105, "<b>STORM OVER.</b> Catch-up sessions close the loading gap."),
         (150, "<b>SPACEWALK WEEK.</b> Leg loading paused 24 h before the EVA, then made up after."),
         (185, "<b>FINAL APPROACH.</b> Training shifts to landing prep: balance, heavy squats, impact work."),

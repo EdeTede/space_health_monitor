@@ -3,9 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DoseFit</title>
+<link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
+<title>Kiwinaut · Bone twin</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
+.kn-lock{display:flex;align-items:center;gap:10px;margin-bottom:6px}.kn-lock img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(94,231,255,.5))}.kn-lock .kn-name{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.02em;color:#dff8fa;text-shadow:0 0 14px rgba(94,231,255,.45)}.kn-lock .kn-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
 /* Layout: cinematic stage. Real BodyParts3D skeleton center-stage, scan HUD + Mars timeline. Single dark space HUD theme. */
 :root{
   --void:#03060d; --hud:rgba(10,22,40,.78); --edge:rgba(120,220,255,.22);
@@ -246,7 +248,8 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
 <div class="app">
   <div class="top">
     <div class="brand">
-      <div class="k">DoseFit · <span id="viewLabel">Bone twin</span> · Transit to Mars · <span id="apiChip" data-on="0">API · …</span></div>
+      <div class="kn-lock"><img src="brand/kiwinaut-mark.png" width="30" height="30" alt="Kiwinaut logo"><span class="kn-name">Kiwinaut</span><span class="kn-tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
+      <div class="k"><span id="viewLabel">Bone twin</span> · Transit to Mars · <span id="apiChip" data-on="0">API · …</span></div>
       <h1 id="viewHeadline">Will you walk off the ship on landing day?</h1>
       <div class="view-nav" role="tablist" aria-label="App view">
         <button type="button" data-view="twin" aria-pressed="true">Bone twin</button>
@@ -443,7 +446,7 @@ body[data-view="bay"] .brand h1,body[data-view="dcs"] .brand h1{max-width:24ch}
 
     <div class="ctrl">
       <div class="seg" role="group" aria-label="Training plan">
-        <button data-m="dose" aria-pressed="true">With DoseFit</button>
+        <button data-m="dose" aria-pressed="true">With Kiwinaut</button>
         <button data-m="std" aria-pressed="false">Fixed plan</button>
       </div>
       <div class="seg" role="group" aria-label="Scan overlay">
@@ -474,7 +477,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 const $=id=>document.getElementById(id);
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// ---------- DoseFit model ----------
+// ---------- Kiwinaut model ----------
 const REG=[
  {id:"hip",name:"Hips · femoral neck",std:1.25,dose:.35,doseNeed:1},
  {id:"spine",name:"Lumbar spine",std:.95,dose:.30,doseNeed:.9},
@@ -517,7 +520,7 @@ const OFFLINE_PLANS={
     {title:"Treadmill intervals",detail:"30 min with harness load",regions:"Shins, heart",flags:[],how:"T2 treadmill + bungee harness · 30 min",steps:["Clip harness; set body-load ~70–80% body weight.","5 min easy walk warm-up.","6×2 min hard / 2 min easy (RPE 7–8).","5 min cool-down walk; check shin comfort."]},
     {title:"CEVIS easy spin",detail:"20 min recovery cadence",regions:"Heart",flags:[],how:"Cycle ergometer · 20 min",steps:["Seat height so knee soft at bottom.","Easy cadence 70–80 rpm, conversational pace.","Keep HR in Zone 2; no hard efforts.","Note resting HR after cool-down."]}
   ]},
-  underload_hip:{scenario_id:"underload_hip",scenario_name:"Under-loaded hip",why:"Smart insoles show the right hip under-loaded. DoseFit shifts squats to right-leg-first and adds single-leg work.",sessions:[
+  underload_hip:{scenario_id:"underload_hip",scenario_name:"Under-loaded hip",why:"Smart insoles show the right hip under-loaded. Kiwinaut shifts squats to right-leg-first and adds single-leg work.",sessions:[
     {title:"Right-leg-first ARED squats",detail:"Unilateral emphasis · 5×5 @ yesterday's load",regions:"Right hip, femur",flags:["asymmetry_correct"],how:"ARED · single-leg bias · ~30 min",steps:["Warm up both legs lightly.","Start every set with the right leg / right-foot bias.","5×5 at yesterday’s load — do not add weight today.","Between sets, check insole: right peak force should rise toward left.","Finish with 2 sets left-leg only if right still trails."]},
     {title:"Heel drops + band rows",detail:"Impact stimulus for femoral neck",regions:"Hips, shins",flags:["impact"],how:"Handrails + resistance bands · 15 min",steps:["Hold rail; rise onto toes, then drop heels firmly (not slam).","3×15 heel drops, pause if shin pain.","Band rows 3×12: squeeze shoulder blades, slow return.","Keep hips level — no leaning off the weak side."]},
     {title:"Treadmill steady",detail:"25 min harness; watch right-foot force",regions:"Legs",flags:["insole_feedback"],how:"T2 + harness + insole HUD · 25 min",steps:["Harness load ~65% BW.","Steady walk/jog; glance at right vs left force every 5 min.","Cue: push harder through right midfoot if gap >10%.","Stop early if right hip ache rises above mild."]}
@@ -528,7 +531,7 @@ const OFFLINE_PLANS={
     {title:"Catch-up session (tomorrow)",detail:"Squat and deadlift +10% sets to close the gap",regions:"Hips, spine",flags:["catch_up"],how:"ARED · post-storm · ~40 min",steps:["Confirm all-clear and readiness first.","Warm up thoroughly after shelter days.","Squat + deadlift: add one set (+10% volume vs plan).","Keep load at last good working weight.","Log that catch-up closed the storm gap."]},
     {title:"Option: blood-flow-restriction cuffs",detail:"Light band work with cuffs keeps muscle; weak for bone. Needs clot-risk screening. Not yet used on the ISS.",regions:"Muscle",flags:["bfr","optional"],how:"Optional BFR cuffs · screening required",steps:["Only if medical cleared clot risk.","Light band work with cuffs — muscle maintenance, not bone dose.","Keep sessions short; stop for numbness or pain.","Skip entirely if unsure — shelter bands are enough."]}
   ]},
-  low_readiness:{scenario_id:"low_readiness",scenario_name:"Low readiness",why:"Resting heart rate is up and HRV is down. DoseFit cuts total volume but keeps a few heavy reps, because bone needs load size, not long sessions.",sessions:[
+  low_readiness:{scenario_id:"low_readiness",scenario_name:"Low readiness",why:"Resting heart rate is up and HRV is down. Kiwinaut cuts total volume but keeps a few heavy reps, because bone needs load size, not long sessions.",sessions:[
     {title:"Heavy ARED singles",detail:"3×3 @ high load · long rest · stop if HR stays elevated",regions:"Hips, spine",flags:["low_volume"],how:"ARED · high load, low volume · ~25 min",steps:["Check resting HR before starting — abort if still climbing.","Warm up carefully to a heavy triple.","3×3 near yesterday’s top load; 3–4 min rest.","Stop the set if form breaks or HR won’t settle.","Skip extras — bone needs the heavy hits, not more sets."]},
     {title:"Short treadmill",detail:"15 min easy harness walk",regions:"Legs, heart",flags:["recovery"],how:"T2 easy · 15 min",steps:["Light harness (~50% BW).","Easy walk only — no intervals.","Stay nasal-breathing if possible.","End early if dizziness or HR spikes."]},
     {title:"Skip CEVIS intervals",detail:"Moved to tomorrow if HRV recovers",regions:"Heart",flags:["deferred"],how:"Deferred · check morning HRV",steps:["Do not ride hard intervals today.","Log the deferral in the plan.","Retest HRV tomorrow morning.","If HRV recovers, run CEVIS then; if not, rest again."]}
@@ -561,7 +564,7 @@ function applyPlanForDay(force=false){
     renderPlan({
       ...plan,
       scenario_name:"Fixed plan",
-      why:"Same workout every day. Nobody notices the right hip is under-loaded — DoseFit would have caught it."
+      why:"Same workout every day. Nobody notices the right hip is under-loaded — Kiwinaut would have caught it."
     });
   }else renderPlan(plan);
   schedulePlanApiSync(id);
@@ -651,13 +654,13 @@ const BaySim=(()=>{
   const EX={
     run:{name:"Treadmill run",dev:"T2 treadmill. Bungee harness pulls the runner down at ~70% body weight so each step loads the bones.",
       cyc:1.4,peak:1.6,hr:152,count:"Steps",perCyc:2,dose:{hips:.0065,spine:.003,thighs:.006,shins:.009},
-      tip:"<b>DOSEFIT</b> Good for shins and hips. If the insoles see one foot landing softer, it raises harness load or cues the stride."},
+      tip:"<b>KIWINAUT</b> Good for shins and hips. If the insoles see one foot landing softer, it raises harness load or cues the stride."},
     bike:{name:"Seatless cycling",dev:"CEVIS cycle ergometer. No seat in microgravity: feet clip into pedals and a belt holds the waist.",
       cyc:1.25,peak:.35,hr:141,count:"Pedal turns",perCyc:1,dose:{hips:.0006,spine:0,thighs:.001,shins:.0008},
-      tip:"<b>DOSEFIT</b> Great for the heart, almost nothing for bone. DoseFit pairs it with heavy squats on the same day."},
+      tip:"<b>KIWINAUT</b> Great for the heart, almost nothing for bone. Kiwinaut pairs it with heavy squats on the same day."},
     squat:{name:"Heavy squat",dev:"ARED. Vacuum cylinders give up to ~2,700 N of resistance, standing in for gravity and weights.",
       cyc:3.2,peak:2.2,hr:118,count:"Reps",perCyc:1,dose:{hips:.07,spine:.06,thighs:.055,shins:.02},
-      tip:"<b>DOSEFIT</b> Fewest reps, biggest bone dose. A few heavy reps beat many light ones. Watch for breath-holding (eye-pressure guard)."}
+      tip:"<b>KIWINAUT</b> Fewest reps, biggest bone dose. A few heavy reps beat many light ones. Watch for breath-holding (eye-pressure guard)."}
   };
   const REG=["hips","spine","thighs","shins"],RN={hips:"Hips",spine:"Spine",thighs:"Thighs",shins:"Shins"};
   const L={th:.44,sh:.43,tor:.52,ua:.3,fa:.28,neck:.1};
@@ -1051,7 +1054,7 @@ function tipForLocal(region){
   const r=REG[RI[region]];
   const d=dens(r,day,mode),gap=loadGap(r,day,mode),risk=fractureRisk(r,day,mode);
   if(scanMode==="dose"){
-    if(gap>.45)return `Load shortfall on ${r.name}. DoseFit would add heavy sets targeting this region.`;
+    if(gap>.45)return `Load shortfall on ${r.name}. Kiwinaut would add heavy sets targeting this region.`;
     if(gap>.2)return `${r.name} is close to today’s mechanical dose. Keep impact or load quality high.`;
     return `${r.name} hit today’s load target.`;
   }
@@ -1380,7 +1383,7 @@ function updateScanHud(region,prog){
   $("scanDensHint").textContent=`Δ ${(d-100).toFixed(1)}% from launch`;
   $("scanGap").textContent=Math.round(gap*100)+"%";
   $("scanGap").style.color=`rgb(${gapCol(gap)})`;
-  $("scanGapHint").textContent=mode==="dose"?"DoseFit session":"fixed plan session";
+  $("scanGapHint").textContent=mode==="dose"?"Kiwinaut session":"fixed plan session";
   $("scanRisk").textContent=Math.round(risk);
   $("scanRisk").style.color=`rgb(${riskCol(risk)})`;
   $("scanRiskHint").textContent=risk>40?"HIGH":risk>18?"WATCH":"LOW";
@@ -1418,10 +1421,10 @@ function finishScan(){
 
 // ---------- UI ----------
 $("regs").innerHTML=REG.filter(r=>r.id!=="skull").map(r=>`<button class="reg" data-i="${RI[r.id]}" aria-pressed="false"><span class="n">${r.name}</span><span class="v"></span><span class="b"><i></i><s></s></span><span class="p"></span></button>`).join("");
-const EVENTS=[[0,"<b>LAUNCH.</b> Bone twin calibrated from pre-flight BodyParts3D scan. Targets set per region."],[30,"<b>MONTH 1.</b> Insoles catch the right hip being under-loaded. DoseFit shifts squats to right-leg-first."],[96,null],[105,"<b>STORM OVER.</b> Catch-up sessions close the loading gap."],[150,"<b>SPACEWALK WEEK.</b> Leg loading paused 24 h before the EVA, then made up after."],[185,"<b>FINAL APPROACH.</b> Training shifts to landing prep: balance, heavy squats, impact work."],[210,null]];
+const EVENTS=[[0,"<b>LAUNCH.</b> Bone twin calibrated from pre-flight BodyParts3D scan. Targets set per region."],[30,"<b>MONTH 1.</b> Insoles catch the right hip being under-loaded. Kiwinaut shifts squats to right-leg-first."],[96,null],[105,"<b>STORM OVER.</b> Catch-up sessions close the loading gap."],[150,"<b>SPACEWALK WEEK.</b> Leg loading paused 24 h before the EVA, then made up after."],[185,"<b>FINAL APPROACH.</b> Training shifts to landing prep: balance, heavy squats, impact work."],[210,null]];
 function eventText(){
   if(twinCache?.event_html)return twinCache.event_html;
-  if(day>=96&&day<105)return mode==="dose"?"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter. DoseFit switches to a compact band and impact session, so no loading days are lost.":"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter, with no machines and no plan. 8 days of bone loading lost.";
+  if(day>=96&&day<105)return mode==="dose"?"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter. Kiwinaut switches to a compact band and impact session, so no loading days are lost.":"<b style='color:var(--amber)'>☀ SOLAR STORM.</b> Crew in the shelter, with no machines and no plan. 8 days of bone loading lost.";
   if(day>=209.5){const r=readiness(210,mode);return r>=75?"<b style='color:var(--ok)'>MARS LANDING.</b> Hips strong enough to climb down the ladder and walk on Mars.":"<b style='color:var(--red)'>MARS LANDING.</b> Hip bone too weak for a safe first walk. High fracture risk in 0.38 g.";}
   let t="";for(const e of EVENTS)if(day>=e[0]&&e[1])t=e[1];
   if(mode==="std"&&day>=30&&day<96)t="<b>FIXED PLAN.</b> Same workout every day. Nobody notices the right hip is under-loaded.";
@@ -1444,7 +1447,7 @@ function sync(requestApi=true){
     const scale=x=>Math.max(0,(x-85)/15*100);
     const i=el.querySelector("i");i.style.width=scale(v)+"%";i.style.background=`rgb(${c})`;i.style.boxShadow=`0 0 8px rgb(${c})`;
     el.querySelector("s").style.left=scale(end)+"%";
-    el.querySelector(".p").textContent=`at landing: ${end.toFixed(1)}%`+(mode==="dose"?`  ·  fixed plan ${alt.toFixed(1)}%`:`  ·  with DoseFit ${alt.toFixed(1)}%`);
+    el.querySelector(".p").textContent=`at landing: ${end.toFixed(1)}%`+(mode==="dose"?`  ·  fixed plan ${alt.toFixed(1)}%`:`  ·  with Kiwinaut ${alt.toFixed(1)}%`);
   });
   const r=twinCache&&apiOnline?twinCache.walkoff_readiness:readiness(210,mode);
   const ok=twinCache&&apiOnline?twinCache.walkoff_ready:r>=75;
