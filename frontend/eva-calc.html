@@ -778,7 +778,7 @@ seg("modes",function(b){S.mode=b.dataset.m});
 try{if(window.claude&&window.claude.hot)window.claude.hot.snapshot(function(){return S})}catch(e){}
 render();
 
-/* Parent shell (dosefit-future) requests current readings via postMessage */
+/* Parent shell (frontend/index.html) requests current readings via postMessage */
 function exportReadings(){
   return {
     type:"kiwinaut-eva-readings",

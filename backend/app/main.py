@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.db import PROJECT_ROOT
+from app.db import FRONTEND_ROOT
 from app.models import HealthOut
 from app.routers import decompress
 
@@ -25,15 +25,18 @@ app.add_middleware(
 
 app.include_router(decompress.router)
 
-models_dir = PROJECT_ROOT / "models"
-if models_dir.is_dir():
-    app.mount("/models", StaticFiles(directory=str(models_dir)), name="models")
-brand_dir = PROJECT_ROOT / "brand"
-if brand_dir.is_dir():
-    app.mount("/brand", StaticFiles(directory=str(brand_dir)), name="brand")
-vendor_dir = PROJECT_ROOT / "vendor"
-if vendor_dir.is_dir():
-    app.mount("/vendor", StaticFiles(directory=str(vendor_dir)), name="vendor")
+# Static frontend assets (brand, anatomy models, Three.js)
+for mount, folder in (
+    ("/models", FRONTEND_ROOT / "models"),
+    ("/brand", FRONTEND_ROOT / "brand"),
+    ("/vendor", FRONTEND_ROOT / "vendor"),
+):
+    if folder.is_dir():
+        app.mount(mount, StaticFiles(directory=str(folder)), name=mount.strip("/"))
+
+
+def _page(name: str) -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / name)
 
 
 @app.get("/api/health", response_model=HealthOut)
@@ -43,39 +46,45 @@ def health() -> HealthOut:
 
 @app.get("/")
 def index() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "dosefit-future.html")
+    return _page("index.html")
+
+
+@app.get("/index.html")
+def index_html() -> FileResponse:
+    return _page("index.html")
 
 
 @app.get("/dosefit-future.html")
-def dosefit_future_page() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "dosefit-future.html")
+def dosefit_future_alias() -> FileResponse:
+    """Legacy alias for the main shell."""
+    return _page("index.html")
 
 
 @app.get("/kiwinaut-eva.html")
 def kiwinaut_eva_page() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "kiwinaut-eva.html")
+    return _page("kiwinaut-eva.html")
 
 
 @app.get("/eva-calc.html")
 def eva_calc_page() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "eva-calc.html")
+    return _page("eva-calc.html")
 
 
 @app.get("/model.js")
 def model_js() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "model.js", media_type="application/javascript")
+    return FileResponse(FRONTEND_ROOT / "model.js", media_type="application/javascript")
 
 
 @app.get("/app.js")
 def app_js() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "app.js", media_type="application/javascript")
+    return FileResponse(FRONTEND_ROOT / "app.js", media_type="application/javascript")
 
 
 @app.get("/DOCUMENTATION.md")
 def documentation_md() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "DOCUMENTATION.md", media_type="text/markdown")
+    return FileResponse(FRONTEND_ROOT / "DOCUMENTATION.md", media_type="text/markdown")
 
 
 @app.get("/VARIABLE-LOG.md")
 def variable_log_md() -> FileResponse:
-    return FileResponse(PROJECT_ROOT / "VARIABLE-LOG.md", media_type="text/markdown")
+    return FileResponse(FRONTEND_ROOT / "VARIABLE-LOG.md", media_type="text/markdown")
