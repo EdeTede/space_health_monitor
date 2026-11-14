@@ -454,45 +454,66 @@ let hatch;
   const ws=glowSprite(0xc6f27a,1.6,.18);ws.position.set(bx,by,bz);iss.add(ws);
 }
 
-/* astronaut */
+/* astronaut: articulated hologram (rigid region skinning around shoulder / elbow / hip / knee pivots) */
 const astro=new THREE.Group();scene.add(astro);
-const body=new THREE.Group();body.scale.setScalar(.26);astro.add(body);
+const body=new THREE.Group();body.scale.setScalar(.26);astro.add(body);   // body units: 7 tall → ~1.8 m
 const holo=new THREE.Group();body.add(holo);
 const mats={
   body:lineMat(KIWI,.42),shell:lineMat(KIWI_B,.06),lungs:lineMat(0x5ef0c2,.5),heart:lineMat(0xff788c,.22),air:lineMat(KIWI_B,.35),
   helmet:lineMat(KIWI_B,.32),pack:lineMat(KIWI,.3),dots:new THREE.PointsMaterial({color:KIWI_B,size:.02,transparent:true,opacity:.55,depthWrite:false,blending:THREE.AdditiveBlending})
 };
+/* rest-pose joints (body units, from the BodyParts3D graph). index 0 = left (−x), 1 = right (+x) */
+const RIG={
+  S:[V(-.8,2.3,-.12),V(.8,2.3,-.12)], E:[V(-.92,1.0,-.13),V(.92,1.0,-.13)], H:[V(-1.12,-.35,.22),V(1.12,-.35,.22)],
+  P:[V(-.33,-.6,0),V(.33,-.6,0)], K:[V(-.33,-1.75,.05),V(.33,-1.75,.05)], A:[V(-.36,-3.1,0),V(.36,-3.1,0)]
+};
+const L1=[0,1].map(i=>RIG.E[i].distanceTo(RIG.S[i])),L2=[0,1].map(i=>RIG.H[i].distanceTo(RIG.E[i]));
+const D1=[0,1].map(i=>RIG.E[i].clone().sub(RIG.S[i]).normalize()),D2=[0,1].map(i=>RIG.H[i].clone().sub(RIG.E[i]).normalize());
+/* segments: 0 torso+head, 1 L upper arm, 2 L forearm+hand, 3 R upper arm, 4 R forearm+hand, 5 L thigh, 6 L shin+foot, 7 R thigh, 8 R shin+foot */
+function classify(x,y){
+  const r=x>0?1:0;
+  if(y>-.75&&y<2.45&&Math.abs(x)>(y>2.05?.74:.72))return y>1.0?1+2*r:2+2*r;
+  if(y<-.75)return y>-1.75?5+2*r:6+2*r;
+  return 0;
+}
+let skins=[];
+function addSkin(geo,seg){const a=geo.attributes.position;const base=Float32Array.from(a.array);
+  if(!seg){seg=new Uint8Array(a.count);for(let i=0;i<a.count;i++)seg[i]=classify(base[i*3],base[i*3+1])}
+  skins.push({attr:a,base,seg});a.setUsage(THREE.DynamicDrawUsage)}
 function graphLines(part,mat){
   const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(part.nodes,3));
   const n=part.nodes.length/3;g.setIndex(new (n>65535?THREE.Uint32BufferAttribute:THREE.Uint16BufferAttribute)(part.edges,1));
   return new THREE.LineSegments(g,mat);
 }
-function clearHolo(){for(const o of [...holo.children]){holo.remove(o);o.geometry?.dispose()}}
+function clearHolo(){skins=[];for(const o of [...holo.children]){holo.remove(o);o.geometry?.dispose()}}
 function buildHolo(data){
   clearHolo();
-  const b=graphLines(data.body,mats.body);holo.add(b);
-  const shell=new THREE.LineSegments(b.geometry,mats.shell);shell.scale.setScalar(1.09);holo.add(shell);
+  const b=graphLines(data.body,mats.body);b.frustumCulled=false;holo.add(b);addSkin(b.geometry);
+  const shell=new THREE.LineSegments(b.geometry,mats.shell);shell.scale.setScalar(1.06);shell.frustumCulled=false;holo.add(shell);
   const dp=new Float32Array(Math.ceil(data.body.nodes.length/9)*3);for(let i=0,j=0;i<data.body.nodes.length;i+=9,j+=3)dp.set(data.body.nodes.slice(i,i+3),j);
-  const dg=new THREE.BufferGeometry();dg.setAttribute("position",new THREE.BufferAttribute(dp,3));holo.add(new THREE.Points(dg,mats.dots));
-  holo.add(graphLines(data.lungs,mats.lungs));
+  const dg=new THREE.BufferGeometry();dg.setAttribute("position",new THREE.BufferAttribute(dp,3));const dots=new THREE.Points(dg,mats.dots);dots.frustumCulled=false;holo.add(dots);addSkin(dg);
+  holo.add(graphLines(data.lungs,mats.lungs));                 // lungs, heart and airways ride with the torso
   if(data.heart)holo.add(graphLines(data.heart,mats.heart));
   if(data.airways)holo.add(graphLines(data.airways,mats.air));
 }
-function buildFallback(){ // procedural wireframe body (used when the anatomy graph can't load, e.g. file://)
+function buildFallback(){ // procedural articulated body (used when the anatomy graph can't load, e.g. file://)
   clearHolo();
-  const L=[];
-  const limb=(a,b,r)=>{const A=V(...a),B=V(...b),d=B.clone().sub(A),len=d.length();const q=new THREE.Quaternion().setFromUnitVectors(V(0,1,0),d.clone().normalize());
-    for(let k=0;k<=5;k++){const c=A.clone().addScaledVector(d,k/5);for(let i=0;i<12;i++){const t0=i/12*Math.PI*2,t1=(i+1)/12*Math.PI*2;const p=t=>V(r*Math.cos(t),0,r*Math.sin(t)).applyQuaternion(q).add(c);L.push(...p(t0).toArray(),...p(t1).toArray())}}
-    for(let i=0;i<4;i++){const t=i/4*Math.PI*2;const o=V(r*Math.cos(t),0,r*Math.sin(t)).applyQuaternion(q);L.push(...A.clone().add(o).toArray(),...B.clone().add(o).toArray())}};
-  limb([0,-.3,0],[0,2.4,0],.62);limb([0,2.45,0],[0,2.75,0],.18);
-  for(const s of[-1,1]){limb([s*.78,2.35,0],[s*1.02,1.0,0],.2);limb([s*1.02,1.0,0],[s*1.25,-.25,.1],.16);limb([s*.32,-.45,0],[s*.32,-1.7,.06],.26);limb([s*.32,-1.7,.06],[s*.34,-3.2,0],.2)}
+  const pos=[],seg=[];
+  const limb=(A,B,r,sg)=>{const d=B.clone().sub(A),q=new THREE.Quaternion().setFromUnitVectors(V(0,1,0),d.clone().normalize());
+    const put=(p)=>{pos.push(p.x,p.y,p.z);seg.push(sg)};
+    for(let k=0;k<=5;k++){const c=A.clone().addScaledVector(d,k/5);for(let i=0;i<12;i++){const t0=i/12*Math.PI*2,t1=(i+1)/12*Math.PI*2;put(V(r*Math.cos(t0),0,r*Math.sin(t0)).applyQuaternion(q).add(c));put(V(r*Math.cos(t1),0,r*Math.sin(t1)).applyQuaternion(q).add(c))}}
+    for(let i=0;i<4;i++){const t=i/4*Math.PI*2,o=V(r*Math.cos(t),0,r*Math.sin(t)).applyQuaternion(q);put(A.clone().add(o));put(B.clone().add(o))}};
+  limb(V(0,-.6,0),V(0,2.4,0),.6,0);limb(V(0,2.45,0),V(0,2.75,0),.18,0);
+  for(const i of[0,1]){limb(RIG.S[i],RIG.E[i],.2,1+2*i);limb(RIG.E[i],RIG.H[i],.16,2+2*i);limb(RIG.P[i],RIG.K[i],.26,5+2*i);limb(RIG.K[i],RIG.A[i],.2,6+2*i)}
   const H=[];ring(H,V(0,3.1,0),.38,"y",24);ring(H,V(0,3.1,0),.38,"x",24);ring(H,V(0,3.1,0),.38,"z",24);
-  holo.add(segs(L.concat(H),mats.body));
+  for(let i=0;i<H.length;i+=3){pos.push(H[i],H[i+1],H[i+2]);seg.push(0)}
+  const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+  const b=new THREE.LineSegments(g,mats.body);b.frustumCulled=false;holo.add(b);addSkin(g,Uint8Array.from(seg));
   const LG=[];for(const s of[-1,1])for(let k=0;k<7;k++){const y=1.45+k*.14,r=.3*Math.sin(Math.PI*(k+.5)/7);ring(LG,V(s*.24,y,0),r,"y",18)}
   holo.add(segs(LG,mats.lungs));
 }
 buildFallback();
-/* helmet, visor and life-support pack: shared by both bodies */
+/* helmet, visor and life-support pack: ride with the torso */
 {
   const Hm=[];for(let k=-3;k<=4;k++){const y=3.08+k*.08,r=Math.sqrt(Math.max(0,.66*.66-(k*.08)*(k*.08)));ring(Hm,V(0,y,0),r,"y",36)}
   for(let i=0;i<10;i++){const a=i/10*Math.PI;for(let j=0;j<16;j++){const t0=j/16*Math.PI*2,t1=(j+1)/16*Math.PI*2;const p=t=>[.66*Math.sin(t)*Math.cos(a),3.08+.66*Math.cos(t),.66*Math.sin(t)*Math.sin(a)];Hm.push(...p(t0),...p(t1))}}
@@ -502,14 +523,48 @@ buildFallback();
   for(const [p,q] of [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]])P.push(...c[p],...c[q]);
   body.add(segs(P,mats.pack));
 }
-/* risk glows: lungs + shoulders, elbows, knees */
+/* risk glows: lungs + shoulders, elbows, knees (elbow/knee glows follow the moving joints) */
 const lungGlow=glowSprite(0x5ef0c2,2.4,.25);lungGlow.position.set(0,1.9,.05);body.add(lungGlow);
-const JOINTS=[[-.78,2.38,0],[.78,2.38,0],[-1.02,1.0,.05],[1.02,1.0,.05],[-.32,-1.65,.12],[.32,-1.65,.12]];
-const jointGlows=JOINTS.map(p=>{const s=glowSprite(0x5ef0c2,.75,.2);s.position.set(...p);body.add(s);return s});
+const jointGlows=[RIG.S[0],RIG.S[1],RIG.E[0],RIG.E[1],RIG.K[0],RIG.K[1]].map(p=>{const s=glowSprite(0x5ef0c2,.75,.2);s.position.copy(p);body.add(s);return s});
+const handGlows=[0,1].map(()=>{const s=glowSprite(0xc6f27a,.55,.0);body.add(s);return s});
 const suitGlow=glowSprite(0x8ee04f,9,.05);body.add(suitGlow);
 
+/* per-frame rig: two-bone arm IK to world targets, forward-kinematic legs, then skin the vertices */
+const segM=new Float32Array(9*16);
+const _m=new THREE.Matrix4(),_m2=new THREE.Matrix4(),_q=new THREE.Quaternion(),_v=new THREE.Vector3(),_u=new THREE.Vector3(),_p=new THREE.Vector3();
+const armE=[V(0,0,0),V(0,0,0)],armH=[V(0,0,0),V(0,0,0)],kneeNow=[V(0,0,0),V(0,0,0)];
+function pivotRot(out,pivot,q,pivotAfter){ // out = T(pivotAfter)·R·T(−pivot)
+  out.makeRotationFromQuaternion(q);out.setPosition(pivotAfter.x-(out.elements[0]*pivot.x+out.elements[4]*pivot.y+out.elements[8]*pivot.z),
+    pivotAfter.y-(out.elements[1]*pivot.x+out.elements[5]*pivot.y+out.elements[9]*pivot.z),pivotAfter.z-(out.elements[2]*pivot.x+out.elements[6]*pivot.y+out.elements[10]*pivot.z));return out}
+function solveArm(i,targetLocal,pole){
+  const S=RIG.S[i];_v.copy(targetLocal).sub(S);let d=_v.length();_u.copy(_v).divideScalar(d||1);
+  d=clamp(d,Math.abs(L1[i]-L2[i])+.05,L1[i]+L2[i]-.02);
+  const a=(L1[i]*L1[i]-L2[i]*L2[i]+d*d)/(2*d),h=Math.sqrt(Math.max(0,L1[i]*L1[i]-a*a));
+  _p.copy(pole).addScaledVector(_u,-pole.dot(_u));if(_p.lengthSq()<1e-6)_p.set(0,0,-1);_p.normalize();
+  armE[i].copy(S).addScaledVector(_u,a).addScaledVector(_p,h);armH[i].copy(S).addScaledVector(_u,d);
+  _q.setFromUnitVectors(D1[i],_v.copy(armE[i]).sub(S).normalize());pivotRot(_m,S,_q,S);_m.toArray(segM,(1+2*i)*16);
+  _q.setFromUnitVectors(D2[i],_v.copy(armH[i]).sub(armE[i]).normalize());pivotRot(_m,RIG.E[i],_q,armE[i]);_m.toArray(segM,(2+2*i)*16);
+}
+const _e=new THREE.Euler();
+function solveLeg(i,hipFlex,abd,knee){
+  _e.set(-hipFlex,0,(i?1:-1)*abd);_q.setFromEuler(_e);pivotRot(_m,RIG.P[i],_q,RIG.P[i]);_m.toArray(segM,(5+2*i)*16);
+  kneeNow[i].copy(RIG.K[i]).applyMatrix4(_m);
+  _e.set(knee,0,0);const qk=new THREE.Quaternion().setFromEuler(_e);_q.multiply(qk);   // shin = thigh rotation · knee flex
+  pivotRot(_m2,RIG.K[i],_q,kneeNow[i]);_m2.toArray(segM,(6+2*i)*16);
+}
+function skinAll(){
+  for(const sk of skins){
+    const a=sk.attr.array,b=sk.base,sg=sk.seg,n=sg.length;
+    for(let i=0;i<n;i++){const s=sg[i];if(s===0)continue;const o=s*16,j=i*3,x=b[j],y=b[j+1],z=b[j+2];
+      a[j]=segM[o]*x+segM[o+4]*y+segM[o+8]*z+segM[o+12];a[j+1]=segM[o+1]*x+segM[o+5]*y+segM[o+9]*z+segM[o+13];a[j+2]=segM[o+2]*x+segM[o+6]*y+segM[o+10]*z+segM[o+14]}
+    sk.attr.needsUpdate=true;
+  }
+  jointGlows[2].position.copy(armE[0]);jointGlows[3].position.copy(armE[1]);
+  jointGlows[4].position.copy(kneeNow[0]);jointGlows[5].position.copy(kneeNow[1]);
+}
+
 /* tether */
-const TETHER_A=V(-6.35,.62,HATCH_Z+.02),TN=40;
+const TETHER_A=V(-6.35,.62,HATCH_Z+.02),TN=48;
 const tetherGeo=new THREE.BufferGeometry();tetherGeo.setAttribute("position",new THREE.BufferAttribute(new Float32Array(TN*3),3));
 const tether=new THREE.Line(tetherGeo,lineMat(0xffc857,.55));tether.frustumCulled=false;scene.add(tether);
 const hook=glowSprite(0xffc857,.25,.6);hook.position.copy(TETHER_A);scene.add(hook);
@@ -518,41 +573,122 @@ fetch("models/anatomy/crew-holo-graph.json").then(r=>r.ok?r.json():Promise.rejec
   .then(d=>{if(d?.body?.nodes&&d?.lungs?.nodes)buildHolo(d)}).catch(()=>{/* keep the procedural fallback */})
   .finally(()=>{const l=$("loading");l.style.opacity=0;setTimeout(()=>l.remove(),900)});
 
-/* path along the truss */
-const INSIDE=V(AIR.x,AIR.y,1.95),HATCH_OUT=V(AIR.x,AIR.y,3.85);
-const MAIN=[HATCH_OUT,V(-5.55,0,3.45),V(-5.05,0,1.42),V(4.15,0,1.42)];
-const WORK=V(4.52,-.05,1.5);
-const segLen=[];let pathLen=0;for(let i=0;i<MAIN.length-1;i++){const l=MAIN[i].distanceTo(MAIN[i+1]);segLen.push(l);pathLen+=l}
-function pathAt(u){let d=clamp(u,0,1)*pathLen;for(let i=0;i<segLen.length;i++){if(d<=segLen[i]||i===segLen.length-1){const t=segLen[i]?d/segLen[i]:0;return{p:MAIN[i].clone().lerp(MAIN[i+1],clamp(t,0,1)),dir:MAIN[i+1].clone().sub(MAIN[i]).normalize()}}d-=segLen[i]}}
+/* ---------- EVA choreography (microgravity: translation is hand over hand along the rails) ---------- */
+const INSIDE=V(AIR.x,AIR.y,1.95),HATCH_OUT=V(AIR.x,AIR.y,3.95);
+const RAIL_Y=.34,RAIL_Z=.78,GRIP_Z=RAIL_Z+.07;
+const XS=-5.35,XE=3.95,BODY_Z=1.06;             // body centre glides along x = XS → XE beside the rails
+const RAIL_START=V(XS,0,BODY_Z),RAIL_END=V(XE,0,BODY_Z);
+const WORK=V(4.55,-.08,1.27),APFR=V(4.55,-.95,1.25),ORU=V(5.35,0,1.05);
+const EGRESS=new THREE.CatmullRomCurve3([INSIDE,V(AIR.x,0,3.1),HATCH_OUT,V(-6.2,.05,3.7),V(-5.6,0,2.4),RAIL_START],false,"centripetal");
+const INGRESS=new THREE.CatmullRomCurve3([RAIL_START,V(-5.6,0,2.4),V(-6.2,.05,3.7),HATCH_OUT,V(AIR.x,0,3.1),INSIDE],false,"centripetal");
 function basisQuat(head,front){
   const y=head.clone().normalize();let z=front.clone().addScaledVector(y,-front.dot(y));
   if(z.lengthSq()<.02){z=V(0,-1,0).addScaledVector(y,-y.y);if(z.lengthSq()<.02)z=V(-1,0,0)}
   z.normalize();const x=new THREE.Vector3().crossVectors(y,z);
   return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(x,y,z));
 }
-const UPRIGHT_IN=basisQuat(V(0,1,0),V(0,0,1)),UPRIGHT_WORK=basisQuat(V(0,1,0),V(1,0,-.35));
-const TRUSS_FRONT=V(0,-.15,-1);
-/* pose for sim minute t: position + target orientation + whether outside */
-function poseAt(plan,t,clock){
-  const p=phaseAt(plan,t),f=p.d>0?clamp((t-p.t0)/p.d,0,1):1,bob=reduce?0:Math.sin(clock*1.3)*.03;
-  if(plan.scrub&&t>=plan.m.P)return{pos:INSIDE.clone().add(V(0,bob,0)),q:UPRIGHT_IN,out:false,hatch:0};
+const UPRIGHT_IN=basisQuat(V(0,1,0),V(0,0,1)),UPRIGHT_WORK=basisQuat(V(0,1,0),V(1,0,-.25));
+const TRUSS_FRONT=V(0,-.12,-1);
+const FWD=basisQuat(V(1,0,0),TRUSS_FRONT),BACK=basisQuat(V(-1,0,0),TRUSS_FRONT);
+const smooth=t=>t*t*(3-2*t);
+/* rail grip for hand on world side ys (±1) at rail x */
+const grip=(x,ys)=>V(x,ys*RAIL_Y,GRIP_Z);
+/* which world rail (±y) is on the body's left/right for a given orientation */
+function railSides(q){const xw=V(1,0,0).applyQuaternion(q);const sg=Math.sign(xw.y)||1;return[-sg,sg]}
+/* hand-over-hand: body has travelled `trav` metres along dir (+1 → +x, −1 → −x) from x0 */
+function gait(x0,dir,trav,stride,D,q,lift){
+  const qn=trav/stride,i=Math.floor(qn),u=qn-i,sides=railSides(q);
+  const gx=j=>x0+dir*(j*stride+D);
+  const anchorSide=(i+1)%2,moverSide=i%2;   // even grips → left hand, odd → right hand
+  const out=[null,null];
+  out[anchorSide]=grip(gx(i+1),sides[anchorSide]);
+  const e=smooth(u),mv=grip(lerp(gx(i),gx(i+2),e),sides[moverSide]);
+  mv.z+=lift*Math.sin(Math.PI*u);mv.y*=1-.25*Math.sin(Math.PI*u);
+  out[moverSide]=mv;
+  return{hands:out,u,moving:moverSide};
+}
+const restArms=(t,a=1)=>[V(-1.05,1.25+.1*Math.sin(t*.7),.95*a),V(1.05,1.2+.1*Math.sin(t*.8+1),.95*a)];   // body-local neutral float
+/* pose for sim minute t. Returns root position/orientation plus limb goals (arm targets in world or body space). */
+function poseAt(plan,t,clock,inten){
+  const p=phaseAt(plan,t),f=p.d>0?clamp((t-p.t0)/p.d,0,1):1,bob=reduce?0:Math.sin(clock*1.3)*.025;
+  const fat=1-.3*inten;                                   // fatigue: smaller reaches / strides at high risk
+  const P={pos:INSIDE.clone(),q:UPRIGHT_IN,out:false,hatch:0,armW:null,armL:restArms(clock),pole:[V(-1,-.3,-.5),V(1,-.3,-.5)],legs:[[.5,.05,.7],[.5,.05,.7]],roll:0,hands:0};
+  const neutral=()=>{P.pos.y+=bob;P.legs=[[.45+.05*Math.sin(clock*.6),.06,.75],[.45+.05*Math.sin(clock*.6+1),.06,.75]]};
+  if(plan.scrub&&t>=plan.m.P){neutral();return P}
   switch(p.k){
-    case"pre":{const ex=plan.m.ex;return{pos:INSIDE.clone().add(V(0,bob+(ex?Math.sin(clock*4)*.04:0),0)),q:UPRIGHT_IN,out:false,hatch:0}}
-    case"dep":return{pos:INSIDE.clone().add(V(0,bob,0)),q:UPRIGHT_IN,out:false,hatch:ease(clamp((f-.75)/.25,0,1))};
-    case"egr":{const e=ease(f);return{pos:INSIDE.clone().lerp(HATCH_OUT,e),q:basisQuat(V(0,.25,1),V(0,-1,0)),out:true,hatch:1}}
+    case"pre":{
+      if(plan.m.ex){const c=reduce?0:clock*3.2;P.legs=[[.85+.35*Math.sin(c),.05,1.15+.45*Math.sin(c+1.2)],[.85+.35*Math.sin(c+Math.PI),.05,1.15+.45*Math.sin(c+Math.PI+1.2)]];
+        P.armL=[V(-.55,.9,1.35),V(.55,.9,1.35)];P.pos.y+=bob*.5}
+      else neutral();
+      return P}
+    case"dep":neutral();P.hatch=smooth(clamp((f-.8)/.2,0,1));return P;
+    case"egr":{
+      // head first out of the hatch, then swing round to the rail start
+      const e=smooth(f),pt=EGRESS.getPointAt(e),tg=EGRESS.getTangentAt(Math.min(.999,e)).normalize();
+      P.pos.copy(pt);P.out=e>.12;P.hatch=1;
+      const front=V(0,-1,0).lerp(TRUSS_FRONT,smooth(clamp((e-.45)/.4,0,1)));
+      P.q=basisQuat(tg.clone().lerp(V(1,0,0),smooth(clamp((e-.6)/.4,0,1))),front);
+      const ahead=EGRESS.getPointAt(Math.min(1,e+.2)),sides=railSides(P.q);
+      if(e<.5){const rim=[V(AIR.x-.5,0,HATCH_Z+.05),V(AIR.x+.5,0,HATCH_Z+.05)];   // hands on the hatch rim
+        P.armW=[rim[0].clone().lerp(ahead,clamp(e*2-.6,0,1)),rim[1].clone().lerp(ahead,clamp(e*2-.6,0,1))]}
+      else{const k=smooth(clamp((e-.5)/.5,0,1));P.armW=[0,1].map(i=>ahead.clone().add(V(0,sides[i]*.3,-.25)).lerp(grip(XS+.85+.36*i,sides[i]),k))}
+      P.pole=[V(-1,0,-.8),V(1,0,-.8)];P.legs=[[.1,.08,.35],[.15,.08,.45]];P.hands=1;
+      return P}
     case"tra":case"ret":case"abort":{
-      const u=p.k==="tra"?ease(f):1-ease(f);const a=pathAt(u);const dir=p.k==="tra"?a.dir:a.dir.clone().negate();
-      const hand=reduce?0:Math.sin(clock*(p.k==="abort"?7:3.4))*.05;
-      return{pos:a.p.add(V(0,hand,0)),q:basisQuat(dir,TRUSS_FRONT),out:true,hatch:1}}
-    case"work":{const sw=reduce?0:Math.sin(clock*.9)*.05;return{pos:WORK.clone().add(V(sw,bob,sw*.5)),q:UPRIGHT_WORK,out:true,hatch:1}}
-    case"ing":case"aing":{const e=ease(clamp(f*2,0,1));return{pos:HATCH_OUT.clone().lerp(INSIDE,e),q:f<.5?basisQuat(V(0,.2,-1),V(0,-1,0)):UPRIGHT_IN,out:f<.5,hatch:f<.5?1:1-ease(clamp((f-.5)/.2,0,1))}}
+      const go=p.k==="tra",urgent=p.k==="abort",L=XE-XS;
+      const tA=go?.06:.1,tB=go?.92:.94;                // ends: leave / reach the worksite
+      const stride=(urgent?.44:.36)*fat,D=.85,lift=(urgent?.2:.14)*fat;
+      P.out=true;P.hatch=1;P.hands=1;
+      if(go&&f>tB||!go&&f<tA){                         // transfer between rail end and foot restraint
+        const k=go?smooth((f-tB)/(1-tB)):1-smooth(f/tA),q0=go?FWD:BACK,sd=railSides(q0),dx=go?1:-1;
+        P.pos.copy(RAIL_END).lerp(WORK,k);P.q=q0.clone().slerp(UPRIGHT_WORK,k);
+        P.armW=[grip(XE+dx*.85,sd[0]).lerp(ORU.clone().add(V(-.45,.15,.12)),k),grip(XE+dx*1.21,sd[1]).lerp(grip(WORK.x+.2,1),k)];
+        P.legs=[[lerp(.05,.12,k),.06,lerp(.3,.18,k)],[lerp(.05,.12,k),.06,lerp(.35,.18,k)]];
+        return P}
+      const g=go?(f-tA)/(tB-tA):(f-tA)/(1-tA);
+      const trav=L*smooth(clamp(g,0,1));
+      const dir=go?1:-1,x0=go?XS:XE,q=go?FWD:BACK;
+      const G=gait(x0,dir,trav,stride,D,q,lift);
+      const sway=reduce?0:Math.sin(Math.PI*2*(trav/stride)/2);
+      P.pos.set(x0+dir*trav,.03*sway,BODY_Z+.02*Math.abs(sway));
+      P.roll=.07*sway*fat;P.q=q;P.armW=G.hands;
+      const fl=reduce?0:Math.sin(clock*(urgent?3:1.6));
+      P.legs=[[-.08+.08*fl,.07,.32+.1*fl],[-.06-.08*fl,.07,.36-.1*fl]];
+      P.pole=[V(-1,0,-.7),V(1,0,-.7)];
+      return P}
+    case"work":{
+      // boots locked in the foot restraint; right hand on the tool at the ORU bolts, left hand on the rail (with re-grabs)
+      P.pos.copy(WORK);P.q=UPRIGHT_WORK;P.out=true;P.hatch=1;P.hands=1;
+      const c=reduce?0:clock;const bolt=Math.floor((c/3.4)%4),ph=(c/3.4)%1;
+      const bolts=[V(-.12,.18,.14),V(-.12,-.06,.14),V(-.12,.18,-.12),V(-.12,-.06,-.12)];
+      const tool=ORU.clone().add(V(-.43,0,0)).add(bolts[bolt]).add(V(-.05*Math.sin(Math.PI*ph)*fat,.025*Math.sin(ph*Math.PI*8),.025*Math.cos(ph*Math.PI*8)));
+      const regrab=((c/9)%1)>.82;                       // occasionally both hands to the work
+      const rail=grip(WORK.x+.2,1);
+      P.armW=[tool,regrab?tool.clone().add(V(0,.14,-.16)):rail];
+      P.pole=[V(-1,-.6,-.3),V(1,-.6,-.3)];
+      P.legs=[[.12,.05,.2+.03*Math.sin(c*.8)],[.12,.05,.2+.03*Math.sin(c*.8+1)]];
+      P.pos.y+=reduce?0:.012*Math.sin(c*1.1);
+      return P}
+    case"ing":case"aing":{
+      if(f<.5){                                        // feet first back through the hatch
+        const e=smooth(f/.5),pt=INGRESS.getPointAt(e),tg=INGRESS.getTangentAt(Math.min(.999,e)).normalize();
+        P.pos.copy(pt);P.out=e<.88;P.hatch=1;
+        const front=TRUSS_FRONT.clone().lerp(V(0,-1,0),smooth(clamp(e/.5,0,1)));
+        P.q=basisQuat(tg.clone().negate(),front);
+        const rim=[V(AIR.x-.5,0,HATCH_Z+.05),V(AIR.x+.5,0,HATCH_Z+.05)],sides=railSides(P.q);
+        P.armW=e<.4?[0,1].map(i=>grip(XS+.4-.3*i,sides[i]).lerp(rim[i],smooth(e/.4))):rim;
+        P.pole=[V(-1,0,-.8),V(1,0,-.8)];P.legs=[[.05,.06,.25],[.08,.06,.3]];P.hands=1;
+      }else{neutral();P.hatch=1-smooth(clamp((f-.5)/.15,0,1))}
+      return P}
   }
-  return{pos:INSIDE.clone(),q:UPRIGHT_IN,out:false,hatch:0};
+  return P;
 }
 
 /* =====================  sim state, HUD, timeline  ===================== */
 let plan=buildPlan(),simT=0,playing=false,camMode=reduce?"free":"cine",lastCoachKey="",bannerKey="";
-const BASE_MIN_PER_SEC=()=>plan.total/75;      // whole sequence ≈ 75 s
+const RATE={pre:1.7,dep:1.2,egr:.42,tra:.3,work:1.1,ret:.3,ing:.5,abort:.42,aing:.9};
+let baseRate=1;   // sim minutes per second; per-phase factors give the hand-over-hand walk most of the screen time (whole EVA ≈ 80 s)
+function computeRate(){let u=0;for(const p of plan.phases)u+=p.d/(RATE[p.k]||1);baseRate=u/80}
 const fmtClock=m=>{m=Math.max(0,m);const h=Math.floor(m/60),mm=Math.floor(m%60);return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0")};
 const fmtH=h=>(h>=0?"+":"−")+Math.abs(h).toFixed(1)+" h";
 
@@ -602,7 +738,7 @@ document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
   else if(simT>plan.total)simT=plan.total;
   lastCoachKey="";renderCards();
 });
-function replan(){plan=buildPlan();buildPhases();drawSpark();}
+function replan(){plan=buildPlan();computeRate();buildPhases();drawSpark();}
 
 /* timeline: phase labels + live risk line */
 function buildPhases(){
@@ -668,54 +804,74 @@ function riskColor(s,out){const stops=[[0,0x5ef0c2],[38,0x8ee04f],[55,0xffc857],
 function resize(){const w=stageEl.clientWidth,h=stageEl.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/Math.max(1,h);camera.updateProjectionMatrix()}
 addEventListener("resize",resize);resize();
 
-function frame(now){
-  const dt=Math.min(.05,(now-last)/1000);last=now;clockS+=dt;
+const _tq=new THREE.Quaternion(),_ax=V(0,1,0),_tl=new THREE.Vector3();
+let lastPose=null;
+function update(dt){
+  clockS+=dt;
   if(playing){
-    simT+=dt*BASE_MIN_PER_SEC();
+    const ph=phaseAt(plan,simT),sNow=scoreAtT(plan,simT),fat=(ph.k==="tra"||ph.k==="ret")?1-.3*clamp((sNow-22)/60,0,1):1;
+    simT+=dt*baseRate*(RATE[ph.k]||1)*fat;
     const stopAt=plan.scrub?plan.m.P+.01:plan.total;
     if(simT>=stopAt){simT=stopAt;playing=false;setPlayIcon()}
   }
   const s=scoreAtT(plan,simT),lvl=plan.abortT!==null&&simT>=plan.abortT-12?"red":levelOf(s);
-  // astronaut
-  const pose=poseAt(plan,simT,clockS);
-  astro.position.lerp(pose.pos,1-Math.exp(-dt*9));
-  astro.quaternion.slerp(pose.q,1-Math.exp(-dt*3.5));
-  hatch.rotation.y=-pose.hatch*1.9;
+  const inten=clamp((s-22)/60,0,1);
+  // astronaut root
+  const P=poseAt(plan,simT,clockS,inten);lastPose=P;
+  astro.position.lerp(P.pos,1-Math.exp(-dt*14));
+  _tq.copy(P.q);if(P.roll)_tq.multiply(new THREE.Quaternion().setFromAxisAngle(_ax,P.roll));
+  astro.quaternion.slerp(_tq,1-Math.exp(-dt*5));
+  astro.updateMatrixWorld(true);
+  // limbs: arms reach world targets (rail grips, hatch rim, tool) through two-bone IK; legs by angle
+  for(let i=0;i<2;i++){
+    if(P.armW)body.worldToLocal(_tl.copy(P.armW[i]));else _tl.copy(P.armL[i]);
+    solveArm(i,_tl,P.pole[i]);
+    solveLeg(i,P.legs[i][0],P.legs[i][1],P.legs[i][2]);
+  }
+  skinAll();
+  hatch.rotation.y=-P.hatch*1.9;
   // risk glows
-  riskColor(s,col);const inten=clamp((s-22)/60,0,1);
+  riskColor(s,col);
   const pulse=reduce?.6:.5+.5*Math.sin(clockS*(2+inten*5));
   mats.lungs.color.copy(col);mats.lungs.opacity=.35+.4*inten+.2*pulse*inten;
   lungGlow.material.color.copy(col);lungGlow.material.opacity=.12+.5*inten*(.55+.45*pulse);lungGlow.scale.setScalar(2+inten*1.4);
   jointGlows.forEach((j,i)=>{j.material.color.copy(col);const ph=reduce?.6:.5+.5*Math.sin(clockS*(2.4+inten*5)+i);j.material.opacity=.08+.6*inten*(.4+.6*ph);j.scale.setScalar(.5+inten*.6)});
+  handGlows.forEach((h,i)=>{h.position.copy(armH[i]);h.material.opacity=P.hands?.22:0});
   suitGlow.material.color.copy(col);suitGlow.material.opacity=.03+.06*inten;
   mats.body.color.copy(KIWI).lerp(col,inten*.35);
-  // tether
-  tether.visible=pose.out;hook.visible=pose.out;
-  if(pose.out){
-    astro.updateMatrixWorld(true);
+  // tether pays out from the hatch hook to the waist
+  tether.visible=P.out;hook.visible=P.out;
+  if(P.out){
     waist.set(0,-.25,-.6).applyMatrix4(body.matrixWorld);
     const pos=tetherGeo.attributes.position.array,dist=TETHER_A.distanceTo(waist);
-    sag.set(0,-1,.25).normalize().multiplyScalar(Math.min(.9,dist*.07));
-    for(let i=0;i<TN;i++){const u=i/(TN-1),w=Math.sin(Math.PI*u)*(1+(reduce?0:.18*Math.sin(clockS*1.1+u*6)));
+    sag.set(0,-1,.35).normalize().multiplyScalar(Math.min(1.1,.15+dist*.06));
+    for(let i=0;i<TN;i++){const u=i/(TN-1),w=Math.sin(Math.PI*u)*(1+(reduce?0:.15*Math.sin(clockS*1.1+u*7)));
       pos[i*3]=lerp(TETHER_A.x,waist.x,u)+sag.x*w;pos[i*3+1]=lerp(TETHER_A.y,waist.y,u)+sag.y*w;pos[i*3+2]=lerp(TETHER_A.z,waist.z,u)+sag.z*w}
     tetherGeo.attributes.position.needsUpdate=true;
   }
-  // earth + sky
   if(!reduce)earth.rotation.y+=dt*.006;
-  // camera
-  camTarget.lerp(astro.position.clone().add(V(0,.1,0)),1-Math.exp(-dt*2.5));
+  // camera: smooth follow; cinematic adds a slow orbit and now and then pulls wide to frame the station and Earth
+  camTarget.lerp(_tl.copy(astro.position).add(V(0,.1,0)),1-Math.exp(-dt*3));
   if(camMode==="cine"){
-    theta+=dt*.07;const inside=!pose.out;
-    const r=(inside?5.2:7.2)+Math.sin(clockS*.05)*1.4,h=1.4+Math.sin(clockS*.037)*1.1;
-    const want=V(camTarget.x+Math.cos(theta)*r,camTarget.y+h,camTarget.z+Math.abs(Math.sin(theta))*r*.9+1.2);
-    camera.position.lerp(want,1-Math.exp(-dt*1.2));camera.lookAt(camTarget);controls.target.copy(camTarget);
+    theta+=dt*.06;const inside=!P.out;
+    const wide=reduce?0:smooth(clamp((Math.sin(clockS*.045)-.55)/.45,0,1));
+    const r=(inside?5.2:7.4)+Math.sin(clockS*.05)*1.2+wide*7,h=1.3+Math.sin(clockS*.037)*1.0+wide*1.2;
+    const want=V(camTarget.x+Math.cos(theta)*r,camTarget.y+h,camTarget.z+Math.abs(Math.sin(theta))*r*.9+1.4);
+    camera.position.lerp(want,1-Math.exp(-dt*1.1));camera.lookAt(camTarget);controls.target.copy(camTarget);
   }else{
     const d=camTarget.clone().sub(prevTarget);camera.position.add(d);controls.target.add(d);controls.update();
   }
   prevTarget.copy(camTarget);
+  return{s,lvl,P};
+}
+let ftAvg=16;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  const t0=performance.now();
+  const r=update(dt);
   renderer.render(scene,camera);
-
-  if(now-hudAt>90){hudAt=now;hud(s,lvl,pose)}
+  ftAvg=ftAvg*.95+(performance.now()-t0)*.05;
+  if(now-hudAt>90){hudAt=now;hud(r.s,r.lvl,r.P)}
   requestAnimationFrame(frame);
 }
 
@@ -772,11 +928,18 @@ let cardsLockedKey="";
 const qp=new URLSearchParams(location.search).get("preset");
 if(qp&&PRESETS[qp]){presetName=qp;inp={...PRESETS[qp]};document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x.dataset.p===qp))}
 replan();renderCards();setCam(camMode);
-hud(scoreAtT(plan,0),levelOf(scoreAtT(plan,0)),poseAt(plan,0,0));
+{const qt=parseFloat(new URLSearchParams(location.search).get("t"));if(isFinite(qt))simT=clamp(qt,0,plan.total)}
+hud(scoreAtT(plan,0),levelOf(scoreAtT(plan,0)),null);
 say("Crew member today: DLCO below baseline. Review the recommendations, then press play.");
 lastCoachKey="intro";
 requestAnimationFrame(t=>{last=t;requestAnimationFrame(frame)});
-window._eva={hudNow(){const s=scoreAtT(plan,simT);const lvl=plan.abortT!==null&&simT>=plan.abortT-12?"red":levelOf(s);hud(s,lvl,poseAt(plan,simT,clockS))},get plan(){return plan},get t(){return simT},set t(v){simT=v},acc,setPlaying(v){playing=v;setPlayIcon()},scoreAtT,missionGain};
+window._eva={hudNow(){const s=scoreAtT(plan,simT);const lvl=plan.abortT!==null&&simT>=plan.abortT-12?"red":levelOf(s);hud(s,lvl,null)},
+  step(n=1,dt=1/60,render=true){let r;for(let i=0;i<n;i++){r=update(dt);if(render)renderer.render(scene,camera)}hud(r.s,r.lvl,r.P);return r},
+  get ft(){return ftAvg},
+  probe(){const w=v=>body.localToWorld(v.clone());const hands=[w(armH[0]),w(armH[1])];const tg=lastPose?.armW;
+    return{pos:astro.position.toArray().map(v=>+v.toFixed(2)),hands:hands.map(h=>h.toArray().map(v=>+v.toFixed(2))),handErr:tg?hands.map((h,i)=>+h.distanceTo(tg[i]).toFixed(3)):null,
+      targets:tg?tg.map(v=>v.toArray().map(x=>+x.toFixed(2))):null,phase:phaseAt(plan,simT).k}},
+  bench(n=120){const t0=performance.now();for(let i=0;i<n;i++)update(1/60);const t1=performance.now();for(let i=0;i<n;i++)renderer.render(scene,camera);renderer.getContext().finish();const t2=performance.now();return{updateMs:+((t1-t0)/n).toFixed(2),renderMs:+((t2-t1)/n).toFixed(2)}},get plan(){return plan},get t(){return simT},set t(v){simT=v},acc,setPlaying(v){playing=v;setPlayIcon()},scoreAtT,missionGain};
 </script>
 </body>
 </html>
