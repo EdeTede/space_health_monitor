@@ -258,9 +258,9 @@ body.landing .keys{opacity:.92}
   <h2>Extra safe hours outside.</h2>
   <p>Work longer, smarter, safer. Live DCS risk for every spacewalk.</p>
   <div class="lv on" id="lv0">
-    <button type="button" class="lbtn" data-lv="1"><span>I’m an astronaut</span><small>my health</small></button>
-    <button type="button" class="lbtn pl" data-lv="2"><span>Mission planner</span><small>whole crew</small></button>
-    <div class="lrow"><button type="button" class="lghost" id="explore">Explore the full spacewalk →</button><span class="lghost" style="cursor:default">Sample data · demo sign-in</span></div>
+    <button type="button" class="lbtn" data-lv="1"><span>Astronaut</span><small>my health</small></button>
+    <button type="button" class="lbtn" data-lv="2"><span>Mission planner</span><small>whole crew</small></button>
+    <span class="lghost" style="cursor:default">Sample data · demo sign-in</span>
   </div>
   <div class="lv" id="lv1">
     <div id="lvCrew" style="display:grid;gap:8px"></div>
@@ -1653,7 +1653,7 @@ function setupLanding(){
   ov.addEventListener("click",e=>{const lv=e.target.closest("[data-lv]");if(lv){showLv(+lv.dataset.lv);return}
     const c=e.target.closest("[data-crew]");if(c&&E){home(E.signInAstronaut(c.dataset.crew))}});
   $("lv2").onsubmit=e=>{e.preventDefault();const ss=E&&E.signInPlanner($("lpin").value);if(!ss){$("lerr").textContent="That PIN doesn’t match. The demo PIN is 2026.";return}home(ss)};
-  $("explore").onclick=()=>{ov.classList.remove("show");document.body.classList.remove("landing");document.body.classList.add("explore");resize();
+  if($("explore"))$("explore").onclick=()=>{ov.classList.remove("show");document.body.classList.remove("landing");document.body.classList.add("explore");resize();
     say("Full spacewalk · ISS, Moon or Mars · presets, recommendations and the DCS test.",true)};
   $("signinPill").onclick=()=>{document.body.classList.remove("explore");document.body.classList.add("landing");showLv(0);ov.classList.add("show");resize()};
   setTimeout(()=>ov.classList.add("show"),reduce?0:1300);
