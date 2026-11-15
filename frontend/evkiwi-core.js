@@ -12,6 +12,7 @@ const CREW=[
 ];
 const PLANNER={id:'morgan',name:'Morgan Bettre',first:'Morgan',role:'Mission planner',initials:'MB',kind:'planner',crew:'lee'};
 const PLANNER_MED={id:'riley',name:'Med Evikiwi',first:'Med',role:'Mission ops',initials:'ME',kind:'planner',crew:'lee'};
+const PLANNERS=[PLANNER,PLANNER_MED];
 /* sample readings per crew member */
 const SAMPLE={
   lee:{dlco:[-0.8,-1.5,-1.1,-2.0,-1.2],bone:{now:98.6,landing:97.9},hr:[62,64,61,63,66,65,64],hrv:[68,66,70,64,61,63,65],water:1900,bub:0,rad:92},
@@ -33,12 +34,13 @@ function reset(){mem=blank();save()}
 function cs(id){return load().crew[id]}
 
 /* ---------- session (shared with the main flow at /index.html) ---------- */
-function getSession(){try{const s=JSON.parse(localStorage.getItem(SESSION));if(s&&(s.kind==='planner'||CREW.some(c=>c.id===s.id)))return s}catch{}return null}
+function getSession(){try{const s=JSON.parse(localStorage.getItem(SESSION));if(s&&((s.kind==='planner'&&PLANNERS.some(p=>p.id===s.id))||CREW.some(c=>c.id===s.id)))return s}catch{}return null}
 function setSession(s){try{localStorage.setItem(SESSION,JSON.stringify(s))}catch{}
   try{sessionStorage.setItem(LEGACY_SESSION,JSON.stringify({id:s.id,name:s.name,role:s.role,kind:s.kind,crew:s.kind==='planner'?(s.crew||'lee'):s.id}))}catch{}}
 function clearSession(){try{localStorage.removeItem(SESSION)}catch{}try{sessionStorage.removeItem(LEGACY_SESSION)}catch{}}
 function signInAstronaut(id){const c=CREW.find(x=>x.id===id);if(!c)return null;const s={kind:'astronaut',id:c.id,name:c.name,role:c.role};setSession(s);return s}
-function signInPlanner(pin){if(String(pin).trim()!==DEMO_PIN)return null;const s={kind:'planner',id:PLANNER.id,name:PLANNER.name,role:PLANNER.role,crew:PLANNER.crew};setSession(s);return s}
+function signInPlannerId(id){const p=PLANNERS.find(x=>x.id===id);if(!p)return null;const s={kind:'planner',id:p.id,name:p.name,role:p.role,crew:p.crew||'lee'};setSession(s);return s}
+function signInPlanner(pin){if(String(pin).trim()!==DEMO_PIN)return null;return signInPlannerId(PLANNER.id)}
 
 /* ---------- health + DRI score (same thresholds as the Decompress view) ---------- */
 function feel(id){return cs(id).feel||{symptoms:[],water:SAMPLE[id].water}}
@@ -193,7 +195,7 @@ function weekHtml(id,{interactive=true,compact=false}={}){
 function todayList(id){const P=plan(id).filter(e=>e.day===0).sort((a,b)=>a.start-b.start);const recs=recList(id).filter(r=>r.status==='open');
   return P.map(e=>`<li class="t-${e.type}${e.cancelled?' cancelled':''}"><time>${fmtTime(e.start)}</time><span>${esc(e.title)}${e.sub?`<small>${esc(e.sub)}</small>`:''}</span></li>`).join('')}
 
-root.EVK={CREW,PLANNER,PLANNER_MED,PLANNERS:[PLANNER,PLANNER_MED],DEMO_PIN,SYMPTOMS,LEVEL,MISSION_DAY,WATER_GOAL,REC_DEFS,TYPES,
-  load,save,reset,getSession,setSession,clearSession,signInAstronaut,signInPlanner,
+root.EVK={CREW,PLANNER,PLANNER_MED,PLANNERS,DEMO_PIN,SYMPTOMS,LEVEL,MISSION_DAY,WATER_GOAL,REC_DEFS,TYPES,
+  load,save,reset,getSession,setSession,clearSession,signInAstronaut,signInPlanner,signInPlannerId,
   metrics,score,feel,setFeel,basePlan,plan,recList,ghost,act,hours,conflicts,nextEva,graphs,weekHtml,todayList,dayName,dayDate,fmtTime,esc};
 })(globalThis);

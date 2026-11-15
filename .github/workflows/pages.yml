@@ -1,6 +1,6 @@
 # Publish the EVKIWI frontend to GitHub Pages.
-# The FastAPI backend can't run on Pages, so this serves frontend/ as static files.
-# The main flow falls back to its local model when /api is unreachable.
+# FastAPI can't run on Pages — this serves frontend/ as a static demo.
+# Client pages use sample data / local models when /api is unreachable.
 name: Deploy to GitHub Pages
 
 on:
@@ -32,17 +32,21 @@ jobs:
           set -euo pipefail
           rm -rf _site && cp -R frontend _site
           cd _site
-          # Match the FastAPI routes: "/" is the 3D spacewalk, the main flow lives at flow.html.
+          # Match FastAPI routes: "/" → 3D landing, main flow at flow.html
           mv index.html flow.html
           cp kiwinaut-eva.html index.html
-          # Pages serves the site under /<repo>/, so root-absolute links must be relative.
-          for f in *.html; do
+          # Project-page base: /<repo>/ — strip leading-slash asset & page links
+          for f in *.html *.js *.css; do
+            [ -f "$f" ] || continue
             sed -i -E \
               -e 's#(["'"'"'`])/index\.html#\1flow.html#g' \
               -e 's#href="/([?"])#href="./\1#g' \
-              -e 's#(["'"'"'`(])/([A-Za-z][A-Za-z0-9_-]*\.(html|js|css|json|png))#\1\2#g' \
+              -e 's#src="/([?"])#src="./\1#g' \
+              -e 's#(["'"'"'`(])/([A-Za-z][A-Za-z0-9_-]*\.(html|js|css|json|png|glb|gltf|jpg|webp|svg))#\1\2#g' \
+              -e 's#location\.href="/#location.href="./#g' \
               "$f"
           done
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><title>EVKIWI</title><meta http-equiv="refresh" content="0;url=./"><p><a href="./">EVKIWI</a></p>' > 404.html
           touch .nojekyll
 
       - uses: actions/configure-pages@v5
