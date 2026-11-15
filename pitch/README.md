@@ -1,6 +1,6 @@
 # EVKIWI pitch deck
 
-NASA Space Apps Challenge 2026 · Team JEM (Jiaqi · Edward · Marco)
+NASA Space Apps Challenge 2026 · Team Cosmosaver (Jiaqi · Edward · Marco)
 
 - `EVKIWI-pitch-deck.html`: 6 animated slides in one self-contained file. Open it in a browser. Arrow keys, space or click to move, F for fullscreen, E to edit text.
 - `EVKIWI-pitch-deck.pptx`: the same 6 slides with editable text, a native chart and speaker notes.
