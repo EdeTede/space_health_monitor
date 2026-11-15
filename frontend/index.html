@@ -22,9 +22,9 @@
 html,body{height:100%;margin:0;background:var(--void);color:var(--fg);font-family:var(--body)}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+a.link{text-decoration:none}
 [hidden]{display:none!important}
 
-/* Garra-inspired top nav: logo+slogan left, quiet links + one pill CTA right */
 .topnav{
   position:fixed;left:0;right:0;top:0;z-index:20;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -70,6 +70,9 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .phase iframe{border:0;width:100%;height:100%;background:var(--void)}
 #phaseCalc{grid-template-rows:1fr}
 #phaseCalc iframe{min-height:0;height:100%}
+#phaseCalendar{padding-top:90px}
+@media (max-width:820px){#phaseCalendar{padding-top:145px}}
+
 .cta{
   font:600 13px var(--body);letter-spacing:.02em;
   border:0;border-radius:999px;padding:10px 16px;cursor:pointer;
@@ -89,7 +92,7 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     radial-gradient(ellipse 60% 40% at 50% 0%,rgba(142,224,79,.12),transparent 55%),
     var(--void);
 }
-.recs-inner{width:min(980px,100%);margin:0 auto;display:grid;gap:16px}
+.recs-inner{width:min(1100px,100%);margin:0 auto;display:grid;gap:16px}
 .recs-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
 .recs-top .brand{display:flex;align-items:center;gap:10px}
 .recs-top .brand img{width:40px;height:40px}
@@ -140,6 +143,13 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .steps span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:4px 8px;border:1px solid transparent;border-radius:3px}
 .steps span.on{color:var(--holo);border-color:var(--edge)}
+
+.mission-frame{
+  width:100%;height:min(62vh,640px);min-height:360px;border:0;border-radius:8px;
+  background:var(--void);display:block;
+}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.section-head .lbl{margin:0}
 @media (prefers-reduced-motion:reduce){
   .acard{transition:none;transform:none;opacity:1}
   .coach .cursor{animation:none}
@@ -160,56 +170,390 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
     <button type="button" class="link" id="navSpace" data-go="entry">Spacewalk</button>
     <button type="button" class="link" id="navDlco" data-go="calc">DLCO test</button>
     <button type="button" class="link" id="navCalendar" data-go="calendar">Calendar</button>
-    <a class="link" href="risk-methods.html" target="_blank" rel="noopener">Risk methods</a>
-    <a class="link" href="developer-tasks.html" target="_blank" rel="noopener">Developer</a>
     <button type="button" class="link" id="navRecs" data-go="recs">Recommendations</button>
     <button type="button" class="pill" id="navEnter" data-go="calc">Enter DRI</button>
   </nav>
 </header>
 
-<!-- Phase 1: full kiwinaut-eva animation -->
 <section class="phase" id="phaseEntry" aria-label="Spacewalk entry">
-  <iframe id="entryFrame" title="" src="/kiwinaut-eva.html?embed=1&auto=1&v=10" allow="fullscreen"></iframe>
+  <iframe id="entryFrame" title="" src="/kiwinaut-eva.html?embed=1&auto=1&v=12" allow="fullscreen"></iframe>
 </section>
 
-<!-- Phase 2: full eva-calc -->
 <section class="phase" id="phaseCalc" hidden aria-label="EVA calculator">
   <iframe id="calcFrame" title="EVA Decompression Risk Calculator" src="about:blank"></iframe>
 </section>
 
-<!-- Calendar and recommendations share one persistent mission workspace. -->
-<section class="phase" id="phasePlanner" hidden aria-label="Mission calendar and EVA recommendations">
-  <iframe id="plannerFrame" title="Crew calendar and EVA recommendations" src="about:blank"></iframe>
+<section class="phase" id="phaseCalendar" hidden aria-label="Mission calendar">
+  <iframe id="calendarFrame" title="Crew calendar" src="about:blank"></iframe>
 </section>
-<style>#phasePlanner{padding-top:90px}@media(max-width:820px){#phasePlanner{padding-top:145px}}</style>
+
+<section class="phase recs" id="phaseRecs" hidden aria-label="Recommendations">
+  <div class="recs-inner">
+    <div class="steps" aria-hidden="true">
+      <span>1 Spacewalk</span>
+      <span>2 Calculator</span>
+      <span>3 Calendar</span>
+      <span class="on">4 Recommendations</span>
+    </div>
+    <div class="recs-top">
+      <div class="brand">
+        <img src="brand/kiwinaut-mark.png" width="40" height="40" alt="Kiwinaut">
+        <div>
+          <div class="k">Kiwinaut · mission plan + DLCO gate</div>
+          <h1>Recommendations</h1>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="q" id="verdictQ">Pressure risk · from EVA model</div>
+        <div class="big" id="ready">--</div>
+        <div class="tag" id="readyTag">—</div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:12px">
+      <div class="section-head">
+        <div class="lbl">Mission recommendations</div>
+        <button type="button" class="cta ghost" id="openCalendar">Open full calendar</button>
+      </div>
+      <iframe id="recsPlannerFrame" class="mission-frame" title="Mission EVA recommendations" src="about:blank"></iframe>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
+          <div class="lbl" style="margin:0">DLCO gate · pressure risk</div>
+          <span class="api-pill off" id="apiPill">API · idle</span>
+        </div>
+        <div class="dial-wrap">
+          <div class="dial" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(142,224,79,.12)" stroke-width="10"/>
+              <circle id="dialArc" cx="60" cy="60" r="48" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 60 60)"/>
+              <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#5ef0c2"/><stop offset="45%" stop-color="#ffc857"/><stop offset="75%" stop-color="#ff8a3d"/><stop offset="100%" stop-color="#ff5d6c"/>
+              </linearGradient></defs>
+              <text x="60" y="58" text-anchor="middle" fill="#eef6e8" font-family="Chakra Petch,sans-serif" font-size="28" font-weight="700" id="dialScore">0</text>
+              <text x="60" y="76" text-anchor="middle" fill="#93a68f" font-family="IBM Plex Mono,monospace" font-size="8" letter-spacing="1">0–100 RISK</text>
+            </svg>
+          </div>
+          <div>
+            <div class="chip green" id="levelChip">GREEN · LOW</div>
+            <p class="blurb" id="levelBlurb">Run Enter DRI from the calculator to score this gate from measured DLCO.</p>
+            <div class="meta" id="meta"></div>
+          </div>
+        </div>
+        <div class="coach" aria-live="polite"><span id="coachText"></span><span class="cursor" aria-hidden="true"></span></div>
+      </div>
+      <div class="panel">
+        <div class="lbl">Why this score</div>
+        <div class="why" id="whyBox"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="lbl">DLCO gate actions · accept to lock the plan</div>
+      <p class="plan" id="planLine"><b>Live plan</b> — accept cards to lock actions into the EVA timeline.</p>
+      <div class="cards" id="cards"></div>
+      <div class="cta-row" style="margin-top:16px;justify-content:flex-start">
+        <button type="button" class="cta ghost" id="backCalc">Back to calculator</button>
+        <button type="button" class="cta ghost" id="restartFlow">Restart from spacewalk</button>
+      </div>
+    </div>
+
+    <p class="foot">Kiwinaut · NASA Space Apps Challenge 2026 · sample thresholds only. Not an official NASA product · not clinical advice. Confirmed by the crew medical officer.</p>
+  </div>
+</section>
+
 <script>
 (()=>{
- const $=id=>document.getElementById(id);let phase='entry';
- function showPhase(name){
+const $=id=>document.getElementById(id);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const COLOR={ok:"var(--ok)",holo:"var(--holo)",amber:"var(--amber)",hot:"var(--hot)",red:"var(--red)"};
+const DAYS={150:{name:"EVA week",note:"Airlock window. DLCO gate is prime. Exercise prebreathe preferred."}};
+const ENTRY_SRC="/kiwinaut-eva.html?embed=1&auto=1&v=12";
+
+let phase="entry";
+let day=150, dlco=-1.22, dlcoPre=32, dlcoPost=31.61, hb=13.3, hyd=70, bub=0, sym=0;
+let prebreatheMin=null, suitP=null;
+let accepted=new Set(), snoozed=new Set(), coachTimer=null, cardTimers=[], risk={level:"green",s:0};
+let lastApi=null;
+
+function syncNav(name){
+  $("navSpace").classList.toggle("on",name==="entry");
+  $("navDlco").classList.toggle("on",name==="calc");
+  $("navCalendar").classList.toggle("on",name==="calendar");
+  $("navRecs").classList.toggle("on",name==="recs");
+  $("navEnter").textContent=name==="calc"?"Get recommendations":"Enter DRI";
+}
+
+function ensurePlanner(frame, view){
+  if(!frame.src.includes("planner.html")){
+    frame.src="/planner.html?view="+view;
+  }else if(frame.contentWindow){
+    frame.contentWindow.postMessage({type:"kiwinaut-planner-navigate",view},location.origin);
+  }
+}
+
+function showPhase(name){
   phase=name;
-  $('phaseEntry').hidden=name!=='entry';$('phaseCalc').hidden=name!=='calc';
-  $('phasePlanner').hidden=!['calendar','recs'].includes(name);
-  for(const [id,route] of [['navSpace','entry'],['navDlco','calc'],['navCalendar','calendar'],['navRecs','recs']])$(id).classList.toggle('on',name===route);
-  $('navEnter').textContent=name==='calc'?'EVA recommendations':'Enter DRI';
-  if(name!=='entry')$('entryFrame').src='about:blank';
-  else if(!$('entryFrame').src.includes('kiwinaut-eva'))$('entryFrame').src='/kiwinaut-eva.html?embed=1&auto=1&v=10';
-  if(name==='calc'&&!$('calcFrame').src.includes('eva-calc'))$('calcFrame').src='/eva-calc.html';
-  if(['calendar','recs'].includes(name)){
-   if(!$('plannerFrame').src.includes('planner.html'))$('plannerFrame').src='/planner.html?view='+name;
-   else $('plannerFrame').contentWindow.postMessage({type:'kiwinaut-planner-navigate',view:name},location.origin);
+  $("phaseEntry").hidden=name!=="entry";
+  $("phaseCalc").hidden=name!=="calc";
+  $("phaseCalendar").hidden=name!=="calendar";
+  $("phaseRecs").hidden=name!=="recs";
+  syncNav(name);
+
+  if(name!=="entry"){
+    if($("entryFrame").src && !$("entryFrame").src.endsWith("about:blank")){
+      $("entryFrame").src="about:blank";
+    }
+  }else if(!$("entryFrame").src.includes("kiwinaut-eva")){
+    $("entryFrame").src=ENTRY_SRC;
   }
- }
- document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>showPhase(b.dataset.go));
- $('navEnter').onclick=()=>showPhase(phase==='calc'?'recs':'calc');
- addEventListener('message',e=>{
+
+  if(name==="calc" && !$("calcFrame").src.includes("eva-calc")){
+    $("calcFrame").src="/eva-calc.html";
+  }
+  if(name==="calendar")ensurePlanner($("calendarFrame"),"calendar");
+  if(name==="recs")ensurePlanner($("recsPlannerFrame"),"recs");
+}
+
+async function goRecsFromCalc(){
+  try{
+    const msg=await requestReadings();
+    applyReadings(msg);
+  }catch(err){/* use last / defaults */}
+  accepted.clear();snoozed.clear();
+  showPhase("recs");
+  await runDecompressTest();
+}
+
+function setApiPill(live,label){
+  const p=$("apiPill");
+  p.className="api-pill "+(live?"live":"off");
+  p.textContent=label||(live?"API · live":"API · offline fallback");
+}
+
+function localScore(){
+  const drop=Math.max(0,-dlco);const parts=[];let s=6;
+  const add=(label,v,push)=>{s+=v;parts.push({label,v:Math.round(v),push:!!push||v>=8})};
+  if(drop<=0)add("DLCO at/above personal baseline",0,false);
+  else if(drop<5)add(`DLCO −${drop.toFixed(2)}% (mild)`,drop*2.4,false);
+  else if(drop<=10)add(`DLCO −${drop.toFixed(2)}% (moderate)`,20+(drop-5)*3.2,true);
+  else add(`DLCO −${drop.toFixed(2)}% (high)`,42+(drop-10)*3.8,true);
+  add(`Bubble grade ${bub}`,bub*9,bub>=2);
+  add(hyd>=70?"Hydration adequate":"Hydration low",hyd>=70?0:(70-hyd)*.5,hyd<55);
+  if(sym){s=Math.max(s,90);add("Symptoms reported",28,true)}
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  let level="green",name="GREEN · LOW",blurb="Cleared for the EVA and normal training.",band="green";
+  if(sym&&drop>0){level="red";name="RED · SYMPTOMS";blurb="Stop the EVA. DCS protocol: 100% O₂, repressurize.";band="red"}
+  else if(drop>10){level="orange";name="ORANGE · HIGH";blurb="Postpone the EVA 24–48 h.";band="orange"}
+  else if(drop>=5){level="yellow";name="YELLOW · MODERATE";blurb="Extend exercise prebreathe.";band="yellow"}
+  return{score:s,s,level,name,blurb,parts,drop:Math.round(drop),band,coach:null,cards:null,day_note:DAYS[150].note,source:"local"};
+}
+
+function applyReadings(msg){
+  if(msg.pre!=null)dlcoPre=+msg.pre;
+  if(msg.post!=null)dlcoPost=+msg.post;
+  if(msg.hb!=null)hb=+msg.hb;
+  if(msg.pb!=null)prebreatheMin=+msg.pb;
+  if(msg.sp!=null)suitP=+msg.sp;
+  if(Number.isFinite(dlcoPre)&&dlcoPre>0)dlco=100*(dlcoPost-dlcoPre)/dlcoPre;
+}
+
+async function runDecompressTest(){
+  const body={
+    day,
+    dlco_pre:dlcoPre,
+    dlco_post:dlcoPost,
+    hb,
+    hydration:hyd,
+    bubble_grade:bub,
+    symptoms:!!sym
+  };
+  if(prebreatheMin!=null)body.prebreathe_min=prebreatheMin;
+  if(suitP!=null)body.suit_p=suitP;
+  try{
+    const r=await fetch("/api/decompress/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error("bad status");
+    const data=await r.json();
+    lastApi=data;
+    dlco=data.dlco_pct;
+    setApiPill(true,"API · EVA model");
+    applyResult({
+      s:data.score,score:data.score,level:data.level,band:data.band,name:data.name,blurb:data.blurb,
+      drop:data.drop,parts:data.parts,coach:data.coach,cards:data.cards,day_note:data.day_note,
+      vge:data.vge,dcs:data.dcs,model_vge:data.model_vge,model_dcs:data.model_dcs,
+      personal_factor:data.personal_factor,oxygen_time_min:data.oxygen_time_min,source:data.source||"eva-model"
+    });
+  }catch(err){
+    setApiPill(false,"API · offline fallback");
+    applyResult(localScore());
+  }
+}
+
+function cardsFrom(res){
+  const palette=c=>COLOR[c]||c||"var(--holo)";
+  if(res.cards&&res.cards.length){
+    return res.cards.filter(c=>!snoozed.has(c.id)).map(c=>({
+      id:c.id,ico:c.ico,t:c.title,r:c.reason,c:palette(c.color),ok:accepted.has(c.id)
+    }));
+  }
+  const out=[];const push=(id,ico,t,r,c)=>{if(!snoozed.has(id))out.push({id,ico,t,r,c,ok:accepted.has(id)})};
+  if(res.level==="green"){
+    push("go","GO","Proceed with standard exercise prebreathe",`because DLCO ${dlco>0?"+"+Number(dlco).toFixed(2):Number(dlco).toFixed(2)}% · GREEN`,"var(--ok)");
+    push("p3","+3h","Schedule DLCO retest +3 h after ingress","because learn personal post-EVA pattern","var(--holo)");
+  }else{
+    push("pb","+45","Extend exercise prebreathe",`because DLCO −${res.drop}%`,"var(--amber)");
+    push("ared","HOLD","Hold heavy ARED 24 h before/after EVA","because loading near pressure drop","var(--hot)");
+  }
+  if(res.level==="yellow")push("lite","EVA","Assign lighter EVA tasks",`because DLCO −${res.drop}%`,"var(--amber)");
+  if(res.level==="orange"){push("delay","+24h","Postpone EVA 24–48 hours",`because DLCO −${res.drop}%`,"var(--hot)");push("mo","MO","Alert crew medical officer","because ORANGE","var(--hot)")}
+  if(res.level==="red"){push("stop","STOP","Abort / do not start EVA","because symptoms + DLCO drop","var(--red)");push("o2","O₂","DCS protocol: 100% O₂ + repressurize","because RED","var(--red)")}
+  push("p24","+24h","Retest DLCO at +24 h","because close the personal pattern loop","var(--holo)");
+  return out;
+}
+function coachText(res){
+  if(res.coach)return res.coach;
+  if(res.level==="red")return "CDR Lee: STOP · 100% O₂ · repressurize · notify MO.";
+  if(res.level==="orange")return `CDR Lee: delay EVA 24–48 h · MO alert · DLCO −${res.drop}%.`;
+  if(res.level==="yellow")return `CDR Lee: extend prebreathe · no heavy ARED · DLCO −${res.drop}%.`;
+  return "CDR Lee: GREEN · standard exercise prebreathe · DLCO +3 h / +24 h after ingress.";
+}
+function typeCoach(text){
+  clearInterval(coachTimer);const el=$("coachText");el.textContent="";
+  if(reduce){el.textContent=text;return}
+  let i=0;coachTimer=setInterval(()=>{el.textContent=text.slice(0,++i);if(i>=text.length)clearInterval(coachTimer)},14);
+}
+function sweep(score){
+  const arc=$("dialArc"),circ=2*Math.PI*48,target=circ*(1-score/100);
+  const prev=parseInt($("dialScore").dataset.prev||"0",10);
+  arc.style.transition=reduce?"none":"stroke-dashoffset .7s ease";
+  arc.style.strokeDashoffset=String(target);
+  if(reduce){$("dialScore").textContent=score;$("dialScore").dataset.prev=score;return}
+  const t0=performance.now();
+  (function step(now){const u=Math.min(1,(now-t0)/700),e=1-Math.pow(1-u,3);$("dialScore").textContent=Math.round(prev+(score-prev)*e);if(u<1)requestAnimationFrame(step);else{$("dialScore").textContent=score;$("dialScore").dataset.prev=String(score)}})(t0);
+}
+function renderCards(res){
+  cardTimers.forEach(clearTimeout);cardTimers=[];
+  const box=$("cards");box.innerHTML="";
+  cardsFrom(res).forEach((c,i)=>{
+    const el=document.createElement("div");
+    el.className="acard"+(c.ok?" accepted in":"");el.dataset.id=c.id;
+    const ops=c.ok?'<span class="r">Accepted</span>':'<button type="button" class="ok" data-act="accept">Accept</button><button type="button" data-act="snooze">Snooze</button>';
+    el.innerHTML=`<div class="ico" style="color:${c.c}">${c.ico}</div><div><div class="t">${c.t}</div><div class="r">${c.r}</div></div><div class="ops">${ops}</div>`;
+    box.appendChild(el);
+    if(!c.ok)cardTimers.push(setTimeout(()=>el.classList.add("in"),reduce?0:90+i*110));
+  });
+}
+function planText(res){
+  const notes=[...accepted].map(id=>({pb:"prebreathe +45",h2o:"+500 ml",ared:"ARED hold",delay:"EVA +24–48h",stop:"ABORT",o2:"DCS O₂",lite:"lighter EVA",go:"standard prebreathe"}[id]||id));
+  const base={green:"Standard EVA timeline.",yellow:"Modified: longer prebreathe, lighter tasks.",orange:"Hold: EVA delayed pending medical review.",red:"Emergency: DCS protocol active."}[res.level];
+  const note=res.day_note||DAYS[150].note;
+  const src=res.source==="local"?' <span style="color:var(--amber)">· local fallback</span>':' <span style="color:var(--ok)">· scored by EVA model API</span>';
+  return `<b>${res.name}</b> — ${base}${notes.length?` Accepted: ${notes.join(", ")}.`:" Accept cards to lock actions."} <span style="color:var(--dim)">${note}</span>${src}`;
+}
+function applyResult(res){
+  risk=res;
+  const pct=Number(dlco);
+  $("levelChip").className="chip "+res.level;$("levelChip").textContent=res.name;
+  $("levelBlurb").textContent=res.blurb;
+  $("ready").textContent=res.s;
+  $("ready").style.color=({green:"var(--ok)",yellow:"var(--amber)",orange:"var(--hot)",red:"var(--red)"})[res.level];
+  $("readyTag").textContent=res.name;$("readyTag").style.color=$("ready").style.color;
+  $("verdictQ").textContent=`Pressure risk · DLCO ${pct>0?"+"+pct.toFixed(2):pct.toFixed(2)}%`;
+  const dcs=res.dcs!=null?Number(res.dcs).toFixed(2)+"%":"—";
+  const vge=res.vge!=null?Number(res.vge).toFixed(0):"—";
+  const fac=res.personal_factor!=null&&res.personal_factor===res.personal_factor?Number(res.personal_factor).toFixed(2)+"×":"—";
+  $("meta").innerHTML=`<span>DLCO <b>${pct.toFixed(2)}%</b></span><span>DCS <b>${dcs}</b></span><span>VGE <b>${vge}</b></span><span>Factor <b>${fac}</b></span><span>Pre <b>${dlcoPre}</b></span><span>Post <b>${dlcoPost}</b></span>`;
+  $("whyBox").innerHTML=(res.parts||[]).map(p=>`<div class="hit${p.push?" push":""}"><span>${p.label}</span><b>${p.v>=0?"+"+p.v:p.v}</b></div>`).join("");
+  $("planLine").innerHTML=planText(res);
+  sweep(res.s);typeCoach(coachText(res));renderCards(res);
+}
+
+function requestReadings(){
+  return new Promise((resolve,reject)=>{
+    const frame=$("calcFrame");
+    if(!frame.contentWindow){reject(new Error("no frame"));return}
+    const t=setTimeout(()=>{cleanup();reject(new Error("timeout"))},2500);
+    function onMsg(e){
+      if(e.origin!==location.origin)return;
+      if(!e.data||e.data.type!=="kiwinaut-eva-readings")return;
+      cleanup();resolve(e.data);
+    }
+    function cleanup(){clearTimeout(t);removeEventListener("message",onMsg)}
+    addEventListener("message",onMsg);
+    frame.contentWindow.postMessage({type:"kiwinaut-request-readings"},location.origin);
+  });
+}
+
+$("cards").addEventListener("click",e=>{
+  const btn=e.target.closest("button[data-act]");if(!btn)return;
+  const card=btn.closest(".acard");if(!card)return;
+  if(btn.dataset.act==="accept"){accepted.add(card.dataset.id);snoozed.delete(card.dataset.id)}
+  else{snoozed.add(card.dataset.id);accepted.delete(card.dataset.id)}
+  if(lastApi)applyResult({
+    s:lastApi.score,score:lastApi.score,level:lastApi.level,band:lastApi.band,name:lastApi.name,blurb:lastApi.blurb,
+    drop:lastApi.drop,parts:lastApi.parts,coach:lastApi.coach,cards:lastApi.cards,day_note:lastApi.day_note,
+    vge:lastApi.vge,dcs:lastApi.dcs,model_vge:lastApi.model_vge,model_dcs:lastApi.model_dcs,
+    personal_factor:lastApi.personal_factor,oxygen_time_min:lastApi.oxygen_time_min,source:lastApi.source||"eva-model"
+  });
+  else applyResult(localScore());
+});
+
+addEventListener("message",e=>{
   if(e.origin!==location.origin)return;
-  if(e.source===$('plannerFrame').contentWindow&&e.data?.type==='kiwinaut-planner-view'){
-   phase=e.data.view==='recs'?'recs':'calendar';$('navCalendar').classList.toggle('on',phase==='calendar');$('navRecs').classList.toggle('on',phase==='recs');
+  if(e.data&&e.data.type==="kiwinaut-start-spacewalk")showPhase("entry");
+  if(e.data&&e.data.type==="kiwinaut-start-dlco")showPhase("calc");
+  if(e.data&&e.data.type==="kiwinaut-start-recs")goRecsFromCalc();
+  if(e.data&&e.data.type==="kiwinaut-planner-view"){
+    const view=e.data.view==="recs"?"recs":"calendar";
+    if(view==="calendar")showPhase("calendar");
+    else showPhase("recs");
   }
-  if(e.source===$('entryFrame').contentWindow&&e.data?.type==='kiwinaut-start-dlco')showPhase('calc');
-  if(e.source===$('calcFrame').contentWindow&&e.data?.type==='kiwinaut-start-recs')showPhase('recs');
- });
- showPhase(location.hash==='#calendar'?'calendar':location.hash==='#recs'?'recs':'entry');
+});
+
+async function handleNav(go){
+  if(go==="entry"){showPhase("entry");return}
+  if(go==="calc"){showPhase("calc");return}
+  if(go==="calendar"){showPhase("calendar");return}
+  if(go==="recs"){
+    showPhase("recs");
+    if(phase==="recs" && ($("calcFrame").src.includes("eva-calc") || lastApi)){
+      if($("calcFrame").src.includes("eva-calc") && !lastApi){
+        $("navEnter").disabled=true;
+        try{
+          try{const msg=await requestReadings();applyReadings(msg)}catch(_){}
+          await runDecompressTest();
+        }finally{$("navEnter").disabled=false;syncNav(phase)}
+      }
+    }
+  }
+}
+
+$("navEnter").onclick=async()=>{
+  if(phase==="calc"){
+    $("navEnter").disabled=true;
+    try{await goRecsFromCalc()}finally{$("navEnter").disabled=false;syncNav(phase)}
+  }else showPhase("calc");
+};
+["navSpace","navDlco","navCalendar","navRecs"].forEach(id=>{
+  $(id).onclick=()=>handleNav($(id).dataset.go);
+});
+
+$("backCalc").onclick=()=>showPhase("calc");
+$("openCalendar").onclick=()=>showPhase("calendar");
+$("restartFlow").onclick=()=>{
+  accepted.clear();snoozed.clear();lastApi=null;
+  $("calcFrame").src="about:blank";
+  $("calendarFrame").src="about:blank";
+  $("recsPlannerFrame").src="about:blank";
+  showPhase("entry");
+};
+
+const hash=location.hash.replace("#","");
+showPhase(hash==="calendar"?"calendar":hash==="recs"?"recs":"entry");
 })();
 </script>
-</body></html>
+</body>
+</html>

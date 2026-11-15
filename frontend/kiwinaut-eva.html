@@ -52,17 +52,16 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(22px,3vw,34px);lin
 .nav{display:flex;gap:18px;margin-top:8px;pointer-events:auto;flex-wrap:wrap}
 .nav a{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:2px;transition:color .3s var(--ease),border-color .3s var(--ease)}
 .nav a:hover{color:var(--kiwi-bright);border-color:var(--line2)}
-/* Embed: parent shell owns logo, slogan, and nav — keep the stage clean */
+/* Embed: parent topnav owns the logo lockup — keep the big slogan + page nav on the stage */
 body.embed .brand .lock,
-body.embed .brand h1,
-body.embed .brand .value-line,
-body.embed .brand .nav,
 body.embed .go-dlco{display:none!important}
-body.embed .brand{display:none}
-body.embed .ui{padding-top:108px}
+body.embed .brand{display:grid;pointer-events:none;max-width:min(560px,100%)}
+body.embed .brand .nav{pointer-events:auto}
+body.embed .ui{padding-top:88px}
 body.embed .keys{padding-top:4px}
 @media (max-width:820px){
-  body.embed .ui{padding-top:132px}
+  body.embed .ui{padding-top:118px}
+  body.embed .brand{min-height:0}
 }
 .go-dlco{display:none}
 
@@ -227,7 +226,7 @@ body.embed .keys{padding-top:4px}
     <div class="lock"><img src="brand/kiwinaut-mark.png" width="26" height="26" alt="Kiwinaut logo"><span class="name">Kiwinaut</span><span class="tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
     <h1 id="title">Small test for extra spacewalk time.</h1>
     <p class="value-line">Extra safe hours outside. Work longer, smarter, safer.</p>
-    <nav class="nav" aria-label="Pages"><a href="/">← Main flow</a><a href="/eva-calc.html">EVA calculator</a></nav>
+    <nav class="nav" aria-label="Pages"><a href="/" id="navMain">← Main flow</a><a href="/eva-calc.html" id="navCalc">EVA calculator</a></nav>
   </header>
 
   <section class="keys" aria-label="Key numbers" aria-live="polite">
@@ -1556,7 +1555,12 @@ function hud(r){
 const qs=new URLSearchParams(location.search);
 {const qp=qs.get("preset");if(qp&&PRESETS[qp]){presetName=qp;inp={...PRESETS[qp]};document.querySelectorAll("[data-p]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.p===qp))}}
 symOn=new Set(inp.sym?["joint","fatigue"]:[]);
-if(qs.get("embed")==="1")document.body.classList.add("embed");
+if(qs.get("embed")==="1"){
+  document.body.classList.add("embed");
+  const navMain=$("navMain"),navCalc=$("navCalc");
+  if(navMain){navMain.href="#";navMain.onclick=e=>{e.preventDefault();try{parent.postMessage({type:"kiwinaut-start-spacewalk"},location.origin)}catch(_){}}}
+  if(navCalc){navCalc.href="#";navCalc.onclick=e=>{e.preventDefault();try{parent.postMessage({type:"kiwinaut-start-dlco"},location.origin)}catch(_){}}}
+}
 setLoc(LOCS[qs.get("loc")]?qs.get("loc"):"iss",false);
 {const qc=qs.get("chapter"),map={suit:"suit",prebreathe:"pre",pre:"pre",eva:"eva",return:"ret",ret:"ret",test:"test",debrief:"debrief"};
   if(qc&&map[qc]){const p=plan.phases.find(x=>x.chap===map[qc]&&!x.cut);if(p)simT=p.t0+.01}
