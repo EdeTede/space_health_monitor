@@ -1088,7 +1088,7 @@ function poseAt(plan,t,clock,inten){
 
 /* =====================  sim state, HUD, panels  ===================== */
 let plan=null,simT=0,playing=false,playMode="manual",camMode=reduce?"free":"cine",lastCoachKey="",bannerKey="";
-const AUTO_SPEED=6; /* auto play runs ~6× faster for the front-page loop */
+const AUTO_SPEED=4.5; /* auto play — slightly eased from 6× for a calmer front-page loop */
 const dAcc=new Set(),dSnz=new Set();
 const fmtClock=m=>{m=Math.max(0,m);const h=Math.floor(m/60),mm=Math.floor(m%60);return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0")};
 const fmtH=h=>(h>=0?"+":"−")+Math.abs(h).toFixed(1)+" h";
