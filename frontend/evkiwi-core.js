@@ -180,7 +180,7 @@ function weekHtml(id,{interactive=true,compact=false}={}){
   let s=`<div class="week" style="--h:${hgt}px">`;
   s+=`<div class="hraxis">${Array.from({length:9},(_,i)=>`<span style="top:${i*2*px}px">${String(H0+i*2).padStart(2,'0')}</span>`).join('')}</div>`;
   for(let d=0;d<7;d++){
-    s+=`<div class="day${d===0?' today':''}"><div class="dh">${d===0?'Today':dayName(d)}<small>${dayDate(d).getDate()}</small></div><div class="col">`;
+    s+=`<div class="day${d===0?' is-today':''}"><div class="dh">${d===0?'Today':dayName(d)}<small>${dayDate(d).getDate()}</small></div><div class="col">`;
     for(const e of P.filter(x=>x.day===d)){const top=(e.start-H0)*px,h=Math.max(e.dur*px,14);
       s+=`<div class="blk t-${e.type}${e.cancelled?' cancelled':''}${e.changed?' changed':''}${conf.has(e.id)?' conflict':''}" style="top:${top}px;height:${h}px" title="${esc(e.title)} · ${fmtTime(e.start)}–${fmtTime(e.start+e.dur)}"><b>${esc(e.title)}</b>${h>26?`<span>${fmtTime(e.start)}${e.sub?' · '+esc(e.sub):''}</span>`:''}</div>`}
     for(const g of ghosts.filter(x=>x.day===d)){const top=(g.start-H0)*px,h=Math.max(g.dur*px,14);

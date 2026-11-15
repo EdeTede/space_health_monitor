@@ -76,7 +76,38 @@ def health() -> HealthOut:
 
 @app.get("/")
 def index() -> FileResponse:
+    """Simple sign-in: astronaut or mission planner, then their own home."""
+    return _page("home.html")
+
+
+@app.get("/home.html")
+def home_page() -> FileResponse:
+    return _page("home.html")
+
+
+@app.get("/flow")
+def main_flow() -> FileResponse:
     return _page("index.html")
+
+
+@app.get("/astronaut.html")
+def astronaut_home() -> FileResponse:
+    return _page("astronaut.html")
+
+
+@app.get("/mission-control.html")
+def mission_control() -> FileResponse:
+    return _page("mission-control.html")
+
+
+@app.get("/evkiwi-core.js")
+def evkiwi_core() -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / "evkiwi-core.js", media_type="application/javascript")
+
+
+@app.get("/evkiwi.css")
+def evkiwi_css() -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / "evkiwi.css", media_type="text/css")
 
 
 @app.get("/index.html")

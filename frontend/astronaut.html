@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EVKIWI · My health</title>
+<link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="evkiwi.css">
+<style>
+.today{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;padding:24px}
+.state{font-family:var(--display);font-weight:800;font-size:clamp(44px,8vw,72px);line-height:.95;letter-spacing:-.01em}
+.greet{font-size:18px;color:var(--dim)}
+.why{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:10px;font-size:14px;color:var(--dim)}
+.why b{color:var(--fg);font-weight:600}
+.today .side{display:grid;gap:10px;justify-items:end;text-align:right}
+.hours{font-family:var(--display);font-size:30px;color:var(--kiwi);font-weight:700}
+.hours small{font-family:var(--mono);font-size:11px;color:var(--dim);display:block;letter-spacing:.1em;text-transform:uppercase;font-weight:400}
+.sec{margin-top:26px}
+.sec>h2{font-family:var(--display);font-size:22px;margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.graphs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.graphs .panel{padding:16px}
+.graphs .wide{grid-column:span 2}
+.plan{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.recs{display:grid;gap:10px}
+.calwrap{overflow:hidden}
+.todaylist{display:none;list-style:none;margin:0;padding:0;gap:8px}
+.todaylist li{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;border-left:3px solid;background:rgba(255,255,255,.04)}
+.todaylist time{font-family:var(--mono);font-size:13px;color:var(--dim)}
+.todaylist small{display:block;color:var(--dim);font-size:12px}
+.feelbtn{font-size:16px;padding:14px 20px}
+@media (max-width:980px){.graphs{grid-template-columns:1fr 1fr}.graphs .wide{grid-column:span 2}.plan{grid-template-columns:1fr}}
+@media (max-width:700px){
+  .today{grid-template-columns:1fr;text-align:left}.today .side{justify-items:start;text-align:left}
+  .graphs{grid-template-columns:1fr}.graphs .wide{grid-column:auto}
+  .calwrap{display:none}.todaylist{display:grid}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/astronaut.html"><img src="brand/kiwinaut-mark.png" alt=""><span><b>EVKIWI</b><small>My health</small></span></a>
+    <div class="who">
+      <span class="avatar" id="av">--</span>
+      <span><span class="n" id="nm">—</span><br><span class="r" id="rl">Astronaut</span></span>
+      <a class="btn small" href="/?switch=1" id="switch">Switch user</a>
+    </div>
+  </header>
+
+  <section class="panel today" aria-live="polite">
+    <div class="dial" id="dial"></div>
+    <div>
+      <div class="greet" id="greet">Hi</div>
+      <div class="state" id="state">—</div>
+      <div class="why" id="why"></div>
+    </div>
+    <div class="side">
+      <div class="hours"><span id="hrs">+0.0 h</span><small>safe EVA time this mission</small></div>
+      <button class="btn primary feelbtn" id="feelBtn" type="button">Log how I feel</button>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>My health <span class="lbl">sample data · updated today</span></h2>
+    <div class="graphs" id="graphs"></div>
+  </section>
+
+  <section class="sec">
+    <h2>My week <span class="lbl" id="weekLbl"></span></h2>
+    <div class="plan">
+      <div class="panel calwrap"><div id="week"></div>
+        <div class="legend"><span><i class="t-eva"></i>EVA</span><span><i class="t-pre"></i>Prebreathe</span><span><i class="t-ared"></i>ARED</span><span><i class="t-t2"></i>T2 / CEVIS</span><span><i class="t-dlco"></i>DLCO test</span><span><i class="t-water"></i>Water</span><span><i class="t-rest"></i>Rest / sleep</span><span style="color:var(--kiwi)">⬚ dashed = suggested change</span></div>
+      </div>
+      <ul class="todaylist panel" id="todayList" aria-label="Today"></ul>
+      <div>
+        <div class="lbl" style="margin-bottom:10px">Suggested changes</div>
+        <div class="recs" id="recs"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">Sample data and an illustrative model. Decision support only, confirmed by the crew medical officer. Not an official NASA product. · <a href="kiwinaut-eva.html">Open 3D spacewalk</a></p>
+</div>
+
+<dialog id="feel" aria-labelledby="feelT">
+  <form method="dialog" id="feelForm" style="display:grid;gap:18px">
+    <div><h2 id="feelT" style="margin:0;font-family:var(--display)">How do you feel?</h2><p class="muted" style="margin:6px 0 0">Tap anything you notice. It updates your status and suggestions.</p></div>
+    <div class="toggles" id="symT"></div>
+    <div>
+      <div class="lbl" style="margin-bottom:8px">Water today · <span id="waterV">0</span> ml</div>
+      <div class="toggles"><button type="button" class="tog" data-w="250">+250 ml</button><button type="button" class="tog" data-w="500">+500 ml</button><button type="button" class="tog" data-w="-250">−250 ml</button></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn" value="cancel" type="submit">Cancel</button><button class="btn primary" id="feelSave" value="save" type="submit">Save</button></div>
+  </form>
+</dialog>
+
+<script src="evkiwi-core.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),E=EVK;
+const sess=E.getSession();
+const qs=new URLSearchParams(location.search);
+// planners may open a crew member's view (read + act as planner); astronauts see their own
+let id=sess?.kind==='astronaut'?sess.id:(sess?.kind==='planner'?(qs.get('crew')||'lee'):null);
+if(!id){location.replace('/');return}
+const asPlanner=sess.kind==='planner';
+const me=E.CREW.find(c=>c.id===id);
+$('av').textContent=me.initials;$('nm').textContent=me.name;$('rl').textContent=asPlanner?`Viewed by ${sess.name}`:me.role;
+if(asPlanner){$('switch').textContent='← Mission control';$('switch').href='/mission-control.html'}
+
+function dial(sc){const c=301.6,off=c*(1-sc.s/100);
+  return`<svg viewBox="0 0 120 120" aria-label="DRI score ${sc.s}"><circle cx="60" cy="60" r="48" fill="none" stroke="rgba(142,224,79,.12)" stroke-width="10"/><circle cx="60" cy="60" r="48" fill="none" stroke="${sc.color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset .8s"/><text x="60" y="62" text-anchor="middle" fill="#eef6e8" font-family="Syne,sans-serif" font-size="30" font-weight="700">${sc.s}</text><text x="60" y="80" text-anchor="middle" fill="#93a68f" font-family="IBM Plex Mono,monospace" font-size="8" letter-spacing="1.5">DRI SCORE</text></svg>`}
+function render(){
+  const sc=E.score(id),m=E.metrics(id),nx=E.nextEva(id),h=E.hours(id);
+  $('dial').innerHTML=dial(sc);
+  $('greet').textContent=`Hi ${me.first} · ${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}`;
+  $('state').textContent=sc.word;$('state').style.color=sc.color;
+  $('why').innerHTML=`<span>DLCO <b>${m.dlcoNow}%</b></span><span>Water <b>${m.hydration}%</b></span><span>Bubbles <b>G${m.bub}</b></span><span>Next EVA <b>${nx?nx.label:'none'}</b></span>${m.symptoms.length?`<span style="color:var(--amber)">Symptoms logged</span>`:''}`;
+  $('hrs').textContent=`+${h.toFixed(1)} h`;
+  $('graphs').innerHTML=E.graphs(id,{wideBone:true}).map((g,i)=>`<div class="panel gcard${i===0?' wide':''}"><div class="gt"><span class="lbl">${g.title}</span><span class="flag ${g.ok?'ok':'watch'}">${g.ok?'on track':'watch'}</span></div><div class="big">${g.big}</div><div class="sub">${g.sub}</div>${g.svg}</div>`).join('');
+  $('week').innerHTML=E.weekHtml(id);
+  $('weekLbl').textContent=`${E.dayName(0,true)} – ${E.dayName(6,true)}`;
+  const recs=E.recList(id);
+  $('todayList').innerHTML=E.todayList(id)||'<li>Nothing planned today.</li>';
+  $('recs').innerHTML=recs.length?recs.map(r=>{
+    const done=r.status!=='open',label={accepted:r.by==='planner'?'Approved by planner':'Accepted',snoozed:'Snoozed',rejected:'Declined by planner'}[r.status];
+    return`<div class="rec${done?' done':''}" data-card="${r.op}"><div class="t">${r.title}</div><div class="why">because ${r.reason}</div><div class="h">${r.h>0?`+${r.h.toFixed(1)} h safe EVA time`:'protects health first'}</div><div class="ops">${done?`<span class="tag">${label}</span>${r.status!=='rejected'?`<button class="btn small" data-act="reset" data-op="${r.op}">Undo</button>`:''}`:`<button class="btn primary small" data-act="accept" data-op="${r.op}">Accept</button><button class="btn small" data-act="snooze" data-op="${r.op}">Snooze</button>`}</div></div>`}).join(''):'<div class="panel muted">No changes needed. Your week looks good.</div>';
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(b){E.act(id,b.dataset.op,b.dataset.act,asPlanner?'planner':'astronaut');render();return}
+  const g=e.target.closest('.blk.ghost[data-rec]');if(g){const c=document.querySelector(`[data-card="${g.dataset.rec}"]`);if(c){c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('flash');setTimeout(()=>c.classList.remove('flash'),1600)}}
+});
+/* log how I feel */
+let draft=null;
+$('symT').innerHTML=E.SYMPTOMS.map(([k,n])=>`<button type="button" class="tog" data-s="${k}" aria-pressed="false">${n}</button>`).join('');
+$('feelBtn').onclick=()=>{const f=E.feel(id);draft={symptoms:[...f.symptoms],water:f.water};paintFeel();$('feel').showModal()};
+function paintFeel(){document.querySelectorAll('#symT [data-s]').forEach(b=>b.setAttribute('aria-pressed',draft.symptoms.includes(b.dataset.s)));$('waterV').textContent=draft.water.toLocaleString('en-GB')}
+$('symT').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;const k=b.dataset.s;draft.symptoms=draft.symptoms.includes(k)?draft.symptoms.filter(x=>x!==k):[...draft.symptoms,k];paintFeel()};
+document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{draft.water=Math.max(0,Math.min(4000,draft.water+ +b.dataset.w));paintFeel()});
+$('feel').addEventListener('close',()=>{if($('feel').returnValue==='save'&&draft){E.setFeel(id,draft);render()}});
+addEventListener('storage',e=>{if(e.key==='evkiwi-crew-v1'){EVK.load&&location.reload()}});
+render();
+window._ast={render,id};
+})();
+</script>
+</body>
+</html>
