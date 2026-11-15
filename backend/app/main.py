@@ -9,6 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from app.db import FRONTEND_ROOT
 from app.models import HealthOut
 from app.routers import decompress
+# Mission dashboard (bone twin, Sense → Score → Adapt) — restored alongside the decompress gate
+from app.legacy.db import init_db as legacy_init_db
+from app.legacy.routers import adapt as legacy_adapt, crew as legacy_crew, mission as legacy_mission, scenarios as legacy_scenarios, score as legacy_score, sense as legacy_sense, twin as legacy_twin
 
 app = FastAPI(
     title="Kiwinaut",
@@ -24,6 +27,13 @@ app.add_middleware(
 )
 
 app.include_router(decompress.router)
+for _r in (legacy_crew, legacy_mission, legacy_sense, legacy_score, legacy_adapt, legacy_twin, legacy_scenarios):
+    app.include_router(_r.router)
+
+
+@app.on_event("startup")
+def _legacy_startup() -> None:
+    legacy_init_db()
 
 # Explicit allow-list: never expose arbitrary files from the project root.
 @app.get("/planner.html")
@@ -78,6 +88,17 @@ def index_html() -> FileResponse:
 def dosefit_future_alias() -> FileResponse:
     """Legacy alias for the main shell."""
     return _page("index.html")
+
+
+@app.get("/dosefit.html")
+@app.get("/dashboard")
+def mission_dashboard() -> FileResponse:
+    return _page("dosefit.html")
+
+
+@app.get("/dosefit-exercise.html")
+def mission_exercise() -> FileResponse:
+    return _page("dosefit-exercise.html")
 
 
 @app.get("/kiwinaut-eva.html")
