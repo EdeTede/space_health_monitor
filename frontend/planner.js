@@ -17,7 +17,21 @@
   function selectedEVA(){return evas().find(e=>e.id===state.eva)||evas().find(e=>e.start>=state.now)||evas().at(-1);}
   function status(e){return M.end(e)<=state.now?'Past · simulated':e.start>state.now?'Planned':'In progress · simulated';}
   const stressLabel=n=>`${n>0?'+':''}${n} pts`;
-  function setView(v){view=v==='recs'?'recs':'calendar';$('calendarView').hidden=view!=='calendar';$('recommendationsView').hidden=view!=='recs';$('pageTitle').textContent=view==='calendar'?'Crew calendar':'EVA recommendations';$('calendarTab').classList.toggle('active',view==='calendar');$('recommendationsTab').classList.toggle('active',view==='recs');if(window.parent!==window)window.parent.postMessage({type:'kiwinaut-planner-view',view},location.origin);render();}
+  function setView(v,opts={}){
+    const next=v==='recs'?'recs':'calendar';
+    const changed=next!==view;
+    view=next;
+    $('calendarView').hidden=view!=='calendar';
+    $('recommendationsView').hidden=view!=='recs';
+    $('pageTitle').textContent=view==='calendar'?'Crew calendar':'EVA recommendations';
+    $('calendarTab').classList.toggle('active',view==='calendar');
+    $('recommendationsTab').classList.toggle('active',view==='recs');
+    // Only notify parent on real user-driven view changes — avoids embed reload loops.
+    if(changed&&!opts.fromParent&&window.parent!==window){
+      window.parent.postMessage({type:'kiwinaut-planner-view',view},location.origin);
+    }
+    render();
+  }
   function render(){
     $('crew').innerHTML=state.crews.map(c=>`<option value="${c.id}" ${c.id===state.crew?'selected':''}>${esc(c.name)} · ${esc(c.role)}</option>`).join('');
     $('clock').value=dt(state.now);$('date').value=state.date;
@@ -128,6 +142,10 @@
   $('editProfile').onclick=()=>{const c=profile();$('profileName').value=c.name;$('profileRole').value=c.role;$('profileHR').value=c.hr;$('profileStress').value=c.stress;$('profileDialog').showModal();};
   $('profileForm').onsubmit=e=>{e.preventDefault();Object.assign(profile(),{name:$('profileName').value.trim(),role:$('profileRole').value.trim(),hr:+$('profileHR').value,stress:+$('profileStress').value});save();$('profileDialog').close();render();};
   $('sourceLinks').innerHTML=Object.entries(M.sources).map(([k,url])=>`<a href="${url}" target="_blank" rel="noopener">${esc(k)} ↗</a>`).join('');
-  addEventListener('message',e=>{if(e.origin===location.origin&&e.source===parent&&e.data?.type==='kiwinaut-planner-navigate')setView(e.data.view);});
-  setView(new URLSearchParams(location.search).get('view'));save();
+  addEventListener('message',e=>{
+    if(e.origin!==location.origin||e.source!==parent||e.data?.type!=='kiwinaut-planner-navigate')return;
+    setView(e.data.view,{fromParent:true});
+  });
+  setView(new URLSearchParams(location.search).get('view'),{fromParent:true});
+  save();
 })();

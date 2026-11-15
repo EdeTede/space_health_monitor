@@ -118,8 +118,7 @@ a.link{text-decoration:none}
 .meta{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim)}
 .meta b{color:var(--fg);font-weight:500}
 .coach{font-family:var(--mono);font-size:13px;line-height:1.55;min-height:3.2em;border:1px solid rgba(142,224,79,.22);border-radius:4px;padding:12px;background:rgba(0,0,0,.38);color:var(--holo);margin-top:12px}
-.coach .cursor{display:inline-block;width:8px;height:1.1em;background:var(--holo);margin-left:2px;vertical-align:-2px;animation:blink 1s step-end infinite}
-@keyframes blink{50%{opacity:0}}
+.coach .cursor{display:none}
 .why{display:grid;gap:6px}
 .why .hit{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:7px 9px;border-radius:4px;background:rgba(142,224,79,.05);border:1px solid rgba(142,224,79,.1)}
 .why .hit b{font-family:var(--mono);font-weight:500}
@@ -127,8 +126,7 @@ a.link{text-decoration:none}
 .plan{margin:0;font-size:13px;line-height:1.5;color:var(--dim)}
 .plan b{color:var(--fg)}
 .cards{display:grid;gap:8px;margin-top:12px}
-.acard{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:start;padding:14px;border:1px solid var(--edge);border-radius:6px;background:rgba(8,18,32,.95);transform:translateX(22px);opacity:0;transition:transform .45s ease,opacity .45s ease,border-color .3s}
-.acard.in{transform:none;opacity:1}
+.acard{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:start;padding:14px;border:1px solid var(--edge);border-radius:6px;background:rgba(8,18,32,.95);opacity:1;transition:border-color .2s}
 .acard.accepted{border-color:var(--ok);background:rgba(94,240,194,.1)}
 .acard .ico{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;font-family:var(--mono);font-size:11px;border:1px solid currentColor}
 .acard .t{font-family:var(--display);font-size:16px;line-height:1.2}
@@ -150,10 +148,6 @@ a.link{text-decoration:none}
 }
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .section-head .lbl{margin:0}
-@media (prefers-reduced-motion:reduce){
-  .acard{transition:none;transform:none;opacity:1}
-  .coach .cursor{animation:none}
-}
 </style>
 </head>
 <body>
@@ -289,19 +283,24 @@ function syncNav(name){
 
 function ensurePlanner(frame, view){
   if(!frame.src.includes("planner.html")){
-    frame.src="/planner.html?view="+view;
-  }else if(frame.contentWindow){
+    frame.src="/planner.html?view="+view+"&v=2";
+    return;
+  }
+  // Already loaded — ask for a quiet view switch (no parent echo).
+  if(frame.contentWindow){
     frame.contentWindow.postMessage({type:"kiwinaut-planner-navigate",view},location.origin);
   }
 }
 
 function showPhase(name){
+  const same=phase===name;
   phase=name;
   $("phaseEntry").hidden=name!=="entry";
   $("phaseCalc").hidden=name!=="calc";
   $("phaseCalendar").hidden=name!=="calendar";
   $("phaseRecs").hidden=name!=="recs";
   syncNav(name);
+  if(same&&(name==="calendar"||name==="recs"))return;
 
   if(name!=="entry"){
     if($("entryFrame").src && !$("entryFrame").src.endsWith("about:blank")){
@@ -421,29 +420,25 @@ function coachText(res){
   return "CDR Lee: GREEN · standard exercise prebreathe · DLCO +3 h / +24 h after ingress.";
 }
 function typeCoach(text){
-  clearInterval(coachTimer);const el=$("coachText");el.textContent="";
-  if(reduce){el.textContent=text;return}
-  let i=0;coachTimer=setInterval(()=>{el.textContent=text.slice(0,++i);if(i>=text.length)clearInterval(coachTimer)},14);
+  clearInterval(coachTimer);
+  $("coachText").textContent=text;
 }
 function sweep(score){
   const arc=$("dialArc"),circ=2*Math.PI*48,target=circ*(1-score/100);
-  const prev=parseInt($("dialScore").dataset.prev||"0",10);
-  arc.style.transition=reduce?"none":"stroke-dashoffset .7s ease";
+  arc.style.transition="none";
   arc.style.strokeDashoffset=String(target);
-  if(reduce){$("dialScore").textContent=score;$("dialScore").dataset.prev=score;return}
-  const t0=performance.now();
-  (function step(now){const u=Math.min(1,(now-t0)/700),e=1-Math.pow(1-u,3);$("dialScore").textContent=Math.round(prev+(score-prev)*e);if(u<1)requestAnimationFrame(step);else{$("dialScore").textContent=score;$("dialScore").dataset.prev=String(score)}})(t0);
+  $("dialScore").textContent=score;
+  $("dialScore").dataset.prev=String(score);
 }
 function renderCards(res){
   cardTimers.forEach(clearTimeout);cardTimers=[];
   const box=$("cards");box.innerHTML="";
-  cardsFrom(res).forEach((c,i)=>{
+  cardsFrom(res).forEach(c=>{
     const el=document.createElement("div");
-    el.className="acard"+(c.ok?" accepted in":"");el.dataset.id=c.id;
+    el.className="acard"+(c.ok?" accepted":"");el.dataset.id=c.id;
     const ops=c.ok?'<span class="r">Accepted</span>':'<button type="button" class="ok" data-act="accept">Accept</button><button type="button" data-act="snooze">Snooze</button>';
     el.innerHTML=`<div class="ico" style="color:${c.c}">${c.ico}</div><div><div class="t">${c.t}</div><div class="r">${c.r}</div></div><div class="ops">${ops}</div>`;
     box.appendChild(el);
-    if(!c.ok)cardTimers.push(setTimeout(()=>el.classList.add("in"),reduce?0:90+i*110));
   });
 }
 function planText(res){
@@ -508,8 +503,17 @@ addEventListener("message",e=>{
   if(e.data&&e.data.type==="kiwinaut-start-recs")goRecsFromCalc();
   if(e.data&&e.data.type==="kiwinaut-planner-view"){
     const view=e.data.view==="recs"?"recs":"calendar";
-    if(view==="calendar")showPhase("calendar");
-    else showPhase("recs");
+    // Sync shell nav only — never bounce showPhase back into the iframe (that caused flashing).
+    if(view!==phase){
+      phase=view;
+      $("phaseEntry").hidden=true;
+      $("phaseCalc").hidden=true;
+      $("phaseCalendar").hidden=view!=="calendar";
+      $("phaseRecs").hidden=view!=="recs";
+      syncNav(view);
+      if(view==="calendar")ensurePlanner($("calendarFrame"),"calendar");
+      else ensurePlanner($("recsPlannerFrame"),"recs");
+    }else syncNav(view);
   }
 });
 
