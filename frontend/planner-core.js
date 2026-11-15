@@ -36,7 +36,7 @@
   const clone=x=>JSON.parse(JSON.stringify(x));
   function seed() {
     const day=Date.parse('2026-11-15T00:00:00Z');
-    const crews=[{id:'lee',name:'Alex Lee',role:'Commander',hr:62,stress:28},{id:'rivera',name:'Sam Rivera',role:'Flight engineer',hr:68,stress:34},{id:'chen',name:'Jamie Chen',role:'Science officer',hr:59,stress:24}];
+    const crews=[{id:'lee',name:'Jiaqi Chen',role:'Commander',hr:62,stress:28},{id:'rivera',name:'Marco Duchamp',role:'Flight engineer',hr:68,stress:34},{id:'chen',name:'Eduard Dante',role:'Science officer',hr:59,stress:24}];
     const events=[];
     crews.forEach((c,i)=>{
       const add=(t,start,duration,link=null)=>{const x={id:`${c.id}-${events.length}`,crew:c.id,task:t,start:day+start*MIN,duration,origin:'Demo mission',link,baselineHR:c.hr};events.push(x);return x;};

@@ -265,8 +265,9 @@ a.link{text-decoration:none}
   width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
   background:rgba(142,224,79,.15);font-family:var(--display);font-weight:700;color:var(--holo);
 }
-.crew-pick .n{font-weight:600;font-size:14px}
-.crew-pick .r{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px}
+.crew-pick .meta{display:grid;gap:2px;min-width:0}
+.crew-pick .n{font-weight:600;font-size:14px;display:block}
+.crew-pick .r{font-family:var(--mono);font-size:11px;color:var(--dim);display:block}
 .login-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
 </style>
 </head>
@@ -281,12 +282,14 @@ a.link{text-decoration:none}
     <p class="topnav-slogan">Small test for extra spacewalk time.</p>
   </div>
   <nav class="topnav-actions" aria-label="Primary">
-    <button type="button" class="link nav-role" data-roles="guest,astronaut" id="navSpace" data-go="entry">Spacewalk</button>
-    <button type="button" class="link nav-role" data-roles="astronaut" id="navDlco" data-go="calc">DLCO test</button>
+    <button type="button" class="link nav-role" data-roles="guest,astronaut,planner" id="navSpace" data-go="entry">Spacewalk</button>
+    <button type="button" class="link nav-role" data-roles="astronaut,planner" id="navDlco" data-go="calc">DLCO test</button>
     <button type="button" class="link nav-role" data-roles="astronaut,planner" id="navCalendar" data-go="calendar">Calendar</button>
-    <button type="button" class="link nav-role" data-roles="astronaut" id="navRecs" data-go="recs">Recommendations</button>
+    <button type="button" class="link nav-role" data-roles="astronaut,planner" id="navRecs" data-go="recs">Recommendations</button>
+    <a class="link nav-role" data-roles="astronaut" id="navMine" href="/astronaut.html">My health</a>
+    <a class="link nav-role" data-roles="planner" id="navMc" href="/mission-control.html">Mission control</a>
     <a class="link nav-role" data-roles="planner" id="navDash" href="/dosefit.html" title="Bone twin, training bay, Decompress view and recommendations hub">Mission dashboard</a>
-    <button type="button" class="pill nav-role" data-roles="astronaut" id="navEnter" data-go="calc">Enter DRI</button>
+    <button type="button" class="pill nav-role" data-roles="astronaut,planner" id="navEnter" data-go="calc">Enter DRI</button>
     <div class="login-btns" id="loginBtns">
       <button type="button" class="astro-btn" id="astroLogin" aria-haspopup="dialog">
         <span class="mark" aria-hidden="true">A</span>
@@ -476,9 +479,9 @@ const DAYS={150:{name:"EVA week",note:"Airlock window. DLCO gate is prime. Exerc
 const ENTRY_SRC="/kiwinaut-eva.html?embed=1&auto=1&v=13";
 const SESSION_KEY="evkiwi-session";
 const CREW=[
-  {id:"lee",name:"Alex Lee",role:"Commander",initials:"AL",kind:"astronaut"},
-  {id:"rivera",name:"Sam Rivera",role:"Flight engineer",initials:"SR",kind:"astronaut"},
-  {id:"chen",name:"Jamie Chen",role:"Science officer",initials:"JC",kind:"astronaut"}
+  {id:"lee",name:"Jiaqi Chen",role:"Commander",initials:"JC",kind:"astronaut"},
+  {id:"rivera",name:"Marco Duchamp",role:"Flight engineer",initials:"MD",kind:"astronaut"},
+  {id:"chen",name:"Eduard Dante",role:"Science officer",initials:"ED",kind:"astronaut"}
 ];
 const PLANNERS=[
   {id:"morgan",name:"Morgan Okonkwo",role:"Flight planner",initials:"MO",kind:"planner",crew:"lee"},
@@ -507,7 +510,8 @@ const hoursLog=new Map();
 
 function loadSession(){
   try{
-    const raw=JSON.parse(sessionStorage.getItem(SESSION_KEY));
+    let raw=JSON.parse(sessionStorage.getItem(SESSION_KEY));
+    if(!raw){const r=JSON.parse(localStorage.getItem("evkiwi-role")||"null");if(r)raw={id:r.id,name:r.name,role:r.role,kind:r.kind,crew:r.kind==="planner"?(r.crew||"lee"):r.id}}
     session=ALL_PROFILES.some(c=>c.id===raw?.id&&c.kind===(raw?.kind||"astronaut"))?raw:null;
   }catch{session=null}
 }
@@ -522,6 +526,7 @@ function saveSession(profile){
       crew:profile.kind==="planner"?(profile.crew||"lee"):profile.id
     };
     sessionStorage.setItem(SESSION_KEY,JSON.stringify(session));
+    try{localStorage.setItem("evkiwi-role",JSON.stringify({kind:session.kind,id:session.id,name:session.name,role:session.role,crew:session.crew}))}catch{}
   }
   paintSession();
   pushCrewToPlanners();
@@ -538,8 +543,7 @@ function paintNavForRole(){
     el.hidden=!roles.includes(role);
   });
   $("navCalendar").textContent=role==="planner"?"Calendar optimization":"Calendar";
-  // Keep planner off astronaut-only phases if they somehow land there.
-  if(role==="planner"&&(phase==="recs"||phase==="calc"))showPhase("calendar");
+  // Planners get every phase (full view); astronauts have their own home at /astronaut.html.
   if(role==="astronaut"&&phase==="entry"&&session){/* stay */}
 }
 function paintSession(){
@@ -929,7 +933,7 @@ function renderLoginPicks(){
   $("modePlanner").setAttribute("aria-selected",loginMode==="planner"?"true":"false");
   picks.innerHTML=list.map(c=>`<button type="button" class="crew-pick" data-id="${c.id}" role="option">
     <span class="av" aria-hidden="true">${c.initials}</span>
-    <span><span class="n">${c.name}</span><span class="r">${c.role} · demo profile</span></span>
+    <span class="meta"><span class="n">${c.name}</span><span class="r">${c.role} · demo profile</span></span>
   </button>`).join("");
 }
 function openLogin(mode){
@@ -953,6 +957,8 @@ $("astroLogin").onclick=()=>openLogin("astronaut");
 $("plannerLogin").onclick=()=>openLogin("planner");
 $("astroOut").onclick=()=>{
   saveSession(null);
+  try{localStorage.removeItem("evkiwi-role")}catch{}
+  location.href="/?logout=1";return;
   $("calendarFrame").src="about:blank";
   $("recsPlannerFrame").src="about:blank";
   if(phase==="calendar"||phase==="recs")showPhase("entry");
@@ -987,8 +993,7 @@ paintSession();
 const hash=location.hash.replace("#","");
 const role=roleKey();
 if(role==="planner"){
-  showPhase(hash==="entry"?"entry":"calendar");
-  if(hash!=="calendar")location.hash="calendar";
+  showPhase(["entry","calc","recs","calendar"].includes(hash)?hash:"calendar");
 }else if(session && (hash==="calendar"||hash==="recs"||!hash)){
   showPhase(hash==="recs"?"recs":"calendar");
 }else{
