@@ -258,7 +258,6 @@ body.landing .keys{opacity:.92}
   <h2>Extra safe hours outside.</h2>
   <p>Work longer, smarter, safer. Live DCS risk for every spacewalk.</p>
   <div class="lv on" id="lv0">
-    <div id="lvCont"></div>
     <button type="button" class="lbtn" data-lv="1"><span>I’m an astronaut</span><small>my health</small></button>
     <button type="button" class="lbtn pl" data-lv="2"><span>Mission planner</span><small>whole crew</small></button>
     <div class="lrow"><button type="button" class="lghost" id="explore">Explore the full spacewalk →</button><span class="lghost" style="cursor:default">Sample data · demo sign-in</span></div>
@@ -1649,12 +1648,7 @@ function setupLanding(){
   if(qs.get("logout")==="1"&&E){E.clearSession();history.replaceState(null,"","/")}
   const showLv=i=>{for(const k of[0,1,2])$("lv"+k).classList.toggle("on",k===i);if(i===2)setTimeout(()=>$("lpin").focus(),60)};
   const home=s=>location.href=s.kind==="planner"?"/mission-control.html":"/astronaut.html";
-  const s=E&&E.getSession();
-  if(s&&qs.get("switch")!=="1"){
-    const first=s.kind==="planner"?s.name.split(" ")[0]:(E.CREW.find(c=>c.id===s.id)?.first||s.name);
-    $("lvCont").innerHTML=`<button type="button" class="lbtn primary" id="contBtn"><span>Continue as ${esc(first)}</span><small>→</small></button>`;
-    $("contBtn").onclick=()=>home(s);
-  }
+  // Just two choices: Astronaut or Mission planner (no 'continue as' shortcut).
   if(E)$("lvCrew").innerHTML=E.CREW.map(c=>`<button type="button" class="lbtn lpick" data-crew="${c.id}"><span class="lpick"><span class="lav">${c.initials}</span><span>${esc(c.name)}<br><small>${esc(c.role)}</small></span></span><small>→</small></button>`).join("");
   ov.addEventListener("click",e=>{const lv=e.target.closest("[data-lv]");if(lv){showLv(+lv.dataset.lv);return}
     const c=e.target.closest("[data-crew]");if(c&&E){home(E.signInAstronaut(c.dataset.crew))}});
