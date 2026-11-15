@@ -17,7 +17,7 @@ Complete these in the **Project** tab of your team page. Don’t leave the NASA 
 | | |
 |---|---|
 | **Team** | Cosmosaver |
-| **Members** | Jiaqi Chen · Eduard Dante · Marco Duchamp |
+| **Members** | Jiaqi · Eduard · Marco |
 | **Event** | NASA Space Apps Challenge · Lucerne 2026 |
 | **Challenge** | Health monitoring / decompression risk for exploration EVA |
 
