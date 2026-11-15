@@ -10,7 +10,8 @@ const CREW=[
   {id:'rivera',name:'Marco Duchamp',first:'Marco',role:'Flight engineer',initials:'MD',evaDay:3},
   {id:'chen',name:'Eduard Dante',first:'Eduard',role:'Science officer',initials:'ED',evaDay:4}
 ];
-const PLANNER={id:'morgan',name:'Morgan Okonkwo',first:'Morgan',role:'Flight planner',initials:'MO',kind:'planner',crew:'lee'};
+const PLANNER={id:'morgan',name:'Morgan Bettre',first:'Morgan',role:'Mission planner',initials:'MB',kind:'planner',crew:'lee'};
+const PLANNER_MED={id:'riley',name:'Med Evikiwi',first:'Med',role:'Mission ops',initials:'ME',kind:'planner',crew:'lee'};
 /* sample readings per crew member */
 const SAMPLE={
   lee:{dlco:[-0.8,-1.5,-1.1,-2.0,-1.2],bone:{now:98.6,landing:97.9},hr:[62,64,61,63,66,65,64],hrv:[68,66,70,64,61,63,65],water:1900,bub:0,rad:92},
@@ -192,7 +193,7 @@ function weekHtml(id,{interactive=true,compact=false}={}){
 function todayList(id){const P=plan(id).filter(e=>e.day===0).sort((a,b)=>a.start-b.start);const recs=recList(id).filter(r=>r.status==='open');
   return P.map(e=>`<li class="t-${e.type}${e.cancelled?' cancelled':''}"><time>${fmtTime(e.start)}</time><span>${esc(e.title)}${e.sub?`<small>${esc(e.sub)}</small>`:''}</span></li>`).join('')}
 
-root.EVK={CREW,PLANNER,DEMO_PIN,SYMPTOMS,LEVEL,MISSION_DAY,WATER_GOAL,REC_DEFS,TYPES,
+root.EVK={CREW,PLANNER,PLANNER_MED,PLANNERS:[PLANNER,PLANNER_MED],DEMO_PIN,SYMPTOMS,LEVEL,MISSION_DAY,WATER_GOAL,REC_DEFS,TYPES,
   load,save,reset,getSession,setSession,clearSession,signInAstronaut,signInPlanner,
   metrics,score,feel,setFeel,basePlan,plan,recList,ghost,act,hours,conflicts,nextEva,graphs,weekHtml,todayList,dayName,dayDate,fmtTime,esc};
 })(globalThis);
