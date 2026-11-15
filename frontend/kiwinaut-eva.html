@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
-<title>Kiwinaut · Spacewalk</title>
+<title>EVKIWI · Spacewalk</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script>
 /* Served by the backend: use the vendored three.js (works offline).
@@ -223,7 +223,7 @@ body.embed .keys{padding-top:4px}
 
 <div class="ui">
   <header class="brand">
-    <div class="lock"><img src="brand/kiwinaut-mark.png" width="26" height="26" alt="Kiwinaut logo"><span class="name">Kiwinaut</span><span class="tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
+    <div class="lock"><img src="brand/kiwinaut-mark.png" width="26" height="26" alt="EVKIWI logo"><span class="name">EVKIWI</span><span class="tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
     <h1 id="title">Small test for extra spacewalk time.</h1>
     <p class="value-line">Extra safe hours outside. Work longer, smarter, safer.</p>
     <nav class="nav" aria-label="Pages"><a href="/" id="navMain">← Main flow</a><a href="/eva-calc.html" id="navCalc">EVA calculator</a></nav>
@@ -1138,7 +1138,7 @@ $("cards").addEventListener("click",e=>{
 });
 
 /* suit-up checklist */
-const SUIT_STEPS=()=>[...SUIT.map(s=>[s.name,""]),["Suit pressure check","4.3 psi"],["Comms check","loud and clear"],["Biomed sensors · Kiwinaut","HR · SpO₂ linked"]];
+const SUIT_STEPS=()=>[...SUIT.map(s=>[s.name,""]),["Suit pressure check","4.3 psi"],["Comms check","loud and clear"],["Biomed sensors · EVKIWI","HR · SpO₂ linked"]];
 function renderSuit(f){
   const st=SUIT_STEPS(),act=f<.66?Math.floor(f/.11):f<.8?6:f<.88?7:f<.995?8:9;
   const base=`HR ${hrAt(0)} · SpO₂ 99%`;
@@ -1234,7 +1234,7 @@ function setLoc(lk,keepChapter=true){
   $("storm").classList.toggle("show",lk==="mars");
   $("title").textContent="Small test for extra spacewalk time.";
   $("suitWhere").textContent=LOCS[lk].place;
-  document.title="Kiwinaut · "+LOCS[lk].name;
+  document.title="EVKIWI · "+LOCS[lk].name;
   $("dDustL").textContent=lk==="moon"?"Lunar dust":"Dust exposure";
   if(!symTouched)symOn=new Set(inp.sym?["joint","fatigue"]:[]);
   recallT=null;dAcc.clear();dSnz.clear();replan();
@@ -1347,7 +1347,7 @@ function coachFor(t,s){
   if(plan.scrub&&t>=plan.stopAt-.5)return["scrub",`No-go: pressure risk ${Math.round(m.s0)} ≥ ${LIMIT}. EVA scrubbed. Accept recommendations or postpone 24–48 h.`];
   const stormNote=loc==="mars"&&stormOn&&p.chap==="eva"?" · storm workload up":"";
   switch(p.k){
-    case"suit":{const i=f<.66?Math.floor(f/.11):-1;return["suit"+i,i>=0?`Suit up · ${SUIT[i].name.toLowerCase()}.`:f<.8?"Suit pressure check · settling at 4.3 psi · no leaks.":f<.88?"Comms check · loud and clear.":"Biomed sensors online · HR and SpO₂ linked to Kiwinaut · baseline set."]}
+    case"suit":{const i=f<.66?Math.floor(f/.11):-1;return["suit"+i,i>=0?`Suit up · ${SUIT[i].name.toLowerCase()}.`:f<.8?"Suit pressure check · settling at 4.3 psi · no leaks.":f<.88?"Comms check · loud and clear.":"Biomed sensors online · HR and SpO₂ linked to EVKIWI · baseline set."]}
     case"pre":return["pre",m.ex?`Exercise prebreathe on the cycle · ${(m.P/60).toFixed(1)} h · nitrogen washing out.`:`Prebreathe · ${(m.P/60).toFixed(1)} h on 100% O₂ · ${L.cabin} ${loc==="iss"?"cabin":"habitat"}.`];
     case"dep":return["dep",`${loc==="iss"?"Airlock":"Habitat airlock"} depress · suit 4.3 psi · 100% O₂ · leak check good.`];
     case"egr":return["egr",loc==="iss"?"Hatch open · tether hooked · egress head first.":`Door open · step out onto the ${loc==="moon"?"regolith":"Martian surface"} · ${loc==="moon"?"1/6 g":"0.38 g"}.`];

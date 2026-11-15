@@ -1,6 +1,6 @@
-# Kiwinaut backend
+# EVKIWI backend
 
-FastAPI service for the Kiwinaut demo.
+FastAPI service for the EVKIWI demo.
 
 Serves the `../frontend` app and powers **Decompression Test** via the EVA DLCO model (`eva_model.py`, ported from `frontend/model.js`).
 

@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kiwinaut · Mission calendar</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EVKIWI · Mission calendar</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="planner.css">
 <link rel="stylesheet" href="nasa.css"></head><body>
 <main>
-  <div class="eyebrow">KIWINAUT / MISSION OPERATIONS <span class="badge">DEMO MISSION</span></div>
+  <div class="eyebrow">EVKIWI / MISSION OPERATIONS <span class="badge">DEMO MISSION</span></div>
   <header class="pagehead"><div><h1 id="pageTitle">Crew calendar</h1><p>One crew. A shared plan. Every activity in context.</p></div><div class="actions"><button id="calendarTab" class="active">Calendar</button><button id="recommendationsTab">EVA recommendations</button></div></header>
   <div class="notice">Fictional crew and simulated readings. No connection to CSA, ESA or NASA services. All times UTC.</div>
   <section class="toolbar panel" aria-label="Mission controls">
@@ -37,5 +37,5 @@
 <dialog id="profileDialog"><form id="profileForm"><div class="sectionhead"><h2>Crew profile</h2><button type="button" data-close="profileDialog" aria-label="Close profile editor">×</button></div><p class="muted">Fictional profile · these values drive demo traces, not clinical predictions.</p><label>Name<input id="profileName" maxlength="60" required></label><label>Role<input id="profileRole" maxlength="60" required></label><div class="formgrid"><label>Demo resting HR (bpm)<input id="profileHR" type="number" min="40" max="100" required></label><label>Demo baseline stress (0–100)<input id="profileStress" type="number" min="0" max="100" required></label></div><button class="primary">Save profile</button></form></dialog>
 <dialog id="connectionDialog"><div class="sectionhead"><h2>Demo connections</h2><button data-close="connectionDialog" aria-label="Close connections">×</button></div><p class="muted">Adapter interfaces for a future integration. No credentials, remote requests or real health records.</p><div id="connectionContent"></div></dialog>
 <dialog id="scenarioDialog"><div class="sectionhead"><h2>Compare a plan change</h2><button data-close="scenarioDialog" aria-label="Close scenario">×</button></div><div id="scenarioContent"></div><div class="actions"><button data-close="scenarioDialog">Keep current plan</button><button class="primary" id="applyScenario">Apply to demo calendar</button></div></dialog>
-<script src="model.js"></script><script src="planner-core.js"></script><script src="dev-engine.js"></script><script src="dev-bootstrap.js"></script><script src="nasa-model.js"></script><script src="nasa-ui.js"></script><script src="planner.js?v=2"></script>
+<script src="model.js"></script><script src="planner-core.js"></script><script src="dev-engine.js"></script><script src="dev-bootstrap.js"></script><script src="nasa-model.js"></script><script src="nasa-ui.js"></script><script src="planner.js?v=4"></script>
 </body></html>

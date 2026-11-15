@@ -142,23 +142,35 @@
   $('editProfile').onclick=()=>{const c=profile();$('profileName').value=c.name;$('profileRole').value=c.role;$('profileHR').value=c.hr;$('profileStress').value=c.stress;$('profileDialog').showModal();};
   $('profileForm').onsubmit=e=>{e.preventDefault();Object.assign(profile(),{name:$('profileName').value.trim(),role:$('profileRole').value.trim(),hr:+$('profileHR').value,stress:+$('profileStress').value});save();$('profileDialog').close();render();};
   $('sourceLinks').innerHTML=Object.entries(M.sources).map(([k,url])=>`<a href="${url}" target="_blank" rel="noopener">${esc(k)} ↗</a>`).join('');
-  function applyCrew(id){
-    if(!id||!state.crews.some(c=>c.id===id)||state.crew===id)return false;
+  let accessMode='astronaut';
+  function paintAccess(){
+    const eyebrow=document.querySelector('.eyebrow');
+    if(!eyebrow)return;
+    const badge=accessMode==='planner'?'PLANNER DESK':'ASTRONAUT';
+    eyebrow.innerHTML=`EVKIWI / MISSION OPERATIONS <span class="badge">${badge}</span>`;
+  }
+  function applyCrew(id,kind){
+    if(kind==='planner'||kind==='astronaut')accessMode=kind;
+    paintAccess();
+    if(!id||!state.crews.some(c=>c.id===id))return false;
+    if(state.crew===id){message(accessMode==='planner'?`Planner desk open · managing ${profile().name}'s calendar.`:`${profile().name} signed in · calendar ready.`);return true}
     state.crew=id;
     state.selected=crewEvents().find(x=>x.start>=state.now)?.id||crewEvents()[0]?.id||null;
     state.eva=null;
     save();
     render();
-    message(`${profile().name} signed in · calendar ready.`);
+    message(accessMode==='planner'?`Planner desk open · managing ${profile().name}'s calendar.`:`${profile().name} signed in · calendar ready.`);
     return true;
   }
   addEventListener('message',e=>{
     if(e.origin!==location.origin||e.source!==parent||!e.data)return;
     if(e.data.type==='kiwinaut-planner-navigate')setView(e.data.view,{fromParent:true});
-    if(e.data.type==='kiwinaut-planner-session'&&e.data.crew)applyCrew(e.data.crew);
+    if(e.data.type==='kiwinaut-planner-session')applyCrew(e.data.crew,e.data.kind);
   });
   const qs=new URLSearchParams(location.search);
-  if(qs.get('crew'))applyCrew(qs.get('crew'));
+  if(qs.get('mode')==='planner')accessMode='planner';
+  paintAccess();
+  if(qs.get('crew'))applyCrew(qs.get('crew'),qs.get('mode'));
   setView(qs.get('view'),{fromParent:true});
   save();
 })();

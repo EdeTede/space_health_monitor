@@ -1,4 +1,4 @@
-# Kiwinaut
+# EVKIWI
 
 NASA Space Apps Challenge 2026 — AI health & exercise monitor with a personal **DLCO / DRI** decompression gate.
 

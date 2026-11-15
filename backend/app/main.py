@@ -1,4 +1,4 @@
-"""Kiwinaut API — DLCO decompression gate for NASA Space Apps Challenge 2026."""
+"""EVKIWI API — DLCO decompression gate for NASA Space Apps Challenge 2026."""
 from __future__ import annotations
 
 from fastapi import Request, FastAPI
@@ -14,7 +14,7 @@ from app.legacy.db import init_db as legacy_init_db
 from app.legacy.routers import adapt as legacy_adapt, crew as legacy_crew, mission as legacy_mission, scenarios as legacy_scenarios, score as legacy_score, sense as legacy_sense, twin as legacy_twin
 
 app = FastAPI(
-    title="Kiwinaut",
+    title="EVKIWI",
     version="1.0.0",
     description="AI health & exercise monitor — DLCO decompression gate",
 )
