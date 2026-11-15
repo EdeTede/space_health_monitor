@@ -1000,10 +1000,10 @@ const DcsMod=(()=>{
     return out;
   }
   function coach(res){
-    if(res.level==="red")return "CDR Lee: STOP EVA · 100% O₂ · repressurize · notify MO · DLCO gate until baseline.";
-    if(res.level==="orange")return "CDR Lee: delay EVA 24–48 h · rest day · hydrate · alert medical officer · retest DLCO.";
-    if(res.level==="yellow")return "CDR Lee: hydrate +500 ml · prebreathe +45 min · no heavy ARED 24 h · lighter EVA tasks.";
-    return "CDR Lee: GREEN · standard exercise prebreathe · DLCO +3 h / +24 h after ingress.";
+    if(res.level==="red")return "CDR Chen: STOP EVA · 100% O₂ · repressurize · notify MO · DLCO gate until baseline.";
+    if(res.level==="orange")return "CDR Chen: delay EVA 24–48 h · rest day · hydrate · alert medical officer · retest DLCO.";
+    if(res.level==="yellow")return "CDR Chen: hydrate +500 ml · prebreathe +45 min · no heavy ARED 24 h · lighter EVA tasks.";
+    return "CDR Chen: GREEN · standard exercise prebreathe · DLCO +3 h / +24 h after ingress.";
   }
   function typeCoach(text){
     clearInterval(coachTimer);const el=$("coachText");el.textContent="";
@@ -1119,19 +1119,19 @@ DcsMod.init();
 /* ---------- Recommendations hub (main dashboard) ---------- */
 const RecsHub=(()=>{
   const BONE={
-    normal:{coach:"CDR Lee: all regions on target · ARED +5% today · treadmill intervals with harness.",cards:[
+    normal:{coach:"CDR Chen: all regions on target · ARED +5% today · treadmill intervals with harness.",cards:[
       ["b-normal-ared","ARED","Progressive ARED squat + deadlift (+5%)","because every region hit its target and bone needs rising load","var(--holo)"],
       ["b-normal-t2","T2","Treadmill intervals with harness load","because shins and heart need impact and aerobic work","var(--holo)"]]},
-    underload_hip:{coach:"CDR Lee: right hip under-loaded · right-leg-first squats · heel drops · watch insole force.",cards:[
+    underload_hip:{coach:"CDR Chen: right hip under-loaded · right-leg-first squats · heel drops · watch insole force.",cards:[
       ["b-hip-right","HIP","Load the right hip first: right-leg-first squats 5×5","because insoles show the right hip under-loaded","var(--amber)"],
       ["b-hip-heel","IMP","Heel drops + band rows","because the femoral neck responds to impact","var(--holo)"]]},
-    flare:{coach:"CDR Lee: stay in the shelter · band session now · catch-up ARED after all-clear.",cards:[
+    flare:{coach:"CDR Chen: stay in the shelter · band session now · catch-up ARED after all-clear.",cards:[
       ["b-flare-shelter","SHLT","Shelter workout now: band squats, heel drops, rows","because the solar storm cut today’s session short","var(--amber)"],
       ["b-flare-catch","+10%","Catch-up ARED after all-clear (+10% sets)","because the storm left a loading gap","var(--holo)"]]},
-    low_readiness:{coach:"CDR Lee: HRV down · heavy singles only · CEVIS intervals move to tomorrow.",cards:[
+    low_readiness:{coach:"CDR Chen: HRV down · heavy singles only · CEVIS intervals move to tomorrow.",cards:[
       ["b-low-heavy","3×3","Heavy ARED singles, low volume","because bone needs load size, not long sessions","var(--holo)"],
       ["b-low-defer","DEFER","Move CEVIS intervals to tomorrow","because resting HR is up and HRV is down","var(--amber)"]]},
-    spacewalk:{coach:"CDR Lee: EVA day · exercise prebreathe · heavy ARED moves to tomorrow · log symptoms after ingress.",cards:[
+    spacewalk:{coach:"CDR Chen: EVA day · exercise prebreathe · heavy ARED moves to tomorrow · log symptoms after ingress.",cards:[
       ["b-eva-pbx","2.0h","Exercise prebreathe ~2.0 h instead of 4.3 h at rest","because guided exercise clears nitrogen faster","var(--holo)"],
       ["ared","MOVE","Move heavy ARED to the day after the EVA","because loading near the pressure drop raises bubble risk","#ff8a3d"],
       ["b-eva-log","LOG","Post-EVA symptom log within 1 h","because joint pain or skin mottling must reach medical fast","var(--holo)"]]}
