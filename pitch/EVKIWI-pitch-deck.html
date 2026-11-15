@@ -240,7 +240,56 @@ h2.title{font-family:var(--display);font-weight:600;font-size:68px;line-height:1
 .alv .state{position:absolute;left:24px;top:16px;font-family:var(--mono);font-size:17px;letter-spacing:.2em}
 .alv .breath{position:absolute;right:24px;top:16px;font-family:var(--mono);font-size:17px;letter-spacing:.12em;color:var(--amber)}
 .alv svg{width:100%;height:300px;display:block}
-.measure{margin-top:22px;font-family:var(--display);font-weight:600;font-size:31px;line-height:1.2;color:#ff8e8e}
+.s2 .eq{font-size:46px;gap:18px}
+.factors{margin-top:16px}
+.factors .flbl{font-family:var(--mono);font-size:15px;letter-spacing:.2em;color:var(--kiwi-bright);text-transform:uppercase}
+.factors .chips{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.factors .chips span{font-size:19px;color:var(--fg);border:1px solid var(--line2);border-radius:999px;padding:7px 16px;background:rgba(142,224,79,.07)}
+.factors .fnote{margin-top:12px;font-size:20px;color:var(--dim);line-height:1.4}
+.factors .fnote b{color:#7fb2ff;font-weight:500}
+.alv svg{height:215px}
+.s2 .col-l{top:282px}
+.s2 .measure{font-size:27px;margin-top:14px}
+.s2 .measure small{font-size:18px;margin-top:6px}
+.eq2{position:absolute;left:72px;top:290px;width:1776px;font-family:var(--display);font-weight:700;color:var(--red)}
+.eq2 .l1{display:flex;align-items:center;gap:26px;font-size:64px}
+.eq2 .l2{display:flex;align-items:center;gap:16px;font-size:40px;margin:6px 0 0 1010px}
+.eq2 .bub{display:flex;gap:6px;align-items:flex-end}
+.eq2 .bub b{display:block;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe2a6,#ffbf5a 55%,#e8902a);box-shadow:0 0 18px rgba(255,200,87,.5);animation:grow 3.2s var(--ease) infinite}
+.eq2 .l1 .bub b:nth-child(1){width:36px;height:36px}.eq2 .l1 .bub b:nth-child(2){width:26px;height:26px}.eq2 .l1 .bub b:nth-child(3){width:44px;height:44px}
+.eq2 .l2 .bub b{width:20px;height:20px}
+.eq2 .arrow{color:var(--fg);font-weight:500}
+.fact{position:absolute;left:72px;top:480px;width:820px;font-family:var(--display);font-weight:600;color:#ff8e8e}
+.fact .ft{font-size:38px}
+.fact ul{list-style:none;margin-top:8px;display:grid;gap:6px}
+.fact li{font-size:34px;padding-left:30px;position:relative}
+.fact li::before{content:"";position:absolute;left:4px;top:18px;width:10px;height:10px;border-radius:50%;background:#ff8e8e}
+.instead{position:absolute;left:1080px;top:490px;width:780px;font-family:var(--display);font-weight:600;font-size:32px;line-height:1.3;color:#ff8e8e}
+.instead p+p{margin-top:28px}
+.alv2{position:absolute;left:560px;top:640px;width:800px;margin:0;padding:10px 18px 4px}
+.alv2 svg{height:200px}
+.s2b .head{position:absolute;left:72px;top:140px;width:1776px}
+.s2b .col-r{position:absolute;left:310px;top:280px;width:1300px;height:620px;padding:22px 26px 16px}
+.s2b .chart{width:100%;height:100%;display:block}
+.s2b.visible .draw{animation:draw 2.6s var(--ease) forwards;animation-delay:var(--dl,0s)}
+.s2b.visible .fadeT{opacity:1;transition-delay:var(--dl,0s)}
+.slide.visible [data-step]:not(.shown){opacity:0!important;transition:opacity .4s}
+.slide [data-step].shown{opacity:1;transition:opacity .5s var(--ease)}
+.slide.visible [data-hide].hid{opacity:0!important}
+.slide.visible .draw[data-step]:not(.shown){animation:none}
+.sref .head{position:absolute;left:72px;top:140px}
+.refc{position:absolute;top:290px;width:556px;height:520px;padding:26px 32px}
+.r1{left:72px}.r2{left:682px}.r3{left:1292px}
+.refc .lbl{font-size:15px;color:var(--kiwi-bright)}
+.refc h3{font-family:var(--display);font-weight:600;font-size:32px;margin:10px 0 16px;line-height:1.1}
+.refc ul{list-style:none;display:grid;gap:8px}
+.refc li{font-size:18px;line-height:1.3;color:var(--dim);padding-left:22px;position:relative}
+.refc li::before{content:"";position:absolute;left:0;top:10px;width:8px;height:8px;border-radius:50%;background:var(--kiwi);box-shadow:0 0 10px var(--kiwi)}
+.refc li b{color:var(--fg);font-weight:500}
+.refc li em{font-style:normal;font-family:var(--mono);font-size:16px;color:#7fb2ff;display:block;margin-top:2px}
+.refnote{position:absolute;left:72px;right:72px;top:836px;text-align:center;font-family:var(--mono);font-size:19px;color:var(--dim);letter-spacing:.04em}
+.refnote b{color:var(--ok);font-weight:500}
+.measure{margin-top:18px;font-family:var(--display);font-weight:600;font-size:31px;line-height:1.2;color:#ff8e8e}
 .measure small{display:block;font-family:var(--body);font-weight:400;font-size:20px;color:var(--dim);margin-top:8px}
 .chart{width:100%;height:100%;display:block}
 .chart text{font-family:var(--mono)}
@@ -295,7 +344,7 @@ h2.title{font-family:var(--display);font-weight:600;font-size:68px;line-height:1
    SLIDE 5 — BUSINESS MODEL + ROADMAP
    =========================================== */
 .s5 .head{position:absolute;left:72px;top:140px}
-.biz{position:absolute;top:300px;width:556px;height:340px;padding:30px 32px}
+.biz{position:absolute;top:300px;width:556px;height:250px;padding:30px 32px}
 .biz .lbl{font-size:15px;color:var(--kiwi-bright)}
 .biz h3{font-family:var(--display);font-weight:600;font-size:34px;margin:10px 0 14px;line-height:1.1}
 .biz ul{list-style:none;display:grid;gap:12px}
@@ -303,7 +352,7 @@ h2.title{font-family:var(--display);font-weight:600;font-size:68px;line-height:1
 .biz li::before{content:"";position:absolute;left:0;top:11px;width:8px;height:8px;border-radius:50%;background:var(--kiwi);box-shadow:0 0 10px var(--kiwi)}
 .biz li b{color:var(--fg);font-weight:500}
 .b1{left:72px}.b2{left:682px}.b3{left:1292px}
-.road{position:absolute;left:72px;right:72px;top:712px;height:160px}
+.road{position:absolute;left:72px;right:72px;top:650px;height:160px}
 .road svg{position:absolute;left:0;top:0;width:100%;height:60px;overflow:visible}
 .road .ms{position:absolute;top:58px;width:400px}
 .road .ms .when{font-family:var(--mono);font-size:16px;letter-spacing:.18em;color:var(--kiwi-bright)}
@@ -360,7 +409,7 @@ body.editing [contenteditable="true"]{outline:1px dashed rgba(142,224,79,.45);ou
         <line id="tlCursor" x1="0" y1="-4" x2="0" y2="30" stroke="#ffc857" stroke-opacity=".6"/>
         <circle id="tlDot" cx="0" cy="18" r="7" fill="#ffc857" style="filter:drop-shadow(0 0 8px #ffc857)"/>
       </svg>
-      <div class="ch" id="chapters"><span>Liftoff</span><span>The science</span><span>Demo</span><span>Who it's for</span><span>Business</span><span>Debrief</span></div>
+      <div class="ch" id="chapters"><span>Liftoff</span><span>The science</span><span>Personal risk</span><span>Demo</span><span>Who it's for</span><span>Business</span><span>Sources</span><span>Debrief</span></div>
     </div>
   </div>
 
@@ -383,19 +432,28 @@ body.editing [contenteditable="true"]{outline:1px dashed rgba(142,224,79,.45);ou
     </div>
   </section>
 
-  <!-- ===== SLIDE 2 · TECHNICAL (from "technical page.pptx") ===== -->
+  <!-- ===== SLIDE 2 · THE SCIENCE (eva-physiology_2, slide 4) ===== -->
   <section class="slide s2" data-coach="DCS test · lung diffusing capacity → personal risk" data-holo="off">
     <div class="head">
       <div class="lbl reveal" style="--d:.05">The science</div>
       <h2 class="title reveal" style="--d:.15">A bubble you can't see, measured in one breath.</h2>
     </div>
-    <div class="col-l">
-      <div class="eq reveal" style="--d:.3"><span>↓Pressure</span><span class="arrow">=</span><span class="bub"><b></b><b></b><b></b></span><span class="arrow">→</span><span>DCS</span></div>
-      <div class="nomethod reveal" style="--d:.4">No currently used method monitors it per astronaut.</div>
-      <div class="alv glass reveal" style="--d:.55">
-        <div class="state" id="alvState" style="color:var(--ok)">NORMAL</div>
-        <div class="breath">one breath, ten seconds</div>
-        <svg viewBox="0 0 760 300" aria-label="Alveolus and capillary, normal versus after a bubble">
+    <div class="eq2">
+      <div class="l1"><span data-step="1" style="display:flex;align-items:center;gap:26px"><span>EVA = ↓Pressure</span><span class="arrow">=</span><span class="bub"><b></b><b></b><b></b></span></span><span data-step="2" style="display:flex;align-items:center;gap:26px"><span class="arrow">→</span><span>DCS</span></span></div>
+      <div class="l2" data-step="2"><span>↑</span><span class="bub"><b></b><b></b><b></b></span><span>= ↑ DCS risk</span></div>
+    </div>
+    <div class="fact" data-step="3">
+      <div class="ft">Adjustable factors:</div>
+      <ul><li>Oxygen prebreathe duration</li><li>Decompression rate</li><li>Time between EVAs</li></ul>
+    </div>
+    <div class="instead" data-step="4">
+      <p>Currently based on generalisable data.</p>
+      <p>Instead, we monitor it in real-time in an individual.</p>
+    </div>
+    <div class="alv alv2" data-step="5">
+      <div class="state" id="alvState" style="color:var(--ok)">NORMAL</div>
+      <div class="breath">one breath, ten seconds</div>
+      <svg viewBox="0 0 760 300" aria-label="Alveolus and capillary, normal versus after a bubble">
           <defs>
             <radialGradient id="lungF" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#0f2a1a"/><stop offset="1" stop-color="#07140d"/></radialGradient>
             <linearGradient id="bloodF" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3a1414"/><stop offset="1" stop-color="#231010"/></linearGradient>
@@ -418,10 +476,16 @@ body.editing [contenteditable="true"]{outline:1px dashed rgba(142,224,79,.45);ou
           <ellipse id="bubble" cx="-40" cy="250" rx="30" ry="18" fill="#ffc46b" stroke="#ffe0a8" stroke-width="2" style="filter:drop-shadow(0 0 10px rgba(255,200,87,.7))"/>
           <text id="squeeze" x="650" y="190" text-anchor="middle" fill="#ffa64a" font-family="IBM Plex Mono" font-size="18" opacity="0">squeezing through</text>
         </svg>
-      </div>
-      <div class="measure reveal" style="--d:.75">We measure the lung damage to give an individual DCS risk assessment.<small>Corrected for oxygen exposure, lunar dust and the crew member's own health data.</small></div>
     </div>
-    <div class="col-r glass reveal" style="--d:.35">
+  </section>
+
+  <!-- ===== SLIDE 3 · PERSONAL RISK (eva-physiology_2, slide 5) ===== -->
+  <section class="slide s2b" data-coach="Δlung · same EVA, different personal risk" data-holo="off">
+    <div class="head">
+      <div class="lbl reveal" style="--d:.05">Personal risk</div>
+      <h2 class="title reveal" style="--d:.15">Same EVA. Three different risks.</h2>
+    </div>
+    <div class="col-r glass reveal" style="--d:.3">
       <svg class="chart" id="chart" viewBox="0 0 900 590" aria-label="Accumulated decompression burden over an 8 hour EVA"></svg>
     </div>
   </section>
@@ -468,9 +532,9 @@ body.editing [contenteditable="true"]{outline:1px dashed rgba(142,224,79,.45);ou
       <div class="lbl reveal" style="--d:.05">Business</div>
       <h2 class="title reveal" style="--d:.15">Every safe hour outside is mission value.</h2>
     </div>
-    <div class="biz b1 glass reveal" style="--d:.3"><div class="lbl">Value</div><h3>More work per spacewalk</h3><ul><li><b>Efficiency margin:</b> low-risk crew can safely stay out longer</li><li><b>Safety margin:</b> catch the high-risk day before the hatch opens</li><li>Shorter, smarter prebreathe frees crew time</li></ul></div>
-    <div class="biz b2 glass reveal" style="--d:.45"><div class="lbl">Model</div><h3>Licence + software per crew</h3><ul><li><b>Agencies:</b> licence and integrate with mission-ops planning tools</li><li><b>Commercial stations:</b> per-crew subscription, astronaut + planner apps</li><li><b>Earth:</b> dive, aviation and hyperbaric spin-offs</li></ul></div>
-    <div class="biz b3 glass reveal" style="--d:.6"><div class="lbl">Edge</div><h3>A number that is personal</h3><ul><li>Decompression models are <b>population</b> models</li><li>One breath turns them into <b>this</b> crew member, today</li><li>Built on published NASA decompression data</li></ul></div>
+    <div class="biz b1 glass reveal" style="--d:.3"><div class="lbl">Value</div><h3>More work per spacewalk</h3><ul><li><b>Efficiency margin:</b> low-risk crew can safely stay out longer</li><li><b>Safety margin:</b> catch the high-risk day before the hatch opens</li></ul></div>
+    <div class="biz b2 glass reveal" style="--d:.45"><div class="lbl">Model</div><h3>A per-mission licence</h3><ul><li>One licence per mission, covering every crew member and every EVA</li><li>Priced against the crew hours it gives back</li></ul></div>
+    <div class="biz b3 glass reveal" style="--d:.6"><div class="lbl">Edge</div><h3>Risk you can act on</h3><ul><li>Not one number, but <b>which lever to move</b> and by how much</li><li>Prebreathe, decompression rate and EVA gap, each with the hours it buys</li></ul></div>
     <div class="road reveal" style="--d:.7">
       <svg viewBox="0 0 1776 60" preserveAspectRatio="none">
         <line x1="0" y1="20" x2="1776" y2="20" stroke="rgba(142,224,79,.18)" stroke-width="2"/>
@@ -484,7 +548,38 @@ body.editing [contenteditable="true"]{outline:1px dashed rgba(142,224,79,.45);ou
     </div>
   </section>
 
-  <!-- ===== SLIDE 6 · ENDING ===== -->
+  <!-- ===== SLIDE 6 · REFERENCES ===== -->
+  <section class="slide sref" data-coach="Sources · published NASA data, every number logged" data-holo="off">
+    <div class="head">
+      <div class="lbl reveal" style="--d:.05">References</div>
+      <h2 class="title reveal" style="--d:.15">Built on published NASA data.</h2>
+    </div>
+    <div class="refc r1 glass reveal" style="--d:.3"><div class="lbl">NASA sources</div><h3>The decompression model</h3><ul>
+      <li><b>Bubble and DCS curves</b><em>NASA TM-100456 · N = 607</em></li>
+      <li><b>Risk limits</b><em>NASA-STD-3001 [V2 6008] · DCS ≤ 15 %</em></li>
+      <li><b>Exploration atmosphere estimate</b><em>NASA NTRS 20170004350</em></li>
+      <li><b>Sea-level tissue ratio</b><em>NASA DCS Evidence Report</em></li>
+      <li><b>Exercise and nitrogen washout</b><em>NASA TP-2004-213158 · TP-2020-220529</em></li>
+      <li><b>Operational ISLE record</b><em>ISS · 0.3 % per EVA</em></li>
+    </ul></div>
+    <div class="refc r2 glass reveal" style="--d:.45"><div class="lbl">Peer-reviewed</div><h3>The lung measurement</h3><ul>
+      <li><b>Bubbles and diffusing capacity</b><em>Thorsen et al. 1995 · PMID 8574122</em></li>
+      <li><b>Oxygen and diffusing capacity</b><em>Thorsen et al. 1994 · Eur Respir J</em></li>
+      <li><b>Diffusing capacity in sustained microgravity</b><em>Prisk et al. 1993</em></li>
+      <li><b>Diffusing capacity after a dive</b><em>van Ooij et al. 2011, 2013 · Dujic et al. 1993</em></li>
+      <li><b>DCS survival analysis</b><em>Conkin et al. 1996</em></li>
+    </ul></div>
+    <div class="refc r3 glass reveal" style="--d:.6"><div class="lbl">How we document it</div><h3>Every number is traceable</h3><ul>
+      <li><b>A variable log</b> lists every quantity, its source and what it means</li>
+      <li>Each one is tagged <b>Published</b>, <b>Derived</b> or <b>Chosen</b></li>
+      <li>The <b>six weakest points</b> are stated openly, not buried</li>
+      <li>Where the model does not apply is written down</li>
+      <li><em>VARIABLE-LOG.md · DOCUMENTATION.md</em></li>
+    </ul></div>
+    <div class="refnote reveal" style="--d:.85">Reproduces NASA's own published figures: <b>8.40 % vs 8.4 %</b> for the 15-minute exploration protocol · Not an official NASA product</div>
+  </section>
+
+  <!-- ===== SLIDE 7 · ENDING ===== -->
   <section class="slide s6" data-coach="Debrief · EVA complete, crew healthy" data-holo="end">
     <div class="center">
       <div class="lbl reveal" style="--d:.1">EVKIWI · Small test for extra spacewalk time</div>
@@ -531,18 +626,24 @@ class SlidePresentation{
   setupNav(){
     addEventListener('keydown',e=>{
       if(document.body.classList.contains('editing'))return;
-      if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();this.show(this.i+1)}
-      else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();this.show(this.i-1)}
+      if(['ArrowRight','ArrowDown','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();this.next()}
+      else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();this.prev()}
       else if(e.key==='Home')this.show(0);else if(e.key==='End')this.show(this.slides.length-1);
       else if(/^[1-6]$/.test(e.key))this.show(+e.key-1);
       else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()}
     });
     addEventListener('hashchange',()=>{const n=(parseInt(location.hash.slice(1))||1)-1;if(n!==this.i)this.show(n)});
     let x0=null;addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
-    addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)this.show(this.i+(dx<0?1:-1));x0=null});
-    let lock=0;addEventListener('wheel',e=>{const t=Date.now();if(t-lock<900||Math.abs(e.deltaY)<20)return;lock=t;this.show(this.i+(e.deltaY>0?1:-1))},{passive:true});
-    this.stage.addEventListener('click',e=>{if(document.body.classList.contains('editing')||e.target.closest('.step,a,button'))return;this.show(this.i+(e.clientX<innerWidth*.25?-1:1))});
+    addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)(dx<0?this.next():this.prev());x0=null});
+    let lock=0;addEventListener('wheel',e=>{const t=Date.now();if(t-lock<900||Math.abs(e.deltaY)<20)return;lock=t;(e.deltaY>0?this.next():this.prev())},{passive:true});
+    this.stage.addEventListener('click',e=>{if(document.body.classList.contains('editing')||e.target.closest('.step,a,button'))return;(e.clientX<innerWidth*.25?this.prev():this.next())});
   }
+  maxStep(s){let m=0;s.querySelectorAll('[data-step]').forEach(e=>{m=Math.max(m,+e.getAttribute('data-step'))});return m}
+  applyStep(){const s=this.slides[this.i],k=this.step||0;
+    s.querySelectorAll('[data-step]').forEach(e=>e.classList.toggle('shown',+e.getAttribute('data-step')<=k));
+    s.querySelectorAll('[data-hide]').forEach(e=>e.classList.toggle('hid',+e.getAttribute('data-hide')<=k))}
+  next(){const s=this.slides[this.i];if((this.step||0)<this.maxStep(s)){this.step=(this.step||0)+1;this.applyStep()}else this.show(this.i+1)}
+  prev(){if((this.step||0)>0){this.step--;this.applyStep()}else if(this.i>0){this.show(this.i-1);this.step=this.maxStep(this.slides[this.i]);this.applyStep()}}
   setupDots(){const d=document.getElementById('dots');this.slides.forEach((_,j)=>{const b=document.createElement('button');b.setAttribute('aria-label','Slide '+(j+1));b.onclick=()=>this.show(j);d.appendChild(b)})}
   show(n,first){
     n=Math.max(0,Math.min(n,this.slides.length-1));if(n===this.i&&!first)return;this.i=n;
@@ -553,7 +654,8 @@ class SlidePresentation{
     const s=this.slides[n];Space.target=HOLO_POSE[s.dataset.holo||'off'];
     Timeline.go(n/(this.slides.length-1));Coach.say(s.dataset.coach||'');
     s.querySelectorAll('[data-count]').forEach(countUp);
-    Demo.active(n===2);Alv.active(n===1);
+    this.step=0;this.applyStep();
+    Demo.active(n===3);Alv.active(n===1);
   }
 }
 
@@ -641,7 +743,7 @@ const Space=(()=>{
 const Alv=(()=>{const q=id=>document.getElementById(id);let on=false,t0=0;
   const rbc=q('rbc');for(let i=0;i<9;i++){const c=document.createElementNS('http://www.w3.org/2000/svg','ellipse');c.setAttribute('rx',10);c.setAttribute('ry',6);rbc.appendChild(c)}
   function f(t){if(!on)return;const s=((t-t0)/1000)%9,after=s>4.5,ph=s%4.5;
-    q('alvState').textContent=after?'AFTER A BUBBLE':'NORMAL';q('alvState').style.color=after?'var(--red)':'var(--ok)';
+    q('alvState').textContent=after?'BUBBLE EFFECTS':'NORMAL';q('alvState').style.color=after?'var(--red)':'var(--ok)';
     q('dmg').setAttribute('opacity',after?Math.min(1,ph*1.5):0);q('squeeze').setAttribute('opacity',after&&ph>.4&&ph<3.6?1:0);
     q('co2').setAttribute('opacity',after?.25:1);q('o2').querySelector('line').setAttribute('stroke-dasharray',after?'8 8':'none');q('o2').setAttribute('opacity',after?.6:1);
     const bx=after?-40+ph/4.5*840:-60;q('bubble').setAttribute('cx',bx);q('bubble').setAttribute('ry',bx>230&&bx<530?12:18);q('bubble').setAttribute('rx',bx>230&&bx<530?38:30);
@@ -665,24 +767,25 @@ const Alv=(()=>{const q=id=>document.getElementById(id);let on=false,t0=0;
     if(dash){const m=document.createElementNS(NS,'mask'),id='m'+Math.random().toString(36).slice(2);m.id=id;const mp=p.cloneNode();mp.setAttribute('stroke','#fff');m.appendChild(mp);svg.insertBefore(m,svg.firstChild);
       p.classList.remove('draw');p.style.strokeDasharray=dash;p.setAttribute('mask',`url(#${id})`)}return p};
   const text=(x,y,t,col,delay,size=19,anchor='start',weight=600)=>{const e=el('text',{x,y,fill:col,'font-size':size,'text-anchor':anchor,'font-weight':weight},t);e.classList.add('fadeT');e.style.setProperty('--dl',delay+'s');return e};
+  const st=(e,n,h)=>{e.setAttribute('data-step',n);if(h)e.setAttribute('data-hide',h);const m=e.getAttribute('mask');if(m){const mp=svg.querySelector(m.slice(4,-1)+' path');if(mp)mp.setAttribute('data-step',n)}return e};
   // suit pressure: 8.2 psi habitat → 4.3 psi suit
   const sp=`M${X(0)} ${YP(8.2)} L${X(1.75)} ${YP(8.2)} L${X(2)} ${YP(4.3)} L${X(10.4)} ${YP(4.3)}`;add(sp,'#d6403a',3,null,.3);
   text(X(.2),YP(8.2)-12,'Suit pressure','#ff7b7b',.6,19,'start',500);
   el('line',{x1:X(0),x2:X(2),y1:Y(64),y2:Y(64),stroke:'#93a68f'}).classList.add('fadeT');text(X(.1),Y(64)-10,'2 h prep and decompression','#93a68f',.5,16,'start',400);
-  el('line',{x1:X(2),x2:X(10),y1:Y(21),y2:Y(21),stroke:'#93a68f'}).classList.add('fadeT');text(X(6),Y(21)-10,'8 h EVA at 4.3 psi','#93a68f',.7,16,'middle',400);
-  add(path(curve(58,1.6),0,10.4),'#ff5d6c',3.5,'12 9',.9);
-  add(path(curve(35,1.55),0,10.4),'#4fa9ff',4,null,1.1);
-  add(path(curve(14.5,1.45),0,10.4),'#5ef0a0',3.5,'12 9',1.3);
-  text(X(9.7),Y(58)-14,'ΔDLCO −1.80 %  ·  DCS 20.5 %','#ff7b7b',2.2,19,'end');
-  text(X(9.7),Y(35)-14,'ΔDLCO −1.11 % (NASA predicted)  ·  DCS 6.6 %','#7fb2ff',2.4,19,'end');
-  text(X(9.7),Y(14.5)-14,'ΔDLCO −0.50 %  ·  DCS 1.4 %','#7de6a8',2.6,19,'end');
+  st(el('line',{x1:X(2),x2:X(10),y1:Y(21),y2:Y(21),stroke:'#93a68f'}),1,2);st(text(X(6),Y(21)-10,'8 h EVA at 4.3 psi','#93a68f',0,16,'middle',400),1,2);
+  st(add(path(curve(58,1.6),0,10.4),'#ff5d6c',3.5,'12 9',0),3);
+  st(add(path(curve(35,1.55),0,10.4),'#4fa9ff',4,null,0),2);
+  st(add(path(curve(14.5,1.45),0,10.4),'#5ef0a0',3.5,'12 9',0),5);
+  st(text(X(9.7),Y(58)-14,'Δlung = −1.80 %  DCS 20.5 %','#ff7b7b',0,19,'end'),3);
+  st(text(X(9.7),Y(35)-14,'Δlung = −1.11 % (NASA estimate)  DCS 6.6 %','#7fb2ff',0,19,'end'),2);
+  st(text(X(9.7),Y(14.5)-14,'Δlung = −0.50 %  DCS 1.4 %','#7de6a8',0,19,'end'),5);
   // margins
-  const arr=(x,y1,y2,col,dl)=>{const l=el('line',{x1:x,x2:x,y1:y1,y2:y2,stroke:col,'stroke-width':3,'marker-start':'url(#ah)','marker-end':'url(#ah)'});l.classList.add('fadeT');l.style.setProperty('--dl',dl+'s')};
-  arr(X(10.05),Y(57),Y(36.5),'#eef6e8',2.9);arr(X(10.05),Y(33.5),Y(16),'#c6f27a',3.2);
-  text(X(9.85),Y(49),'Safety','#eef6e8',2.9,20,'end',700);text(X(9.85),Y(49)+22,'margin','#eef6e8',2.9,20,'end',700);
-  text(X(9.85),Y(26),'Efficiency','#c6f27a',3.2,20,'end',700);text(X(9.85),Y(26)+22,'margin','#c6f27a',3.2,20,'end',700);
+  const arr=(x,y1,y2,col,dl)=>{const l=el('line',{x1:x,x2:x,y1:y1,y2:y2,stroke:col,'stroke-width':3,'marker-start':'url(#ahc)','marker-end':'url(#ahc)'});l.setAttribute('data-step',dl)};
+  arr(X(10.05),Y(57),Y(36.5),'#eef6e8',4);arr(X(10.05),Y(33.5),Y(16),'#c6f27a',6);
+  st(text(X(9.85),Y(49),'Safety','#eef6e8',0,20,'end',700),4);st(text(X(9.85),Y(49)+22,'Margin','#eef6e8',0,20,'end',700),4);
+  st(text(X(9.85),Y(26),'Efficiency','#c6f27a',0,20,'end',700),6);st(text(X(9.85),Y(26)+22,'Margin','#c6f27a',0,20,'end',700),6);
   // marker for arrows (svg-local)
-  const defs=document.createElementNS(NS,'defs');defs.innerHTML='<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="context-stroke"/></marker>';svg.insertBefore(defs,svg.firstChild);
+  const defs=document.createElementNS(NS,'defs');defs.innerHTML='<marker id="ahc" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="context-stroke"/></marker>';svg.insertBefore(defs,svg.firstChild);
 })();
 
 /* ===========================================
