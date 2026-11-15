@@ -146,6 +146,34 @@ a.link{text-decoration:none}
   width:100%;height:min(62vh,640px);min-height:360px;border:0;border-radius:8px;
   background:var(--void);display:block;
 }
+.gate-src{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--dim);margin:0 0 12px}
+.gate-src b{color:var(--fg);font-weight:500}
+.gate-src .tagsrc{padding:3px 8px;border-radius:999px;border:1px solid var(--edge);letter-spacing:.1em;text-transform:uppercase;font-size:10px}
+.gate-src .tagsrc.manual{color:var(--amber);border-color:rgba(255,200,87,.45)}
+.gate-src .tagsrc.calc{color:var(--ok);border-color:rgba(94,240,194,.45)}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.presets button{font-family:var(--mono);font-size:11px;letter-spacing:.12em;padding:7px 12px;border-radius:999px;border:1px solid var(--edge);background:transparent;cursor:pointer}
+.presets button[data-preset="green"]{color:var(--ok)}.presets button[data-preset="yellow"]{color:var(--amber)}.presets button[data-preset="orange"]{color:var(--hot)}.presets button[data-preset="red"]{color:var(--red)}
+.presets button[aria-pressed="true"]{background:currentColor}
+.presets button[aria-pressed="true"] span{color:#02121c}
+.sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px}
+.sliders label{display:grid;grid-template-columns:1fr auto;gap:6px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.04em}
+.sliders label b{color:var(--fg);font-weight:500}
+.sliders input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--holo);height:24px;cursor:pointer}
+.symptoms{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.symptoms .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-right:4px}
+.symptoms button{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:6px 11px;border-radius:999px;border:1px solid var(--edge);background:transparent;color:var(--dim);cursor:pointer}
+.symptoms button[aria-pressed="true"]{color:#02121c;background:var(--amber);border-color:var(--amber)}
+.hub{display:grid;grid-template-columns:auto 1fr;gap:16px 24px;align-items:start}
+.hub .big{font-family:var(--display);font-weight:700;font-size:clamp(34px,5vw,48px);line-height:1;color:var(--kiwi);font-variant-numeric:tabular-nums;text-shadow:0 0 22px rgba(142,224,79,.4)}
+.hub .big small{font-size:.45em;color:var(--holo)}
+.hub .cap{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg);margin-top:6px}
+.hub .mini{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:6px}
+.how{display:grid;gap:5px;font-size:12px;color:var(--dim)}
+.how .row{display:grid;grid-template-columns:64px 1fr;gap:8px}
+.how .row b{font-family:var(--mono);font-weight:500;color:var(--kiwi);text-align:right}
+.acard .val{font-family:var(--mono);font-size:11px;color:var(--kiwi);margin-top:5px}
+@media (max-width:820px){.sliders{grid-template-columns:1fr}.hub{grid-template-columns:1fr}}
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .section-head .lbl{margin:0}
 
@@ -238,6 +266,7 @@ a.link{text-decoration:none}
     <button type="button" class="link" id="navDlco" data-go="calc">DLCO test</button>
     <button type="button" class="link" id="navCalendar" data-go="calendar">Calendar</button>
     <button type="button" class="link" id="navRecs" data-go="recs">Recommendations</button>
+    <a class="link" id="navDash" href="/dosefit.html" title="Bone twin, training bay, Decompress view and recommendations hub">Mission dashboard</a>
     <button type="button" class="pill" id="navEnter" data-go="calc">Enter DRI</button>
     <button type="button" class="astro-btn" id="astroLogin" aria-haspopup="dialog">
       <span class="mark" aria-hidden="true">A</span>
@@ -320,6 +349,32 @@ a.link{text-decoration:none}
       <iframe id="recsPlannerFrame" class="mission-frame" title="Mission EVA recommendations" src="about:blank"></iframe>
     </div>
 
+    <div class="panel" id="gateInputs">
+      <div class="section-head">
+        <div class="lbl">Crew member today · DRI inputs</div>
+        <button type="button" class="cta ghost" id="useCalc">Use calculator result</button>
+      </div>
+      <p class="gate-src" id="gateSrc"></p>
+      <div class="presets" role="group" aria-label="Preset">
+        <button type="button" data-preset="green" aria-pressed="false"><span>GREEN</span></button>
+        <button type="button" data-preset="yellow" aria-pressed="false"><span>YELLOW · DLCO −8%</span></button>
+        <button type="button" data-preset="orange" aria-pressed="false"><span>ORANGE · DLCO −13%</span></button>
+        <button type="button" data-preset="red" aria-pressed="false"><span>RED · symptoms</span></button>
+      </div>
+      <div class="sliders">
+        <label>DLCO vs personal baseline <b id="gDlcoV">−1.2%</b><input type="range" id="gDlco" min="-20" max="5" step="0.5" value="-1" aria-label="DLCO change versus personal baseline, percent"></label>
+        <label>Hydration <b id="gHydV">70 · adequate</b><input type="range" id="gHyd" min="0" max="100" step="1" value="70" aria-label="Hydration"></label>
+        <label>Bubble grade (Doppler) <b id="gBubV">G0</b><input type="range" id="gBub" min="0" max="4" step="1" value="0" aria-label="Bubble grade"></label>
+      </div>
+      <div class="symptoms" role="group" aria-label="Symptoms">
+        <span class="k">Symptoms</span>
+        <button type="button" data-sym="joint" aria-pressed="false">Joint pain</button>
+        <button type="button" data-sym="itch" aria-pressed="false">Itch · skin</button>
+        <button type="button" data-sym="fatigue" aria-pressed="false">Fatigue</button>
+        <button type="button" data-sym="chokes" aria-pressed="false">Chokes</button>
+      </div>
+    </div>
+
     <div class="grid2">
       <div class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
@@ -363,6 +418,22 @@ a.link{text-decoration:none}
       </div>
     </div>
 
+    <div class="panel" id="hubPanel">
+      <div class="section-head">
+        <div class="lbl">Safe EVA time · this mission</div>
+        <button type="button" class="cta ghost" id="hubReset">Reset hours</button>
+      </div>
+      <div class="hub">
+        <div>
+          <div class="big"><span id="hubHours">+0.0</span><small> h</small></div>
+          <div class="cap">safe EVA time this mission</div>
+          <div class="mini"><b id="hubScrubs">0</b> scrubbed EVAs avoided · <b id="hubAcc">0</b> accepted</div>
+        </div>
+        <div class="how" id="hubHow"></div>
+      </div>
+      <p class="foot" style="margin:12px 0 0">Illustrative model, sample data. Each accepted action adds the safe EVA time it protects; hours add up across the mission. Decision support, confirmed by the crew medical officer.</p>
+    </div>
+
     <p class="foot">Kiwinaut · NASA Space Apps Challenge 2026 · sample thresholds only. Not an official NASA product · not clinical advice. Confirmed by the crew medical officer. Open <button type="button" class="link" id="footLab" style="padding:0;color:var(--dim);text-decoration:underline">lab tools</button> for developer pages.</p>
   </div>
 </section>
@@ -387,6 +458,17 @@ let prebreatheMin=null, suitP=null;
 let accepted=new Set(), snoozed=new Set(), coachTimer=null, cardTimers=[], risk={level:"green",s:0};
 let lastApi=null;
 let session=null;
+/* crew inputs: "calc" = scored from the calculator readings by the EVA model API; "manual" = DRI presets/sliders scored with the Decompress rules */
+let gateMode="calc",symSet=new Set(),presetOn=null;
+const PRESETS={green:{dlco:-1,hyd:80,bub:0,sym:[]},yellow:{dlco:-8,hyd:48,bub:1,sym:[]},orange:{dlco:-13,hyd:40,bub:2,sym:[]},red:{dlco:-12,hyd:35,bub:3,sym:["joint","fatigue"]}};
+const SYM_NAMES={joint:"joint pain",itch:"itch / skin",fatigue:"fatigue",chokes:"chokes"};
+/* illustrative hours of safe EVA time each accepted action protects (same model as the mission dashboard hub) */
+const HOURS={go:{h:.5,why:"standard prebreathe on schedule, so no EVA time is lost waiting"},p3:{h:.5,why:"each retest sharpens the personal DLCO baseline"},p24:{h:.5,why:"each retest sharpens the personal DLCO baseline"},
+  pb:{h:6.5,scrub:1,why:"a timely longer prebreathe avoids scrubbing a 6.5 h EVA"},h2o:{h:1,why:"good hydration lowers bubble risk and keeps the EVA on its full timeline"},
+  ared:{h:1,why:"no heavy loading near the pressure drop keeps bubble risk down"},lite:{h:2,why:"lighter tasks keep the crew outside instead of ending early"},
+  delay:{h:6.5,scrub:1,why:"moving the EVA 24–48 h turns a likely abort into a full EVA later"},mo:{h:.5,why:"medical confirms early, before the airlock schedule slips"},
+  rest:{h:1,why:"recovery today protects tomorrow’s EVA window"},stop:{h:0,why:"protects health first: a DCS case avoided"},o2:{h:0,why:"treats bubbles before they become injury"}};
+const hoursLog=new Map();
 
 function loadSession(){
   try{const raw=JSON.parse(sessionStorage.getItem(SESSION_KEY));session=CREW.some(c=>c.id===raw?.id)?raw:null}
@@ -468,7 +550,7 @@ function showPhase(name){
     $("calcFrame").src="/eva-calc.html";
   }
   if(name==="calendar")ensurePlanner($("calendarFrame"),"calendar");
-  if(name==="recs")ensurePlanner($("recsPlannerFrame"),"recs");
+  if(name==="recs"){ensurePlanner($("recsPlannerFrame"),"recs");if(!lastApi&&gateMode==="calc"&&!risk.s)runDecompressTest()}
 }
 
 async function goRecsFromCalc(){
@@ -476,7 +558,7 @@ async function goRecsFromCalc(){
     const msg=await requestReadings();
     applyReadings(msg);
   }catch(err){/* use last / defaults */}
-  accepted.clear();snoozed.clear();
+  accepted.clear();snoozed.clear();gateMode="calc";presetOn=null;
   showPhase("recs");
   await runDecompressTest();
 }
@@ -505,6 +587,40 @@ function localScore(){
   return{score:s,s,level,name,blurb,parts,drop:Math.round(drop),band,coach:null,cards:null,day_note:DAYS[150].note,source:"local"};
 }
 
+function manualScore(){
+  const drop=Math.max(0,-dlco),parts=[];let s=8;
+  const add=(label,v,push)=>{s+=v;parts.push({label,v:Math.round(v),push:!!push||v>=8})};
+  if(drop<=0)add("DLCO at/above personal baseline",0,false);
+  else if(drop<5)add(`DLCO −${drop.toFixed(1)}% (mild)`,drop*2.2,false);
+  else if(drop<=10)add(`DLCO −${drop.toFixed(1)}% (moderate)`,18+(drop-5)*3.5,true);
+  else if(drop<=15)add(`DLCO −${drop.toFixed(1)}% (high)`,40+(drop-10)*4,true);
+  else add(`DLCO −${drop.toFixed(1)}% (severe)`,62+(drop-15)*2.5,true);
+  add(`Bubble grade ${bub}`,bub*10,bub>=2);
+  const hr=hyd>=70?0:hyd>=45?(70-hyd)*.45:12+(45-hyd)*.7;
+  add(hyd>=70?"Hydration adequate":hyd>=45?"Hydration low":"Hydration critical",hr,hyd<55);
+  add("EVA-day load + sleep/HRV (sample)",12,true);
+  if(sym){s=Math.max(s,88);add(`Symptoms: ${[...symSet].map(k=>SYM_NAMES[k]).join(", ")}`,25,true)}
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  let level="green",name="GREEN · LOW",blurb="Cleared for the EVA and normal training.";
+  if(sym&&drop>0){level="red";name="RED · SYMPTOMS";blurb="Stop the EVA. DCS protocol: 100% O₂, repressurize. No EVA until DLCO back to baseline."}
+  else if(drop>10||s>=75){level="orange";name="ORANGE · HIGH";blurb="Postpone the EVA 24–48 h. Rest day. Log symptoms. Alert the medical officer."}
+  else if(drop>=5||s>=50){level="yellow";name="YELLOW · MODERATE";blurb="Extend prebreathe 30–60 min. Drink more. No heavy ARED 24 h before/after. Lighter EVA tasks."}
+  return{score:s,s,level,name,blurb,parts:parts.sort((a,b)=>b.v-a.v),drop:Math.round(drop),band:level,coach:null,cards:null,day_note:DAYS[150].note,source:"manual"};
+}
+function paintInputs(){
+  $("gDlco").value=Math.max(-20,Math.min(5,dlco));$("gDlcoV").textContent=`${dlco>0?"+":""}${Number(dlco).toFixed(1)}%`;
+  $("gHyd").value=hyd;$("gHydV").textContent=`${hyd} · ${hyd>=70?"adequate":hyd>=45?"low":"critical"}`;
+  $("gBub").value=bub;$("gBubV").textContent=`G${bub}`;
+  document.querySelectorAll("[data-sym]").forEach(b=>b.setAttribute("aria-pressed",symSet.has(b.dataset.sym)));
+  document.querySelectorAll("[data-preset]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.preset===presetOn));
+  const calc=`calculator DLCO pre <b>${dlcoPre}</b> → post <b>${dlcoPost}</b>`;
+  $("gateSrc").innerHTML=gateMode==="calc"
+    ?`<span class="tagsrc calc">Source · calculator + EVA model API</span><span>${calc}</span><span>Move a slider or pick a preset to override.</span>`
+    :`<span class="tagsrc manual">Source · DRI inputs (Decompress rules)</span><span>Baseline was ${calc}</span><span>Same thresholds as the mission dashboard’s Decompress view.</span>`;
+}
+function rescore(){paintInputs();if(gateMode==="manual"){setApiPill(false,"DRI inputs · local rules");applyResult(manualScore())}else runDecompressTest()}
+function goManual(){gateMode="manual";accepted.clear();snoozed.clear()}
+
 function applyReadings(msg){
   if(msg.pre!=null)dlcoPre=+msg.pre;
   if(msg.post!=null)dlcoPost=+msg.post;
@@ -530,6 +646,7 @@ async function runDecompressTest(){
     const r=await fetch("/api/decompress/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
     if(!r.ok)throw new Error("bad status");
     const data=await r.json();
+    if(gateMode!=="calc")return;   // crew switched to DRI inputs while the API was answering
     lastApi=data;
     dlco=data.dlco_pct;
     setApiPill(true,"API · EVA model");
@@ -540,6 +657,7 @@ async function runDecompressTest(){
       personal_factor:data.personal_factor,oxygen_time_min:data.oxygen_time_min,source:data.source||"eva-model"
     });
   }catch(err){
+    if(gateMode!=="calc")return;
     setApiPill(false,"API · offline fallback");
     applyResult(localScore());
   }
@@ -558,6 +676,7 @@ function cardsFrom(res){
     push("p3","+3h","Schedule DLCO retest +3 h after ingress","because learn personal post-EVA pattern","var(--holo)");
   }else{
     push("pb","+45","Extend exercise prebreathe",`because DLCO −${res.drop}%`,"var(--amber)");
+    if(hyd<70)push("h2o","H₂O","Hydrate +500 ml before airlock",`because hydration ${hyd}/100`,"var(--amber)");
     push("ared","HOLD","Hold heavy ARED 24 h before/after EVA","because loading near pressure drop","var(--hot)");
   }
   if(res.level==="yellow")push("lite","EVA","Assign lighter EVA tasks",`because DLCO −${res.drop}%`,"var(--amber)");
@@ -591,7 +710,8 @@ function renderCards(res){
     const el=document.createElement("div");
     el.className="acard"+(c.ok?" accepted":"");el.dataset.id=c.id;
     const ops=c.ok?'<span class="r">Accepted</span>':'<button type="button" class="ok" data-act="accept">Accept</button><button type="button" data-act="snooze">Snooze</button>';
-    el.innerHTML=`<div class="ico" style="color:${c.c}">${c.ico}</div><div><div class="t">${c.t}</div><div class="r">${c.r}</div></div><div class="ops">${ops}</div>`;
+    const hv=HOURS[c.id];const val=hv?`<div class="val">${hv.h>0?"+"+hv.h.toFixed(1)+" h":"Safety"} · ${hv.why}</div>`:"";
+    el.innerHTML=`<div class="ico" style="color:${c.c}">${c.ico}</div><div><div class="t">${c.t}</div><div class="r">${c.r}</div>${val}</div><div class="ops">${ops}</div>`;
     box.appendChild(el);
   });
 }
@@ -599,7 +719,7 @@ function planText(res){
   const notes=[...accepted].map(id=>({pb:"prebreathe +45",h2o:"+500 ml",ared:"ARED hold",delay:"EVA +24–48h",stop:"ABORT",o2:"DCS O₂",lite:"lighter EVA",go:"standard prebreathe"}[id]||id));
   const base={green:"Standard EVA timeline.",yellow:"Modified: longer prebreathe, lighter tasks.",orange:"Hold: EVA delayed pending medical review.",red:"Emergency: DCS protocol active."}[res.level];
   const note=res.day_note||DAYS[150].note;
-  const src=res.source==="local"?' <span style="color:var(--amber)">· local fallback</span>':' <span style="color:var(--ok)">· scored by EVA model API</span>';
+  const src=res.source==="manual"?' <span style="color:var(--amber)">· DRI inputs, Decompress rules</span>':res.source==="local"?' <span style="color:var(--amber)">· local fallback</span>':' <span style="color:var(--ok)">· scored by EVA model API</span>';
   return `<b>${res.name}</b> — ${base}${notes.length?` Accepted: ${notes.join(", ")}.`:" Accept cards to lock actions."} <span style="color:var(--dim)">${note}</span>${src}`;
 }
 function applyResult(res){
@@ -617,7 +737,14 @@ function applyResult(res){
   $("meta").innerHTML=`<span>DLCO <b>${pct.toFixed(2)}%</b></span><span>DCS <b>${dcs}</b></span><span>VGE <b>${vge}</b></span><span>Factor <b>${fac}</b></span><span>Pre <b>${dlcoPre}</b></span><span>Post <b>${dlcoPost}</b></span>`;
   $("whyBox").innerHTML=(res.parts||[]).map(p=>`<div class="hit${p.push?" push":""}"><span>${p.label}</span><b>${p.v>=0?"+"+p.v:p.v}</b></div>`).join("");
   $("planLine").innerHTML=planText(res);
-  sweep(res.s);typeCoach(coachText(res));renderCards(res);
+  sweep(res.s);typeCoach(coachText(res));renderCards(res);paintInputs();renderHub();
+}
+function renderHub(){
+  let h=0;const days=new Set();
+  for(const v of hoursLog.values()){if(v.scrub){if(days.has("x"))continue;days.add("x")}h+=v.h}
+  $("hubHours").textContent=(h>=0?"+":"")+h.toFixed(1);$("hubScrubs").textContent=days.size;$("hubAcc").textContent=hoursLog.size;
+  const rows=[...hoursLog.entries()].sort((a,b)=>b[1].h-a[1].h);
+  $("hubHow").innerHTML=`<div class="lbl" style="margin:0 0 4px">How the hours add up</div>`+(rows.length?rows.map(([id,v])=>`<div class="row"><b>${v.h>0?"+"+v.h.toFixed(1)+" h":"safety"}</b><span><span style="color:var(--fg)">${v.title}</span> · ${v.level} · ${v.why}</span></div>`).join(""):`<div>Nothing accepted yet. Each card shows the safe EVA time it protects; accepted cards add up here for the whole mission.</div>`);
 }
 
 function requestReadings(){
@@ -639,16 +766,29 @@ function requestReadings(){
 $("cards").addEventListener("click",e=>{
   const btn=e.target.closest("button[data-act]");if(!btn)return;
   const card=btn.closest(".acard");if(!card)return;
-  if(btn.dataset.act==="accept"){accepted.add(card.dataset.id);snoozed.delete(card.dataset.id)}
+  if(btn.dataset.act==="accept"){accepted.add(card.dataset.id);snoozed.delete(card.dataset.id);
+    const hv=HOURS[card.dataset.id]||{h:0,why:"decision support action"};hoursLog.set(card.dataset.id,{h:hv.h,scrub:!!hv.scrub,why:hv.why,title:card.querySelector(".t")?.textContent||card.dataset.id,level:risk.name||""})}
   else{snoozed.add(card.dataset.id);accepted.delete(card.dataset.id)}
-  if(lastApi)applyResult({
+  if(gateMode==="manual")applyResult(manualScore());
+  else if(lastApi)applyResult({
     s:lastApi.score,score:lastApi.score,level:lastApi.level,band:lastApi.band,name:lastApi.name,blurb:lastApi.blurb,
     drop:lastApi.drop,parts:lastApi.parts,coach:lastApi.coach,cards:lastApi.cards,day_note:lastApi.day_note,
     vge:lastApi.vge,dcs:lastApi.dcs,model_vge:lastApi.model_vge,model_dcs:lastApi.model_dcs,
     personal_factor:lastApi.personal_factor,oxygen_time_min:lastApi.oxygen_time_min,source:lastApi.source||"eva-model"
   });
-  else applyResult(localScore());
+  else applyResult(gateMode==="manual"?manualScore():localScore());
 });
+/* DRI inputs: presets, sliders, symptoms */
+document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>{const p=PRESETS[b.dataset.preset];presetOn=b.dataset.preset;goManual();
+  dlco=p.dlco;hyd=p.hyd;bub=p.bub;symSet=new Set(p.sym);sym=symSet.size?1:0;rescore()});
+$("gDlco").oninput=e=>{dlco=+e.target.value;presetOn=null;goManual();rescore()};
+$("gHyd").oninput=e=>{hyd=+e.target.value;presetOn=null;goManual();rescore()};
+$("gBub").oninput=e=>{bub=+e.target.value;presetOn=null;goManual();rescore()};
+document.querySelectorAll("[data-sym]").forEach(b=>b.onclick=()=>{const k=b.dataset.sym;symSet.has(k)?symSet.delete(k):symSet.add(k);sym=symSet.size?1:0;presetOn=null;goManual();rescore()});
+$("useCalc").onclick=()=>{gateMode="calc";presetOn=null;symSet.clear();sym=0;hyd=70;bub=0;
+  if(Number.isFinite(dlcoPre)&&dlcoPre>0)dlco=100*(dlcoPost-dlcoPre)/dlcoPre;accepted.clear();snoozed.clear();rescore()};
+$("hubReset").onclick=()=>{hoursLog.clear();renderHub()};
+paintInputs();renderHub();
 
 addEventListener("message",e=>{
   if(e.origin!==location.origin)return;
