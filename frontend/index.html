@@ -148,6 +148,79 @@ a.link{text-decoration:none}
 }
 .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
 .section-head .lbl{margin:0}
+
+.astro-btn{
+  margin-left:6px;display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:.01em;
+  color:var(--fg);background:rgba(142,224,79,.08);border:1px solid rgba(142,224,79,.28);
+  padding:8px 12px;border-radius:999px;white-space:nowrap;
+}
+.astro-btn:hover{background:rgba(142,224,79,.14)}
+.astro-btn .mark{
+  width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(142,224,79,.18);font-size:12px;line-height:1;
+}
+.astro-chip{
+  display:none;align-items:center;gap:8px;margin-left:6px;
+  padding:5px 6px 5px 10px;border-radius:999px;
+  border:1px solid rgba(142,224,79,.28);background:rgba(8,18,32,.9);
+}
+.astro-chip.on{display:inline-flex}
+.astro-chip .who{font-size:12.5px;font-weight:500;max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.astro-chip .role{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.astro-chip .out{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);padding:6px 8px;border-radius:999px;
+}
+.astro-chip .out:hover{color:var(--fg);background:rgba(255,255,255,.05)}
+
+.lab-wrap{position:relative;margin-left:2px}
+.lab-toggle{
+  width:34px;height:34px;border-radius:999px;color:rgba(238,246,232,.35);
+  font-size:16px;line-height:1;display:grid;place-items:center;
+}
+.lab-toggle:hover,.lab-toggle[aria-expanded="true"]{color:var(--fg);background:rgba(255,255,255,.05)}
+.lab-menu{
+  position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:220px;
+  padding:8px;border-radius:10px;border:1px solid var(--edge);
+  background:rgba(8,18,32,.96);backdrop-filter:blur(14px);
+  box-shadow:0 16px 40px rgba(0,0,0,.45);
+  display:none;
+}
+.lab-menu.open{display:grid;gap:2px}
+.lab-menu .lab-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim);padding:6px 10px 8px;
+}
+.lab-menu a{
+  display:block;padding:9px 10px;border-radius:6px;color:var(--fg);text-decoration:none;
+  font-size:13px;
+}
+.lab-menu a:hover{background:rgba(142,224,79,.1);color:var(--holo)}
+.lab-menu .hint{font-size:11px;color:var(--dim);padding:6px 10px 4px;line-height:1.4}
+
+.login-dialog{
+  border:1px solid var(--edge);border-radius:14px;padding:0;max-width:min(420px,92vw);
+  background:rgba(8,18,32,.98);color:var(--fg);box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.login-dialog::backdrop{background:rgba(3,6,13,.72);backdrop-filter:blur(6px)}
+.login-inner{padding:22px 22px 18px;display:grid;gap:14px}
+.login-inner h2{margin:0;font-family:var(--display);font-size:22px}
+.login-inner p{margin:0;color:var(--dim);font-size:13px;line-height:1.45}
+.crew-picks{display:grid;gap:8px}
+.crew-pick{
+  display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;text-align:left;
+  width:100%;padding:12px;border-radius:10px;border:1px solid var(--edge);
+  background:rgba(0,0,0,.28);cursor:pointer;
+}
+.crew-pick:hover,.crew-pick:focus-visible{border-color:rgba(142,224,79,.55);background:rgba(142,224,79,.08)}
+.crew-pick .av{
+  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(142,224,79,.15);font-family:var(--display);font-weight:700;color:var(--holo);
+}
+.crew-pick .n{font-weight:600;font-size:14px}
+.crew-pick .r{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px}
+.login-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
 </style>
 </head>
 <body>
@@ -166,8 +239,43 @@ a.link{text-decoration:none}
     <button type="button" class="link" id="navCalendar" data-go="calendar">Calendar</button>
     <button type="button" class="link" id="navRecs" data-go="recs">Recommendations</button>
     <button type="button" class="pill" id="navEnter" data-go="calc">Enter DRI</button>
+    <button type="button" class="astro-btn" id="astroLogin" aria-haspopup="dialog">
+      <span class="mark" aria-hidden="true">A</span>
+      Astronaut login
+    </button>
+    <div class="astro-chip" id="astroChip" aria-live="polite">
+      <div>
+        <div class="who" id="astroName">—</div>
+        <div class="role" id="astroRole">Crew</div>
+      </div>
+      <button type="button" class="out" id="astroOut">Sign out</button>
+    </div>
+    <div class="lab-wrap">
+      <button type="button" class="lab-toggle" id="labToggle" aria-expanded="false" aria-controls="labMenu" title="Lab tools">⋯</button>
+      <div class="lab-menu" id="labMenu" role="menu" hidden>
+        <div class="lab-label">Developer lab</div>
+        <a href="/risk-methods.html" target="_blank" rel="noopener" role="menuitem">Compare risk methods</a>
+        <a href="/developer-tasks.html" target="_blank" rel="noopener" role="menuitem">Task specifications</a>
+        <a href="/developer-calculator.html" target="_blank" rel="noopener" role="menuitem">Calculator lab</a>
+        <a href="/developer-nasa.html" target="_blank" rel="noopener" role="menuitem">NASA model lab</a>
+        <p class="hint">Hidden from the main flow · demo tooling only.</p>
+      </div>
+    </div>
   </nav>
 </header>
+
+<dialog class="login-dialog" id="loginDialog" aria-labelledby="loginTitle">
+  <form method="dialog" class="login-inner">
+    <div>
+      <h2 id="loginTitle">Astronaut login</h2>
+      <p>Demo sign-in only — pick a crew profile to open your calendar and recommendations. No password, no real credentials.</p>
+    </div>
+    <div class="crew-picks" id="crewPicks" role="listbox" aria-label="Crew profiles"></div>
+    <div class="login-actions">
+      <button type="submit" class="cta ghost" value="cancel">Cancel</button>
+    </div>
+  </form>
+</dialog>
 
 <section class="phase" id="phaseEntry" aria-label="Spacewalk entry">
   <iframe id="entryFrame" title="" src="/kiwinaut-eva.html?embed=1&auto=1&v=12" allow="fullscreen"></iframe>
@@ -255,7 +363,7 @@ a.link{text-decoration:none}
       </div>
     </div>
 
-    <p class="foot">Kiwinaut · NASA Space Apps Challenge 2026 · sample thresholds only. Not an official NASA product · not clinical advice. Confirmed by the crew medical officer.</p>
+    <p class="foot">Kiwinaut · NASA Space Apps Challenge 2026 · sample thresholds only. Not an official NASA product · not clinical advice. Confirmed by the crew medical officer. Open <button type="button" class="link" id="footLab" style="padding:0;color:var(--dim);text-decoration:underline">lab tools</button> for developer pages.</p>
   </div>
 </section>
 
@@ -266,12 +374,56 @@ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const COLOR={ok:"var(--ok)",holo:"var(--holo)",amber:"var(--amber)",hot:"var(--hot)",red:"var(--red)"};
 const DAYS={150:{name:"EVA week",note:"Airlock window. DLCO gate is prime. Exercise prebreathe preferred."}};
 const ENTRY_SRC="/kiwinaut-eva.html?embed=1&auto=1&v=12";
+const SESSION_KEY="kiwinaut-astro-session";
+const CREW=[
+  {id:"lee",name:"Alex Lee",role:"Commander",initials:"AL"},
+  {id:"rivera",name:"Sam Rivera",role:"Flight engineer",initials:"SR"},
+  {id:"chen",name:"Jamie Chen",role:"Science officer",initials:"JC"}
+];
 
 let phase="entry";
 let day=150, dlco=-1.22, dlcoPre=32, dlcoPost=31.61, hb=13.3, hyd=70, bub=0, sym=0;
 let prebreatheMin=null, suitP=null;
 let accepted=new Set(), snoozed=new Set(), coachTimer=null, cardTimers=[], risk={level:"green",s:0};
 let lastApi=null;
+let session=null;
+
+function loadSession(){
+  try{const raw=JSON.parse(sessionStorage.getItem(SESSION_KEY));session=CREW.some(c=>c.id===raw?.id)?raw:null}
+  catch{session=null}
+}
+function saveSession(crew){
+  session=crew?{id:crew.id,name:crew.name,role:crew.role}:null;
+  if(session)sessionStorage.setItem(SESSION_KEY,JSON.stringify(session));
+  else sessionStorage.removeItem(SESSION_KEY);
+  paintSession();
+  pushCrewToPlanners();
+}
+function paintSession(){
+  const on=!!session;
+  $("astroLogin").hidden=on;
+  $("astroChip").classList.toggle("on",on);
+  if(on){
+    $("astroName").textContent=session.name;
+    $("astroRole").textContent=session.role;
+  }
+}
+function plannerUrl(view){
+  const q=new URLSearchParams({view,v:"3"});
+  if(session?.id)q.set("crew",session.id);
+  return "/planner.html?"+q.toString();
+}
+function pushCrewToPlanners(){
+  ["calendarFrame","recsPlannerFrame"].forEach(id=>{
+    const frame=$(id);
+    if(!frame.contentWindow||!frame.src.includes("planner.html"))return;
+    frame.contentWindow.postMessage({
+      type:"kiwinaut-planner-session",
+      crew:session?.id||null,
+      name:session?.name||null
+    },location.origin);
+  });
+}
 
 function syncNav(name){
   $("navSpace").classList.toggle("on",name==="entry");
@@ -282,13 +434,15 @@ function syncNav(name){
 }
 
 function ensurePlanner(frame, view){
+  const next=plannerUrl(view);
   if(!frame.src.includes("planner.html")){
-    frame.src="/planner.html?view="+view+"&v=2";
+    frame.src=next;
     return;
   }
-  // Already loaded — ask for a quiet view switch (no parent echo).
+  // Already loaded — quiet view/crew sync (no parent echo).
   if(frame.contentWindow){
     frame.contentWindow.postMessage({type:"kiwinaut-planner-navigate",view},location.origin);
+    pushCrewToPlanners();
   }
 }
 
@@ -555,8 +709,63 @@ $("restartFlow").onclick=()=>{
   showPhase("entry");
 };
 
+/* —— Astronaut demo login —— */
+const picks=$("crewPicks");
+picks.innerHTML=CREW.map(c=>`<button type="button" class="crew-pick" data-crew="${c.id}" role="option">
+  <span class="av" aria-hidden="true">${c.initials}</span>
+  <span><span class="n">${c.name}</span><span class="r">${c.role} · demo profile</span></span>
+</button>`).join("");
+picks.onclick=e=>{
+  const btn=e.target.closest("[data-crew]");if(!btn)return;
+  const crew=CREW.find(c=>c.id===btn.dataset.crew);if(!crew)return;
+  saveSession(crew);
+  $("loginDialog").close();
+  // Fresh planner iframes so the chosen crew is primary on entry.
+  $("calendarFrame").src="about:blank";
+  $("recsPlannerFrame").src="about:blank";
+  showPhase("calendar");
+  location.hash="calendar";
+};
+$("astroLogin").onclick=()=>$("loginDialog").showModal();
+$("astroOut").onclick=()=>{
+  saveSession(null);
+  $("calendarFrame").src="about:blank";
+  $("recsPlannerFrame").src="about:blank";
+  if(phase==="calendar"||phase==="recs")showPhase("entry");
+  location.hash="";
+};
+
+/* —— Hidden lab tools —— */
+function setLabOpen(open){
+  $("labMenu").classList.toggle("open",open);
+  $("labMenu").hidden=!open;
+  $("labToggle").setAttribute("aria-expanded",open?"true":"false");
+}
+$("labToggle").onclick=e=>{
+  e.stopPropagation();
+  setLabOpen(!$("labMenu").classList.contains("open"));
+};
+$("footLab").onclick=()=>{
+  setLabOpen(true);
+  $("labToggle").focus();
+};
+addEventListener("click",e=>{
+  if(!$("labMenu").classList.contains("open"))return;
+  if(e.target.closest(".lab-wrap"))return;
+  setLabOpen(false);
+});
+addEventListener("keydown",e=>{
+  if(e.key==="Escape")setLabOpen(false);
+});
+
+loadSession();
+paintSession();
 const hash=location.hash.replace("#","");
-showPhase(hash==="calendar"?"calendar":hash==="recs"?"recs":"entry");
+if(session && (hash==="calendar"||hash==="recs"||!hash)){
+  showPhase(hash==="recs"?"recs":"calendar");
+}else{
+  showPhase(hash==="calendar"?"calendar":hash==="recs"?"recs":"entry");
+}
 })();
 </script>
 </body>

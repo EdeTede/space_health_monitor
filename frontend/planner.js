@@ -142,10 +142,23 @@
   $('editProfile').onclick=()=>{const c=profile();$('profileName').value=c.name;$('profileRole').value=c.role;$('profileHR').value=c.hr;$('profileStress').value=c.stress;$('profileDialog').showModal();};
   $('profileForm').onsubmit=e=>{e.preventDefault();Object.assign(profile(),{name:$('profileName').value.trim(),role:$('profileRole').value.trim(),hr:+$('profileHR').value,stress:+$('profileStress').value});save();$('profileDialog').close();render();};
   $('sourceLinks').innerHTML=Object.entries(M.sources).map(([k,url])=>`<a href="${url}" target="_blank" rel="noopener">${esc(k)} ↗</a>`).join('');
+  function applyCrew(id){
+    if(!id||!state.crews.some(c=>c.id===id)||state.crew===id)return false;
+    state.crew=id;
+    state.selected=crewEvents().find(x=>x.start>=state.now)?.id||crewEvents()[0]?.id||null;
+    state.eva=null;
+    save();
+    render();
+    message(`${profile().name} signed in · calendar ready.`);
+    return true;
+  }
   addEventListener('message',e=>{
-    if(e.origin!==location.origin||e.source!==parent||e.data?.type!=='kiwinaut-planner-navigate')return;
-    setView(e.data.view,{fromParent:true});
+    if(e.origin!==location.origin||e.source!==parent||!e.data)return;
+    if(e.data.type==='kiwinaut-planner-navigate')setView(e.data.view,{fromParent:true});
+    if(e.data.type==='kiwinaut-planner-session'&&e.data.crew)applyCrew(e.data.crew);
   });
-  setView(new URLSearchParams(location.search).get('view'),{fromParent:true});
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('crew'))applyCrew(qs.get('crew'));
+  setView(qs.get('view'),{fromParent:true});
   save();
 })();
