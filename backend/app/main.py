@@ -76,8 +76,8 @@ def health() -> HealthOut:
 
 @app.get("/")
 def index() -> FileResponse:
-    """Simple sign-in: astronaut or mission planner, then their own home."""
-    return _page("home.html")
+    """Landing: the 3D spacewalk plays immediately, with the astronaut / planner sign-in inside it."""
+    return _page("kiwinaut-eva.html")
 
 
 @app.get("/home.html")
