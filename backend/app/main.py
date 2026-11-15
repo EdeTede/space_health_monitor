@@ -1,7 +1,7 @@
 """Kiwinaut API — DLCO decompression gate for NASA Space Apps Challenge 2026."""
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import Request, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -24,6 +24,26 @@ app.add_middleware(
 )
 
 app.include_router(decompress.router)
+
+# Explicit allow-list: never expose arbitrary files from the project root.
+@app.get("/planner.html")
+def planner_page() -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / "planner.html")
+
+
+@app.get("/planner.css")
+def planner_styles() -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / "planner.css", media_type="text/css")
+
+
+@app.get("/planner-core.js")
+def planner_core() -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / "planner-core.js", media_type="application/javascript")
+
+
+@app.get("/planner.js")
+def planner_script() -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / "planner.js", media_type="application/javascript")
 
 # Static frontend assets (brand, anatomy models, Three.js)
 for mount, folder in (
@@ -88,3 +108,40 @@ def documentation_md() -> FileResponse:
 @app.get("/VARIABLE-LOG.md")
 def variable_log_md() -> FileResponse:
     return FileResponse(FRONTEND_ROOT / "VARIABLE-LOG.md", media_type="text/markdown")
+
+
+@app.get("/developer-tasks.html")
+def developer_tasks() -> FileResponse:
+    return _page("developer-tasks.html")
+
+
+@app.get("/developer-calculator.html")
+def developer_calculator() -> FileResponse:
+    return _page("developer-calculator.html")
+
+
+@app.get("/developer.css")
+def developer_css() -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / "developer.css", media_type="text/css")
+
+
+@app.get("/developer.js")
+@app.get("/dev-engine.js")
+@app.get("/dev-bootstrap.js")
+def developer_script(request: Request) -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / request.url.path.lstrip("/"), media_type="application/javascript")
+
+
+# Explicit NASA comparison assets; no arbitrary filesystem path is accepted.
+@app.get("/risk-methods.html")
+@app.get("/developer-nasa.html")
+@app.get("/nasa-model.js")
+@app.get("/nasa-ui.js")
+@app.get("/nasa-developer.js")
+@app.get("/risk-methods.js")
+@app.get("/nasa.css")
+@app.get("/nasa-equation.png")
+@app.get("/NASAmodel.pdf")
+@app.get("/NASA-METHOD.md")
+def nasa_assets(request: Request) -> FileResponse:
+    return FileResponse(FRONTEND_ROOT / request.url.path.lstrip("/"))

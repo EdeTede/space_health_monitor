@@ -1,0 +1,2 @@
+DevConfig.attachTasks();
+DevConfig.load();

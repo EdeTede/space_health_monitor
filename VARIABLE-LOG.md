@@ -17,7 +17,6 @@ The last column is the name in `model.js`, for cross-referencing only.
 | Tissue nitrogen half-time | 360 min at rest | Published | NASA operational single compartment model | How long the body takes to clear half its dissolved nitrogen once breathing pure oxygen. | `tau` |
 | Exercise effect on clearance | 0.03 per mL/kg/min | Published | NASA TP-2004-213158, TP-2020-220529 | How much faster nitrogen leaves the tissue when the crew member works rather than rests. | `exerciseK` |
 | Sea-level tissue ratio | 0.79 | Published | NASA DCS Evidence Report | The supersaturation everyone carries permanently at sea level, below which there is no decompression dose. | `anchor` |
-| Decompression dose | ratio minus 0.79 | Published | NASA DCS Evidence Report | The supersaturation above the sea-level baseline, which is what the gravity and carryover factors scale rather than the ratio itself. | derived |
 
 ## Supersaturation to risk
 
@@ -25,13 +24,9 @@ The last column is the name in `model.js`, for cross-referencing only.
 | --- | --- | --- | --- | --- | --- |
 | Bubble formation curve | exponent 3.08, midpoint 0.47 | Published | NASA TM-100456, 34 experiments, N = 607, r = 0.91 | The curve turning tissue supersaturation into the chance gas bubbles appear in venous blood. | `vgeN`, `vgeC` |
 | Decompression sickness curve | exponent 4.24, midpoint 2.16 | Published | NASA TM-100456, r = 0.84 | The same transformation but for sickness itself rather than bubbles. | `dcsN`, `dcsC` |
-| Exploration-atmosphere factor | 1.577 on the dose | Derived, **cross-model** | Solved against NASA NTRS 20170004350, Case 1 | Makes this model agree with NASA's 8.4 percent for the 15 minute exploration protocol. NASA produced that figure with the Tissue Bubble Dynamics Model, a different model, and the paper does not state whether the EVA is ambulatory. | `ambWalk` |
-| Microgravity factor | 0.295 on the dose | Derived | Solved against the ISS ISLE operational figure | Makes this model agree with NASA's quoted 0.3 percent per EVA for operational ISLE, which is observational rather than modelled and is backed by 130 EVAs with no cases. | `ambMicro` |
-| Ratio between them | 5.35 times | Derived | Falls out of the two anchors | **Do not quote this as an ambulation effect.** It is the distance between two different models plus an unknown amount of ambulation. |  |
+| Ambulation effect | 1.204 times the ratio | Derived | Solved here against NASA NTRS 20170004350 | How much walking raises effective supersaturation, set so the model reproduces NASA's published 8.4 percent for their own protocol. | `amb` |
 | Tissue ratio ceiling | 1.65 | Published | NASA operational limit | The supersaturation above which a protocol is not flown whatever else the numbers say. | `rLimit` |
-| Acceptable sickness risk | 15 % | Published | NASA-STD-3001 [V2 6008] | The decompression sickness limit, at 95 percent statistical confidence, covering Type I and isolated cutis marmorata. | `dcsAccept` |
-| Grade IV bubble limit | 20 % | Published | NASA-STD-3001 [V2 6008] | A second limit on the highest Doppler bubble grade, not evaluated here because it is a different quantity from the any-bubble likelihood this index uses. | `vgeGrade4Limit` |
-| Type II prevention | absolute | Published | NASA-STD-3001 [V2 6008] | A third requirement to prevent neurological decompression sickness entirely, which is not a probability and is not modelled. | not modelled |
+| Acceptable sickness risk | 3.0 % per person per EVA | Published | NASA acceptable risk standard | The decompression sickness probability NASA will accept for one crew member on one EVA. | `dcsAccept` |
 
 ## Supersaturation to diffusing capacity
 
@@ -47,7 +42,7 @@ The last column is the name in `model.js`, for cross-referencing only.
 
 | Quantity | Value | Confidence | Source | What it is | In code |
 | --- | --- | --- | --- | --- | --- |
-| Nuclei added per EVA | 0.03 on the dose | **Chosen** | No published value for EVA | How much one EVA raises the supersaturation the next one starts from, through the bubble seeds it leaves behind. | `carryPer` |
+| Nuclei added per EVA | 0.03 on the ratio | **Chosen** | No published value for EVA | How much one EVA raises the supersaturation the next one starts from, through the bubble seeds it leaves behind. | `carryPer` |
 | Nuclei half-life | 36 hours | **Chosen** | No published value for EVA | How fast that seed population disappears between exposures. | `carryHalf` |
 | Carryover mechanism | qualitative only | Published | Arieli 2017, Balestra 2024 | Bubbles grow only from pre-existing seeds, repeat exposures raise the seed count, and across a week of diving bubble counts fall then rise. | - |
 
@@ -89,17 +84,7 @@ The last column is the name in `model.js`, for cross-referencing only.
 
 ---
 
-## Where the model does not apply
-
-The Hill fits were checked against NASA's threshold table between tissue ratios of
-1.22 and 1.49. The exploration atmosphere sits inside that. ISS protocols land
-between 1.7 and 2.0, far outside it, and the raw fit over-predicts there by orders
-of magnitude. The microgravity anchor was added precisely to make ISS cases usable,
-but any habitat pressure near 14.7 psia should be treated as indicative only.
-
----
-
-## The six weakest points
+## The four weakest points
 
 1. **The bubble effect on diffusing capacity rests on an abstract.** Thorsen 1995
    full text has not been obtained. The minus 5.9 and minus 2.8 percent figures come
@@ -111,16 +96,6 @@ but any habitat pressure near 14.7 psia should be treated as indicative only.
    physiologically more plausible.
 4. **Group fits are read as individual probabilities.** The Hill curves were fitted
    across 607 chamber exposures as population incidences.
-5. **The exploration-atmosphere factor is a cross-model calibration, not a physical
-   measurement.** It reconciles a Hill tissue-ratio model with NASA's Tissue Bubble
-   Dynamics Model for one case. The ambulation interpretation is not supported by
-   the source, which does not state the EVA type.
-6. **There is no decompression rate term.** The model is Haldanean and compares
-   dissolved nitrogen against ambient pressure at the endpoint only. A faster drop
-   excites more micronuclei at the same dissolved load, which is well established
-   in diving and in NASA's own bubble literature, so risk at short decompression
-   times is underestimated. No coefficient exists for an 8.2 to 4.3 psia suit
-   transition, so none was invented.
 
 ---
 

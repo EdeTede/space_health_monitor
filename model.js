@@ -19,19 +19,7 @@ var K = {
   vgeC:      0.47,    /* Hill constant, venous gas emboli                                 */
   dcsN:      4.24,    /* Hill exponent, decompression sickness                            */
   dcsC:      2.16,    /* Hill constant, decompression sickness                            */
-  /* Gravity regime multipliers on the tissue ratio. Both are solved against a
-     published NASA figure, which is why microgravity is not 1.
-       walking     Artemis 8.2/34, 15 min prebreathe, resting ratio 1.2228,
-                   NASA modelled 8.4 % DCS (NTRS 20170004350).
-       microg      ISS ISLE operational, 194 min prebreathe of which 50 min light
-                   exercise, resting ratio 1.8252, NASA quoted 0.3 % per EVA.
-     The two give an ambulation effect of 5.35x, which is what NASA means when it
-     says microgravity prebreathe protocols are not effective for planetary EVA.
-     The multiplier acts on the DECOMPRESSION DOSE, which is the ratio above the
-     sea-level anchor of 0.79, not on the ratio itself. Scaling the ratio would
-     drag the anchor with it and send low-dose microgravity cases to exactly zero. */
-  ambWalk:   1.5772,
-  ambMicro:  0.2945,
+  amb:       1.2043,  /* ambulation multiplier on the tissue ratio                        */
 
   /* --- supersaturation to diffusing capacity --- */
   kBub:      3.1,     /* % DLCO lost per unit venous gas emboli likelihood                */
@@ -45,15 +33,7 @@ var K = {
 
   /* --- operational limits --- */
   rLimit:    1.65,    /* tissue ratio ceiling. a plan above this is not flown             */
-  /* NASA-STD-3001 [V2 6008], three limits, each at 95 % statistical confidence:
-       DCS at or below 15 % (includes Type I or isolated cutis marmorata)
-       Grade IV venous gas emboli at or below 20 %
-       prevent Type II DCS
-     Only the first is modelled here. Grade IV VGE is a specific Doppler grade and
-     is not the same quantity as the any-VGE likelihood this index is built on, so
-     the 20 % limit is not checked. Type II prevention is not a probability at all. */
-  dcsAccept: 15.0,
-  vgeGrade4Limit: 20.0  /* carried for reference only, not evaluated */
+  dcsAccept: 3.0      /* % per person per EVA. NASA acceptable risk                       */
 };
 
 /* rate constant for nitrogen washout at a given metabolic rate */
@@ -71,7 +51,6 @@ function hillDCSinv(d){ d=Math.min(99.99,Math.max(1e-9,d))/100;
 function hbFactor(hb){ return (10.22+hb)/(1.7*hb); }
 
 /* carryover multiplier after n preceding EVAs spaced gapHours apart */
-/* multiplier on the decompression dose from nuclei left by preceding EVAs */
 function carryover(n,gapHours){
   if(!n||n<=0) return 1;
   var r=Math.pow(0.5,gapHours/K.carryHalf), load=0;
@@ -99,8 +78,7 @@ function forward(p){
   pN2 *= Math.exp(-k*tOxygen);
 
   var Rrest = pN2/pSuit;
-  var A = (p.ambulatory?K.ambWalk:K.ambMicro) * carryover(p.priorEVAs,p.gapHours);
-  var Reff  = K.anchor + A*(Rrest-K.anchor);
+  var Reff  = Rrest * (p.ambulatory?K.amb:1) * carryover(p.priorEVAs,p.gapHours);
 
   /* hyperoxic dose. habitat pressure during prebreathe and decompression,
      suit pressure while outside, all on oxygen. */
@@ -143,9 +121,8 @@ function inverse(p,m){
 function restingRatioFor(targetDCS,p,factor){
   var f=factor||1;
   var vgeWanted = hillVGE(hillDCSinv(targetDCS))/f;
-  var Reff = hillVGEinv(Math.min(99.9,vgeWanted));
-  var A = (p.ambulatory?K.ambWalk:K.ambMicro)*carryover(p.priorEVAs,p.gapHours);
-  return K.anchor + (Reff-K.anchor)/A;        /* undo the dose scaling */
+  return hillVGEinv(Math.min(99.9,vgeWanted))
+         /((p.ambulatory?K.amb:1)*carryover(p.priorEVAs,p.gapHours));
 }
 /* what this crew member actually experiences on a protocol built for the average */
 function experiencedDCS(modelVGE,factor){

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Kiwinaut · Mission calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="planner.css">
+<link rel="stylesheet" href="nasa.css"></head><body>
+<main>
+  <div class="eyebrow">KIWINAUT / MISSION OPERATIONS <span class="badge">DEMO MISSION</span></div>
+  <header class="pagehead"><div><h1 id="pageTitle">Crew calendar</h1><p>One crew. A shared plan. Every activity in context.</p></div><div class="actions"><button id="calendarTab" class="active">Calendar</button><button id="recommendationsTab">EVA recommendations</button></div></header>
+  <div class="notice">Fictional crew and simulated readings. No connection to CSA, ESA or NASA services. All times UTC.</div>
+  <section class="toolbar panel" aria-label="Mission controls">
+    <label>Crew profile<select id="crew"></select></label><button id="editProfile">Edit profile</button>
+    <label>Simulation clock (UTC)<input id="clock" type="datetime-local" step="60"></label><button id="advance">+30 min</button>
+    <button id="connections">Connections</button><span id="saveState" class="muted" role="status">Saved on this browser</span>
+  </section>
+  <div id="feedback" role="status" aria-live="polite"></div>
+  <section id="calendarView">
+    <div class="stats" id="crewStats"></div>
+    <div class="calendar-layout">
+      <section class="panel schedule"><div class="sectionhead"><div><div class="eyebrow">MISSION TIMELINE</div><h2 id="rangeTitle"></h2></div><button class="primary" id="addTask">+ Add activity</button></div>
+        <div class="datebar"><button id="previous" aria-label="Previous period">←</button><input id="date" type="date" aria-label="Calendar date"><button id="next" aria-label="Next period">→</button><button id="today">Mission today</button><select id="period" aria-label="Calendar view"><option value="1">Day</option><option value="7" selected>7 days</option></select></div>
+        <div class="legend"><span class="dot eva"></span>EVA <span class="dot preparation"></span>Preparation <span class="dot recovery"></span>Recovery <span class="muted">Select any activity to inspect its readings.</span></div>
+        <div id="calendar" class="calendar"></div>
+      </section>
+      <aside class="panel activity-detail" id="detail" aria-label="Activity details"></aside>
+    </div>
+  </section>
+  <section id="recommendationsView" hidden><div id="recommendations"></div><div id="nasaComparison"></div></section>
+  <footer><p><a href="developer-tasks.html" target="_blank" rel="noopener">Developer · task specifications</a> · <a href="developer-calculator.html" target="_blank" rel="noopener">Calculator lab</a></p><p id="devState"></p><details><summary>Data sources and simulation assumptions</summary><p>Task names are adapted from NASA mission reports and reference procedures. Schedule dates, durations, fictional profiles, readings and stress coefficients are demo assumptions, not historical astronaut measurements. EveryWear is an application connected to biomedical sensors, not itself a sensor.</p><p>Calendar DCS estimates use the existing model.js forward model. Consecutive oxygen stages are converted to equivalent washout inputs. Hydration and general stress have no validated numeric DCS coefficient here. Prior-EVA carryover uses the existing model's assumed equal spacing based on the latest gap. EVA duration changes oxygen exposure but not DCS in this model. Predicted monitor readings do not diagnose DCS or measure DLCO. Pressure containment failure probability is not modeled.</p><div id="sourceLinks"></div><p>No automated medical clearance. Mission-approved protocols and medical review govern operational use.</p></details></footer>
+</main>
+<dialog id="taskDialog"><form id="taskForm"><div class="sectionhead"><h2 id="taskHeading">Add activity</h2><button type="button" data-close="taskDialog" aria-label="Close activity editor">×</button></div><p class="muted">NASA-derived task catalogue · all scheduling is simulated.</p>
+  <label>Find a task<input id="taskSearch" type="search" placeholder="Search EVA, medical, exercise…"></label>
+  <label>Task<select id="taskType" required></select></label><p id="taskSource" class="muted"></p>
+  <div class="formgrid"><label>Start (UTC)<input id="taskStart" type="datetime-local" required></label><label>Duration (minutes)<input id="taskDuration" type="number" min="5" max="1440" step="1" required></label></div>
+  <label>Link preparation to EVA<select id="taskLink"></select></label><p class="muted">Only linked oxygen tasks immediately preceding an EVA receive prebreathe credit. No overlapping activities for the same crew.</p>
+  <label>Personal note<textarea id="taskNote" maxlength="500" rows="2" placeholder="Optional crew note"></textarea></label>
+  <p id="taskError" class="error" role="alert"></p><div class="actions"><button type="button" data-close="taskDialog">Cancel</button><button class="primary" type="submit">Save activity</button></div>
+</form></dialog>
+<dialog id="profileDialog"><form id="profileForm"><div class="sectionhead"><h2>Crew profile</h2><button type="button" data-close="profileDialog" aria-label="Close profile editor">×</button></div><p class="muted">Fictional profile · these values drive demo traces, not clinical predictions.</p><label>Name<input id="profileName" maxlength="60" required></label><label>Role<input id="profileRole" maxlength="60" required></label><div class="formgrid"><label>Demo resting HR (bpm)<input id="profileHR" type="number" min="40" max="100" required></label><label>Demo baseline stress (0–100)<input id="profileStress" type="number" min="0" max="100" required></label></div><button class="primary">Save profile</button></form></dialog>
+<dialog id="connectionDialog"><div class="sectionhead"><h2>Demo connections</h2><button data-close="connectionDialog" aria-label="Close connections">×</button></div><p class="muted">Adapter interfaces for a future integration. No credentials, remote requests or real health records.</p><div id="connectionContent"></div></dialog>
+<dialog id="scenarioDialog"><div class="sectionhead"><h2>Compare a plan change</h2><button data-close="scenarioDialog" aria-label="Close scenario">×</button></div><div id="scenarioContent"></div><div class="actions"><button data-close="scenarioDialog">Keep current plan</button><button class="primary" id="applyScenario">Apply to demo calendar</button></div></dialog>
+<script src="model.js"></script><script src="planner-core.js"></script><script src="dev-engine.js"></script><script src="dev-bootstrap.js"></script><script src="nasa-model.js"></script><script src="nasa-ui.js"></script><script src="planner.js"></script>
+</body></html>

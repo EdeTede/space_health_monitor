@@ -1,42 +1,14 @@
 var S={mode:"assess",fix:"pb",
   pre:32.00,post:31.61,noPre:0,noPost:0,hb:13.3,dust:0,kDust:0,
-  pb:15,ex:0,dc:15,sp:4.3,out:360,tgt:8,lim:15,
-  habP:8.2,habFO2:0.34,oxThr:21,ambWalk:1.5772,ambMicro:0.2945,walking:true,prior:0,gap:24,
+  pb:15,ex:0,dc:0,sp:4.3,out:360,tgt:3,
+  habP:8.2,habFO2:0.34,oxThr:21,ambK:1.204,prior:0,gap:24,
   nDays:7,gapH:24,day:{}};
 
 function D(i){return document.getElementById(i)}
-
-/* ---------------------------------------------------------------------
-   INPUT BOUNDARY
-   Every value this application holds is a finite number. Nothing else is
-   ever admitted into state, so no string of any kind can reach the DOM.
-   num() is the only way a control's value enters S. It coerces, rejects
-   anything non-finite, and clamps to the control's own declared range.
-   --------------------------------------------------------------------- */
-function num(el, fallback){
-  var v = Number(el.value);
-  if(typeof v !== "number" || !isFinite(v)) return fallback;
-  var lo = el.min===""?-Infinity:Number(el.min);
-  var hi = el.max===""? Infinity:Number(el.max);
-  if(isFinite(lo) && v<lo) v=lo;
-  if(isFinite(hi) && v>hi) v=hi;
-  return v;
-}
-/* every number this application prints goes through one of these two, so
-   what reaches innerHTML is always a formatted numeric literal. */
-function fx(v,dp){ var n=Number(v); return isFinite(n)?n.toFixed(dp||0):"0"; }
-function iv(v){ var n=Math.round(Number(v)); return isFinite(n)?String(n):"0"; }
-/* habitat atmospheres NASA has specified the xEVA system to operate from,
-   EVA-EXP-0075. the exploration atmosphere is the Artemis baseline. */
-var ATMOS={
-  expl:{p:8.2, f:0.34, name:"Exploration atmosphere"},
-  mid :{p:10.2,f:0.265,name:"Intermediate"},
-  iss :{p:14.7,f:0.21, name:"ISS standard"}
-};
 function prof(o){
-  K.oxThr=S.oxThr; K.ambWalk=S.ambWalk; K.ambMicro=S.ambMicro;
+  K.oxThr=S.oxThr; K.amb=S.ambK;
   var p={habP:S.habP,habFO2:S.habFO2,suitP:S.sp,prebreathe:S.pb,exercise:S.ex,
-         decompress:S.dc,outside:S.out,ambulatory:S.walking,priorEVAs:S.prior,gapHours:S.gap};
+         decompress:S.dc,outside:S.out,ambulatory:true,priorEVAs:S.prior,gapHours:S.gap};
   if(o) for(var k in o) p[k]=o[k];
   return p;
 }
@@ -61,12 +33,7 @@ function buys(nEVAs){
   var vgeBlind=forward(prof({prebreathe:tBlind,decompress:0})).vge;
   var actual=experiencedDCS(vgeBlind,F);
   var n=nEVAs||1;
-  /* one quantity physiologically, two entries on an operational timeline.
-     the decompression floor is held and prebreathe absorbs the remainder. */
-  var dcInfo=Math.min(S.dc,tInfo), pbInfo=Math.max(0,tInfo-dcInfo);
-  var dcBlind=Math.min(S.dc,tBlind), pbBlind=Math.max(0,tBlind-dcBlind);
   return { factor:F, tBlind:tBlind, tInfo:tInfo,
-           pbBlind:pbBlind, pbInfo:pbInfo, dcBlind:dcBlind, dcInfo:dcInfo,
            dTime:(tInfo-tBlind)*n, dRisk:actual-t, actual:actual, n:n };
 }
 function buysBlock(nEVAs,scope){
@@ -82,17 +49,15 @@ function buysBlock(nEVAs,scope){
     '<div><div class="k">EVA time '+(saves?"saved":"added")+'</div>'+
       '<div class="v" style="color:'+(saves?"var(--ok)":"var(--warn)")+'">'+
       (saves?"":"+")+Math.round(b.dTime)+'<u>min</u></div>'+
-      '<div class="s">Blind you would fly <b>'+b.pbBlind.toFixed(0)+'</b> prebreathe plus <b>'+
-      b.dcBlind.toFixed(0)+'</b> decompression'+
-      (b.n>1?" a day":"")+'. This crew member needs <b>'+b.pbInfo.toFixed(0)+' plus '+
-      b.dcInfo.toFixed(0)+' min</b>'+
+      '<div class="s">Blind you would fly <b>'+b.tBlind.toFixed(0)+' min</b> of oxygen time'+
+      (b.n>1?" a day":"")+'. For this crew member the target needs <b>'+b.tInfo.toFixed(0)+' min</b>'+
       (saves?', so measuring hands back '+Math.abs(Math.round(b.dTime))+' minutes'+(b.n>1?" over the mission":"")+'.'
             :', so measuring costs '+Math.round(b.dTime)+' minutes'+(b.n>1?" over the mission":"")+'.')+'</div></div>'+
     '<div><div class="k">DCS risk '+(avoids?"avoided":"traded away")+'</div>'+
       '<div class="v" style="color:'+(avoids?"var(--ok)":"var(--muted)")+'">'+
       (avoids?"−":"+")+Math.abs(b.dRisk).toFixed(2)+'<u>pts</u></div>'+
       '<div class="s">Flown blind, this crew member would sit at <b>'+b.actual.toFixed(2)+
-      '%</b> against the <b>'+fx(S.tgt,1)+'%</b> intended'+
+      '%</b> against the <b>'+S.tgt.toFixed(1)+'%</b> intended'+
       (avoids?'. Measuring removes that gap.':'. They were already inside it, which is where the time comes from.')+'</div></div></div>';
 }
 
@@ -112,7 +77,7 @@ function renderAssess(){
 
   var over=r.dcs>K.dcsAccept;
   D("verdict").style.color=over?"var(--crit)":"var(--ok)";
-  D("verdictTxt").textContent=over?"Over NASA's 15% limit":"Inside NASA's 15% limit";
+  D("verdictTxt").textContent=over?"Over NASA's 3% acceptable":"Inside NASA's 3% acceptable";
 
   var noTxt="";
   if(S.noPre>0&&S.noPost>0){
@@ -121,9 +86,9 @@ function renderAssess(){
       (vc>=0?"+":"")+vc.toFixed(2)+"% capillary blood volume.";
   }
   D("note").innerHTML = r.rising
-    ? "The reading rose from <b>"+fx(S.pre,2)+"</b> to <b>"+fx(S.post,2)+"</b>. The lung does not improve across an EVA, so the earlier value understated this crew member's baseline. Carry <b>"+fx(S.post,2)+"</b> forward and score this EVA as zero."
-    : "Diffusing capacity fell <b>"+Math.abs(r.dPct).toFixed(2)+"%</b>, from <b>"+fx(S.pre,2)+
-      "</b> to <b>"+fx(S.post,2)+"</b>. Taking off the part explained by oxygen exposure"+
+    ? "The reading rose from <b>"+S.pre.toFixed(2)+"</b> to <b>"+S.post.toFixed(2)+"</b>. The lung does not improve across an EVA, so the earlier value understated this crew member's baseline. Carry <b>"+S.post.toFixed(2)+"</b> forward and score this EVA as zero."
+    : "Diffusing capacity fell <b>"+Math.abs(r.dPct).toFixed(2)+"%</b>, from <b>"+S.pre.toFixed(2)+
+      "</b> to <b>"+S.post.toFixed(2)+"</b>. Taking off the part explained by oxygen exposure"+
       (S.kDust*S.dust?", dust":"")+" and haemoglobin leaves <b>"+(-r.residual).toFixed(3)+
       "%</b> attributable to bubbles, which is an index of <b>"+r.vge.toFixed(0)+
       "</b> and a decompression sickness probability of <b>"+r.dcs.toFixed(2)+"%</b>. The protocol flown was modelled to give <b>"+
@@ -192,7 +157,7 @@ function renderPlan(){
   });
   D("fixNote").innerHTML="Holding <b style='color:var(--gas)'>"+LEV[S.fix].label.toLowerCase()+
     "</b>. Move <b>"+LEV[slide].label.toLowerCase()+"</b> and <b style='color:var(--accent)'>"+
-    LEV[drive].label.toLowerCase()+"</b> follows to keep "+fx(S.tgt,1)+"%.";
+    LEV[drive].label.toLowerCase()+"</b> follows to keep "+S.tgt.toFixed(1)+"%.";
 
   D("k1").textContent="DCS probability";
   D("v1").innerHTML=f.dcs.toFixed(2)+'<u>%</u>';
@@ -203,40 +168,13 @@ function renderPlan(){
   D("v3").textContent=f.Reff.toFixed(3);
   D("v3").style.color=f.Reff>K.rLimit?"var(--crit)":"var(--muted)";
 
-  /* why the target is unreachable, when it is. every lever here only lowers risk,
-     so a held lever that already over-protects can never be climbed back out of. */
-  var needTotal = oxygenTimeFor(S.tgt,prof(),S.ex,S.sp,1);
-  var heldVal2  = S[S.fix];
-  var overProtect = miss && f.dcs < S.tgt;
-  var reason="";
-  if(miss && overProtect){
-    if(S.fix==="dc"||S.fix==="pb"){
-      var maxHold=Math.max(0,needTotal);
-      reason = heldVal2>maxHold
-        ? LEV[S.fix].label+" of "+heldVal2.toFixed(0)+" min already over-protects. "+
-          "This target needs <b>"+needTotal.toFixed(0)+" min</b> of oxygen time in total, so "+
-          LEV[S.fix].label.toLowerCase()+" cannot exceed <b>"+maxHold.toFixed(0)+" min</b> and still allow it. "+
-          "Lower it, or lower the target."
-        : "Nothing left to give. The habitat alone already meets this target.";
-    } else {
-      reason = "Exercise only speeds nitrogen clearance, so it cannot raise risk back to the target. "+
-               "Lower the target or shorten the time on oxygen.";
-    }
-    if(needTotal<=0) reason = "At <b>"+fx(S.tgt,1)+"%</b> the habitat needs no prebreathe at all, so any "+
-      "oxygen time at all over-protects. The lowest risk this atmosphere gives with no intervention is <b>"+
-      forward(prof({prebreathe:0,decompress:0,exercise:0})).dcs.toFixed(2)+"%</b>. Lower the target to tune a protocol.";
-  }
   D("verdict").style.color=miss?"var(--warn)":"var(--ok)";
-  D("verdictTxt").textContent=miss
-    ? (overProtect?"Target unreachable, this protocol is safer at "+f.dcs.toFixed(2)+"%"
-                  :"Target unreachable, nearest is "+f.dcs.toFixed(2)+"%")
-    : "On target";
+  D("verdictTxt").textContent=miss?"Cannot reach the target, nearest is "+f.dcs.toFixed(2)+"%":"On target";
 
   var deg=(S.fix==="ex");
-  if(reason){ D("note").innerHTML="<b style='color:var(--warn)'>Why.</b> "+reason; D("buys").innerHTML=""; D("plot").innerHTML=tradeCurve(LEV[slide],LEV[drive],slide,drive); return; }
-  D("note").innerHTML="Suit at <b>"+fx(S.sp,1)+" psid</b>. Holding "+
+  D("note").innerHTML="Suit at <b>"+S.sp.toFixed(1)+" psid</b>. Holding "+
     LEV[S.fix].label.toLowerCase()+" at <b>"+S[S.fix].toFixed(LEV[S.fix].dp)+" "+LEV[S.fix].unit+
-    "</b>, the protocol that lands on <b>"+fx(S.tgt,1)+"%</b> is "+
+    "</b>, the protocol that lands on <b>"+S.tgt.toFixed(1)+"%</b> is "+
     LEV[slide].label.toLowerCase()+" <b>"+S[slide].toFixed(LEV[slide].dp)+" "+LEV[slide].unit+
     "</b> with "+LEV[drive].label.toLowerCase()+" <b>"+S[drive].toFixed(LEV[drive].dp)+" "+
     LEV[drive].unit+"</b>."+
@@ -282,7 +220,7 @@ function tradeCurve(A,B,aKey,bKey){
   s+='<circle cx="'+xv(S[aKey])+'" cy="'+yv(S[bKey])+'" r="6.5" fill="#ff9f45" stroke="#080b10" stroke-width="2"/>';
   s+='<text x="'+(L+w/2)+'" y="'+(H-10)+'" fill="#74849a" font-size="11" text-anchor="middle">'+A.label+' ('+A.unit+')</text>';
   s+='<text transform="translate(18,'+(T+h/2)+') rotate(-90)" fill="#74849a" font-size="11" text-anchor="middle">'+B.label+' ('+B.unit+')</text>';
-  s+='<text x="'+(W-R)+'" y="'+(T+12)+'" fill="#46c97e" font-size="11" font-family="monospace" text-anchor="end">shaded side is safer than '+fx(S.tgt,1)+'%</text>';
+  s+='<text x="'+(W-R)+'" y="'+(T+12)+'" fill="#46c97e" font-size="11" font-family="monospace" text-anchor="end">shaded side is safer than '+S.tgt.toFixed(1)+'%</text>';
   return s+'</svg>';
 }
 
@@ -303,7 +241,7 @@ function missionDays(){
     var rec={day:d,model:model,
              predDcs:hillDCS(R),predVge:vge,factor:factor,
              expPost:S.pre*(1+(-(K.kBub*vge/100+K.kOx*model.H))/100)};
-    var v=S.day["d"+iv(d)];
+    var v=S.day["d"+d];
     if(v!=null&&v>0){
       var r=inverse(p,{pre:S.pre,post:v,hb:S.hb,dust:S.dust,kDust:S.kDust});
       rec.post=v; rec.meas=r;
@@ -314,24 +252,23 @@ function missionDays(){
   return out;
 }
 function renderCamp(){
-  K.dcsAccept=S.lim;          /* the mission panel sets its own limit */
   var days=missionDays(), last=days[days.length-1];
   var breach=0; for(var i=0;i<days.length;i++) if(days[i].predDcs>K.dcsAccept){breach=days[i].day;break;}
   var fitted=days.filter(function(d){return d.meas&&d.meas.usable}).length;
 
-  D("k1").textContent="Days inside "+fx(S.lim,1)+"%";
+  D("k1").textContent="Days inside NASA's 3%";
   D("v1").innerHTML=(breach===1?"0":breach?String(breach-1):String(S.nDays)+"+")+'<u>days</u>';
   D("v1").style.color=breach===1?"var(--crit)":breach?"var(--warn)":"var(--ok)";
-  D("k2").textContent="Day "+iv(S.nDays)+" DCS";
+  D("k2").textContent="Day "+S.nDays+" DCS";
   D("v2").textContent=last.predDcs.toFixed(2)+"%"; D("v2").style.color=col(last.predDcs);
   D("k3").textContent="Calibrated on";
   D("v3").textContent=fitted; D("v3").style.color="var(--muted)";
 
   D("verdict").style.color=breach?"var(--warn)":"var(--ok)";
-  D("verdictTxt").textContent=breach===1?"Over 15% on the first day"
-    :breach?"Over 15% from day "+breach:"Inside 15% for the whole mission";
+  D("verdictTxt").textContent=breach===1?"Over 3% on the first day"
+    :breach?"Over 3% from day "+breach:"Inside 3% for the whole mission";
 
-  D("note").innerHTML="The same protocol flown "+iv(S.nDays)+" days running, "+iv(S.gapH)+
+  D("note").innerHTML="The same protocol flown "+S.nDays+" days running, "+S.gapH+
     " hours apart. Carryover from the bubble nuclei left by each EVA reaches <b>"+
     last.model.Reff.toFixed(3)+"</b> on the tissue ratio by the last day, against <b>"+
     days[0].model.Reff.toFixed(3)+"</b> on the first."+
@@ -344,20 +281,16 @@ function renderCamp(){
     rows+="<tr"+(d.meas?" class='has'":"")+"><td>"+d.day+"</td>"+
       "<td style='color:"+col(d.predDcs)+"'>"+d.predDcs.toFixed(2)+"%</td>"+
       "<td>"+d.expPost.toFixed(2)+"</td>"+
-      "<td><input type='number' step='0.01' data-day='"+d.day+"' value='"+(d.post!=null?fx(d.post,2):"")+"' placeholder='"+fx(d.expPost,2)+"'></td>"+
+      "<td><input type='number' step='0.01' data-day='"+d.day+"' value='"+(d.post!=null?d.post:"")+"' placeholder='"+d.expPost.toFixed(2)+"'></td>"+
       "<td>"+(d.meas?"<span style='color:"+col(d.meas.dcs)+"'>"+d.meas.dcs.toFixed(2)+"%</span>":"—")+"</td></tr>";
   });
   D("buys").innerHTML=buysBlock(S.nDays);
-  D("limNote").innerHTML = Math.abs(S.lim-15)<0.01
-    ? "15% is NASA-STD-3001 [V2 6008], per person per EVA at 95% confidence."
-    : (S.lim<15 ? "Tighter than NASA's 15% limit. This is the margin a flight surgeon might choose to hold."
-                : "Looser than NASA's 15% limit, shown for comparison only.");
   D("plot").innerHTML=missionChart(days)+"<table class='days'>"+rows+"</table>";
 
   Array.prototype.forEach.call(D("plot").querySelectorAll("input[data-day]"),function(el){
     el.addEventListener("change",function(){
-      var v=num(this,NaN), d=iv(this.dataset.day);
-      if(isFinite(v)&&v>0) S.day["d"+d]=v; else delete S.day["d"+d];
+      var v=parseFloat(this.value);
+      if(isFinite(v)&&v>0) S.day["d"+this.dataset.day]=v; else delete S.day["d"+this.dataset.day];
       render();
     });
   });
@@ -374,7 +307,7 @@ function missionChart(days){
        '<text x="'+(L-8)+'" y="'+(yv(gv)+4)+'" fill="#74849a" font-size="10" font-family="monospace" text-anchor="end">'+gv.toFixed(1)+'</text>'; }
   var ay=yv(K.dcsAccept);
   s+='<line x1="'+L+'" y1="'+ay+'" x2="'+(W-R)+'" y2="'+ay+'" stroke="#e35d5d" stroke-width="1.5" stroke-dasharray="5 4"/>'+
-     '<text x="'+(W-R-2)+'" y="'+(ay-6)+'" fill="#e35d5d" font-size="10" font-family="monospace" text-anchor="end">NASA 15% limit</text>';
+     '<text x="'+(W-R-2)+'" y="'+(ay-6)+'" fill="#e35d5d" font-size="10" font-family="monospace" text-anchor="end">NASA 3% acceptable</text>';
   s+='<polyline points="'+days.map(function(d,i){return xv(i)+","+yv(d.predDcs)}).join(" ")+'" fill="none" stroke="#58c2d4" stroke-width="2"/>';
   days.forEach(function(d,i){
     s+='<circle cx="'+xv(i)+'" cy="'+yv(d.predDcs)+'" r="3.5" fill="#58c2d4"/>'+
@@ -389,30 +322,8 @@ function missionChart(days){
 }
 
 /* ---------- wiring ---------- */
-function syncAtm(){
-  var hit=null;
-  for(var k in ATMOS) if(Math.abs(ATMOS[k].p-S.habP)<0.05&&Math.abs(ATMOS[k].f-S.habFO2)<0.005) hit=k;
-  Array.prototype.forEach.call(D("atmSel").querySelectorAll("button"),function(b){
-    b.setAttribute("aria-pressed",String(b.dataset.a===hit)); });
-  var R=forward(prof()).Rrest;
-  D("atmNote").innerHTML = "Tissue nitrogen at equilibrium <b>"+fx(S.habP*(1-S.habFO2),2)+
-    " psi</b>. NASA gives 5.4 psi for 8.2 at 34% and 11.6 psi for 14.7 at 21%."+
-    (hit?"":" Custom, edit in Advanced.")+
-    (R>1.6?" <b style='color:var(--warn)'>Ratio "+R.toFixed(2)+" is far outside the 1.22 to 1.49 band the risk fits were checked against. This atmosphere needs hours of prebreathe, not minutes, and the number shown is not trustworthy until it does.</b>":"");
-}
 function render(){
-  syncAtm();
-  /* the model is Haldanean. it compares dissolved nitrogen against ambient
-     pressure at the endpoint and has no term for the rate of the drop. a fast
-     decompression excites more micronuclei into growing bubbles at the same
-     dissolved load, so the risk shown below is an underestimate at short times,
-     and a very fast drop is a barotrauma hazard before it is a bubble one. */
-  D("dcWarn").innerHTML = S.dc<=3
-    ? "<b style='color:var(--crit)'>Below 3 minutes this is a rapid decompression.</b> Ear, sinus and lung barotrauma become the limiting hazard, and the bubble risk shown is an underestimate because this model has no term for the rate of the pressure drop."
-    : S.dc<10
-    ? "<b style='color:var(--warn)'>Short.</b> A fast drop excites more bubble nuclei at the same dissolved nitrogen load. This model does not represent that, so the risk shown is an underestimate here."
-    : "";
-  K.oxThr=S.oxThr; K.ambWalk=S.ambWalk; K.ambMicro=S.ambMicro;
+  K.oxThr=S.oxThr; K.amb=S.ambK;
   var plan=S.mode==="plan", camp=S.mode==="camp", assess=S.mode==="assess";
   D("measBlock").classList.toggle("hide",plan);
   D("targetBlock").classList.toggle("hide",!plan);
@@ -421,32 +332,27 @@ function render(){
   ["dPB","dEX","dDC"].forEach(function(i){ D(i).style.display=plan?"block":"none"; });
   if(!plan) ["cPB","cEX","cDC"].forEach(function(i){ D(i).classList.remove("held"); });
   D("evaHead").textContent=plan?"The EVA":camp?"The daily protocol":"The EVA that was flown";
-  if(camp) renderCamp(); else { K.dcsAccept=15; if(plan) renderPlan(); else renderAssess(); }
+  if(plan) renderPlan(); else if(camp) renderCamp(); else renderAssess();
 }
 function br(id,out,key,unit,dp){
   var el=D(id),o=D(out);
-  function u(){S[key]=num(el,S[key]);
+  function u(){S[key]=parseFloat(el.value);
     if(key==="pb"||key==="ex"||key==="dc") LAST=key;
     o.innerHTML=(dp!=null?S[key].toFixed(dp):S[key])+(unit?' <span>'+unit+'</span>':'');render()}
   el.addEventListener("input",u);u();
 }
 br("pb","oPB","pb","min"); br("ex","oEX","ex","mL/kg/min",1);
-br("dc","oDC","dc","min"); br("sp","oSP","sp","psid",2);
+br("dc","oDC","dc","min"); br("sp","oSP","sp","psid",1);
 br("out","oOUT","out","min"); br("tgt","oTgt","tgt","% DCS",1);
 br("nDays","oNDays","nDays","days"); br("gapH","oGapH","gapH","hours");
-br("lim","oLim","lim","% DCS",1);
-["pre","post","noPre","noPost","hb","dust","kDust","habP","habFO2","oxThr","ambWalk","ambMicro","prior","gap"]
- .forEach(function(k){D(k).addEventListener("input",function(){S[k]=num(this,S[k]);render()})});
+["pre","post","noPre","noPost","hb","dust","kDust","habP","habFO2","oxThr","ambK","prior","gap"]
+ .forEach(function(k){D(k).addEventListener("input",function(){S[k]=parseFloat(this.value)||0;render()})});
 function seg(id,fn){D(id).addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
   this.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});
   fn(b);render()})}
-seg("gravSel",function(b){S.walking=(b.dataset.g==="1")});   /* boolean, not a string */
-seg("atmSel",function(b){ var A=ATMOS[b.dataset.a];      /* key must exist in ATMOS */
-  if(!A) return;
-  S.habP=A.p; S.habFO2=A.f; D("habP").value=A.p; D("habFO2").value=A.f; });
-seg("fixSel",function(b){ if(!LEV[b.dataset.f]) return; S.fix=b.dataset.f;
+seg("fixSel",function(b){S.fix=b.dataset.f;
   LAST=["pb","ex","dc"].filter(function(k){return k!==S.fix})[0];});
-seg("modes",function(b){ if(["assess","plan","camp"].indexOf(b.dataset.m)<0) return; S.mode=b.dataset.m});
+seg("modes",function(b){S.mode=b.dataset.m});
 try{if(window.claude&&window.claude.hot)window.claude.hot.snapshot(function(){return S})}catch(e){}
 render();
