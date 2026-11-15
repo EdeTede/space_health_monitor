@@ -6,7 +6,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["frontend/**", ".github/workflows/pages.yml"]
+    paths: ["frontend/**", "pitch/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -48,6 +48,8 @@ jobs:
           done
           printf '%s\n' '<!doctype html><meta charset="utf-8"><title>EVKIWI</title><meta http-equiv="refresh" content="0;url=./"><p><a href="./">EVKIWI</a></p>' > 404.html
           touch .nojekyll
+          # Pitch deck (self-contained HTML + PDF) at /pitch/
+          cp -R ../pitch pitch
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
