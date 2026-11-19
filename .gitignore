@@ -10,5 +10,5 @@ __pycache__/
 *.pyc
 backend/.venv/
 backend/.vendor/
-backend/data/dosefit.db
-backend/data/dosefit.db-*
+backend/data/*.db
+backend/data/*.db-*

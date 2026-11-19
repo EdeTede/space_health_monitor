@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
+<title>EVKIWI · Exercise sim</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+.kn-nav{display:flex;gap:14px;margin:0 0 8px;pointer-events:auto;flex-wrap:wrap}.kn-nav a{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);text-decoration:none;border-bottom:1px solid transparent}.kn-nav a:hover{color:var(--kiwi-bright,#c6f27a);border-color:rgba(142,224,79,.3)}
+.kn-lock{display:flex;align-items:center;gap:10px;margin-bottom:6px}.kn-lock img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(142,224,79,.5))}.kn-lock .kn-name{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.02em;color:#eefbe0;text-shadow:0 0 14px rgba(142,224,79,.45)}.kn-lock .kn-tag{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+/* Layout: hologram training bay. Astronaut + machine wireframe on a full-screen stage, exercise tabs on top, live loading readouts on the right, a force trace along the bottom. Same single dark HUD theme as the Bone Twin demo. */
+:root{
+  --void:#03060d; --hud:rgba(10,22,40,.74); --edge:rgba(142,224,79,.22);
+  --fg:#eef6e8; --dim:#93a68f; --holo:#8ee04f; --amber:#ffc857; --hot:#ff8a3d; --ok:#5ef0c2;
+  --display:"Chakra Petch",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--void);color:var(--fg);font-family:var(--body);font-size:14px;overflow-x:hidden}
+#stage{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:pan-y}
+#stage:active{cursor:grabbing}
+.scan{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(142,224,79,.035) 0 1px,transparent 1px 3px)}
+.app{position:relative;z-index:2;min-height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:14px;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));pointer-events:none}
+.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--holo);text-transform:uppercase;text-shadow:0 0 8px var(--void)}
+h1{font-family:var(--display);font-size:clamp(24px,3.6vw,40px);margin:2px 0 0;line-height:1.04;text-shadow:0 0 24px rgba(142,224,79,.4);text-wrap:balance;max-width:20ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;pointer-events:auto}
+.tabs button{font:600 13px var(--display);letter-spacing:.06em;color:var(--fg);background:var(--hud);border:1px solid var(--edge);border-radius:4px;padding:9px 14px;cursor:pointer;text-align:left}
+.tabs button small{display:block;font:400 11px var(--mono);color:var(--dim);letter-spacing:.04em}
+.tabs button[aria-pressed="true"]{border-color:var(--holo);background:rgba(142,224,79,.16);color:var(--holo);box-shadow:0 0 18px rgba(142,224,79,.25)}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.mid{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+.side{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:14px;display:grid;gap:12px;backdrop-filter:blur(6px)}
+.side h2{font-family:var(--display);font-size:18px;margin:0}
+.side .dev{font-size:13px;color:var(--dim);margin:0}
+.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--holo);text-transform:uppercase}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{border:1px solid var(--edge);border-radius:4px;padding:7px 8px}
+.stat .v{font-family:var(--display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .v small{font:400 11px var(--mono);color:var(--dim)}
+.stat .n{font-size:11px;color:var(--dim)}
+.dose{display:grid;gap:7px}
+.dose div{display:grid;grid-template-columns:62px 1fr 42px;gap:8px;align-items:center;font-size:13px}
+.dose .bar{height:6px;background:rgba(255,255,255,.07);border-radius:3px;position:relative;overflow:hidden}
+.dose .bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--holo),var(--amber));border-radius:3px}
+.dose .p{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+.tip{border-left:2px solid var(--amber);padding:6px 10px;font-size:13px;background:rgba(255,200,87,.06)}
+.tip b{font-family:var(--display);color:var(--amber);letter-spacing:.05em}
+.bottom{pointer-events:auto;background:var(--hud);border:1px solid var(--edge);border-radius:6px;padding:12px 14px;display:grid;gap:8px;backdrop-filter:blur(6px)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#play{font:600 13px var(--display);letter-spacing:.1em;background:var(--holo);color:#02121c;border:0;border-radius:4px;padding:8px 14px;cursor:pointer;min-width:92px}
+#trace{width:100%;height:64px;display:block}
+.legend{font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.legend i{display:inline-block;width:26px;height:6px;border-radius:3px;background:linear-gradient(90deg,#4e8a1e,var(--holo),var(--amber),var(--hot));margin-right:6px;vertical-align:1px}
+.foot{font-size:11px;color:var(--dim);font-family:var(--mono)}
+@media (max-width:820px){.mid{grid-template-columns:1fr}.mid .spacer{height:52vh}}
+body.embed .top h1{font-size:clamp(18px,3vw,26px);max-width:28ch}
+body.embed .top .k{opacity:.7}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<canvas id="stage" aria-label="Hologram of an astronaut exercising on the selected machine. Drag to rotate."></canvas>
+<div class="scan"></div>
+
+<div class="app">
+  <div class="top">
+    <div>
+      <div class="kn-lock"><img src="brand/kiwinaut-mark.png" width="30" height="30" alt="EVKIWI logo"><span class="kn-name">EVKIWI</span><span class="kn-tag">for NASA Space Apps Challenge 2026 · Health monitoring</span></div>
+      <nav class="kn-nav" aria-label="Pages"><a href="/">← Main flow</a><a href="eva-calc.html">EVA calculator</a><a href="kiwinaut-eva.html">3D spacewalk</a></nav>
+      <div class="k">Training bay simulation</div>
+      <h1>Three machines. Very different bone doses.</h1>
+    </div>
+    <div class="tabs" role="group" aria-label="Choose an exercise">
+      <button data-e="run" aria-pressed="true">RUN<small>T2 treadmill</small></button>
+      <button data-e="bike" aria-pressed="false">CYCLE<small>CEVIS bike</small></button>
+      <button data-e="squat" aria-pressed="false">SQUAT<small>ARED lift</small></button>
+    </div>
+  </div>
+
+  <div class="mid">
+    <div class="spacer"></div>
+    <aside class="side" aria-live="polite">
+      <div><h2 id="exName"></h2><p class="dev" id="exDev"></p></div>
+      <div class="stats">
+        <div class="stat"><div class="v" id="fV">0</div><div class="n">Foot force ×BW</div></div>
+        <div class="stat"><div class="v" id="hrV">0</div><div class="n">Heart rate</div></div>
+        <div class="stat"><div class="v" id="cV">0</div><div class="n" id="cN">Steps</div></div>
+      </div>
+      <div class="lbl">Bone dose this session</div>
+      <div class="dose" id="dose"></div>
+      <div class="tip" id="tip"></div>
+    </aside>
+  </div>
+
+  <div class="bottom">
+    <div class="row">
+      <button id="play">❚❚ PAUSE</button>
+      <span class="legend"><span><i></i>glow = load on that bone right now</span><span>drag to rotate</span></span>
+    </div>
+    <canvas id="trace" aria-label="Foot force over time"></canvas>
+    <div class="foot">Simplified motion and sample values for illustration, not real crew data. Machine names are the real ISS devices: T2 treadmill, CEVIS cycle ergometer, ARED resistive exercise device. EVA week: open <a href="dosefit.html" style="color:var(--holo)">Decompress</a> in the main app for DLCO / bubble decision support (sample thresholds; confirmed by the crew medical officer).</div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const EX={
+ run:{name:"Treadmill run",dev:"T2 treadmill. Bungee harness pulls the runner down at ~70% body weight so each step loads the bones.",
+   cyc:1.4,peak:1.6,hr:152,count:"Steps",perCyc:2,dose:{hips:.0065,spine:.003,thighs:.006,shins:.009},
+   tip:"<b>EVKIWI</b> Good for shins and hips. If the insoles see one foot landing softer, it raises harness load or cues the stride."},
+ bike:{name:"Seatless cycling",dev:"CEVIS cycle ergometer. No seat in microgravity: feet clip into pedals and a belt holds the waist.",
+   cyc:1.25,peak:.35,hr:141,count:"Pedal turns",perCyc:1,dose:{hips:.0006,spine:0,thighs:.001,shins:.0008},
+   tip:"<b>EVKIWI</b> Great for the heart, almost nothing for bone. EVKIWI pairs it with heavy squats on the same day."},
+ squat:{name:"Heavy squat",dev:"ARED. Vacuum cylinders give up to ~2,700 N of resistance, standing in for gravity and weights.",
+   cyc:3.2,peak:2.2,hr:118,count:"Reps",perCyc:1,dose:{hips:.07,spine:.06,thighs:.055,shins:.02},
+   tip:"<b>EVKIWI</b> Fewest reps, biggest bone dose. A few heavy reps beat many light ones. Watch for breath-holding (eye-pressure guard)."}
+};
+const REG=["hips","spine","thighs","shins"],RN={hips:"Hips",spine:"Spine",thighs:"Thighs",shins:"Shins"};
+let ex="run",t=0,playing=true,count=0,lastCyc=0;
+const dose={run:{},bike:{},squat:{}};for(const e in dose)for(const r of REG)dose[e][r]=0;
+$("dose").innerHTML=REG.map(r=>`<div><span>${RN[r]}</span><span class="bar"><i id="d-${r}"></i></span><span class="p" id="p-${r}">0%</span></div>`).join("");
+
+// ---------- kinematics (x forward, y up, z side) ----------
+const L={th:.44,sh:.43,tor:.52,ua:.3,fa:.28,neck:.1};
+function ik(h,f,l1,l2,bendFwd=1){ // sagittal 2-bone IK, returns knee/elbow
+  let dx=f[0]-h[0],dy=f[1]-h[1],d=Math.hypot(dx,dy);d=Math.min(d,l1+l2-1e-3);
+  const a=Math.atan2(dy,dx),c=Math.acos((l1*l1+d*d-l2*l2)/(2*l1*d));
+  const ang=a+c*bendFwd;return[h[0]+Math.cos(ang)*l1,h[1]+Math.sin(ang)*l1];
+}
+function pose(e,ph){
+  const P={},T=Math.PI*2;let hip,lean,load={hips:0,spine:0,thighs:0,shins:0},force=0;
+  const legs=[],arms=[];
+  if(e==="run"){
+    hip=[0,.9+.035*Math.cos(2*T*ph)];lean=.12;
+    for(const [s,o] of[[-1,0],[1,.5]]){const p=(ph+o)%1,a=p*T;
+      const stance=Math.sin(a)<0;const fx=.32*Math.cos(a),fy=stance?0:.2*Math.sin(a);
+      legs.push({s,foot:[fx+.02,fy+.04],stance,str:stance?Math.sin(-a):0});
+      arms.push({s,sw:-.5*Math.cos(a)});}
+    force=Math.max(...legs.map(l=>l.str))*EX.run.peak;const k=force/EX.run.peak;
+    load={hips:.75*k,spine:.45*k,thighs:.7*k,shins:k};
+  }else if(e==="bike"){
+    hip=[-.02,1.02];lean=.22;const c=[.16,.42],r=.17;
+    for(const [s,o] of[[-1,0],[1,.5]]){const a=(ph+o)*T;legs.push({s,foot:[c[0]+r*Math.cos(a),c[1]+r*Math.sin(a)],str:Math.max(0,Math.sin(a+.6))});arms.push({s,bar:[.36,1.18]})}
+    force=Math.max(...legs.map(l=>l.str))*EX.bike.peak;const k=force/EX.bike.peak;
+    load={hips:.15*k,spine:.05,thighs:.25*k,shins:.18*k};P.crank=c;P.cr=r;P.ang=ph*T;
+  }else{
+    const d=(1-Math.cos(ph*T))/2; // 0 top -> 1 bottom
+    hip=[-.12*d,.92-.42*d];lean=.12+.55*d;
+    for(const s of[-1,1]){legs.push({s,foot:[.05,.04],str:1});arms.push({s,bar:true})}
+    const k=.55+.45*d;force=EX.squat.peak*k;load={hips:k,spine:.85*k,thighs:.9*k,shins:.45*k};
+  }
+  P.hip=hip;
+  const neck=[hip[0]+Math.sin(lean)*L.tor,hip[1]+Math.cos(lean)*L.tor];P.neck=neck;
+  P.head=[neck[0]+Math.sin(lean*.6)*.13,neck[1]+Math.cos(lean*.6)*.13];
+  P.mid=[hip[0]+Math.sin(lean)*L.tor*.45,hip[1]+Math.cos(lean)*L.tor*.45];
+  P.legs=legs.map(l=>({s:l.s,stance:l.stance,hip:hip,knee:ik(hip,l.foot,L.th,L.sh,1),foot:l.foot,str:l.str}));
+  const sh=[neck[0]-Math.sin(lean)*.04,neck[1]-Math.cos(lean)*.04];
+  P.arms=arms.map(a=>{let hand;
+    if(a.bar===true){hand=[sh[0]-.06,sh[1]+.03];}else if(a.bar){hand=a.bar}
+    else{const ang=Math.PI+a.sw;hand=[sh[0]+Math.sin(a.sw)*.35+.12,sh[1]-.35];}
+    return{s:a.s,sh,el:ik(sh,hand,L.ua,L.fa,a.bar===true?1:-1),hand}});
+  P.load=load;P.force=force;P.lean=lean;return P;
+}
+
+// ---------- render ----------
+const cv=$("stage"),g=cv.getContext("2d"),tr=$("trace"),tg=tr.getContext("2d");
+let W,H,DPR,rotY=-.4,rotX=-.12,drag=null,vel=0;
+const stars=Array.from({length:220},()=>[Math.random(),Math.random(),Math.random()*1.3+.3,Math.random()]);
+function size(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;g.setTransform(DPR,0,0,DPR,0,0);
+  const r=tr.getBoundingClientRect();tr.width=r.width*DPR;tr.height=r.height*DPR;tg.setTransform(DPR,0,0,DPR,0,0)}
+let view;
+function proj(x,y,z){const cy=Math.cos(rotY),sy=Math.sin(rotY);let X=x*cy-z*sy,Z=x*sy+z*cy;const cx=Math.cos(rotX),sx=Math.sin(rotX);const Y=(y-.8)*cx-Z*sx;Z=(y-.8)*sx+Z*cx;const p=3.2/(3.2+Z);return[view.cx+X*view.s*p,view.cy-Y*view.s*p,p]}
+function heat(k){k=Math.max(0,Math.min(1,k));const s=[[78,138,30],[142,224,79],[255,200,87],[255,138,61]];const f=k*3,i=Math.min(2,Math.floor(f)),u=f-i;return s[i].map((v,j)=>Math.round(v+(s[i+1][j]-v)*u))}
+function seg(a,b,z1,z2,k,w){const A=proj(a[0],a[1],z1),B=proj(b[0],b[1],z2),c=heat(k);
+  g.strokeStyle=`rgba(${c},.95)`;g.shadowColor=`rgb(${c})`;g.shadowBlur=8+k*22;g.lineWidth=w*(A[2]+B[2])/2;g.beginPath();g.moveTo(A[0],A[1]);g.lineTo(B[0],B[1]);g.stroke();
+  // particle shimmer
+  g.shadowBlur=0;g.fillStyle=`rgba(${c},.55)`;for(let i=0;i<6;i++){const u=((i*.173+t*.6*(1+k))%1),j=Math.sin(i*91.7+t*3)*3;g.fillRect(A[0]+(B[0]-A[0])*u+j,A[1]+(B[1]-A[1])*u-j*.5,1.6,1.6)}}
+function wire(pts,alpha=.45,close=false){g.strokeStyle=`rgba(142,224,79,${alpha})`;g.shadowBlur=0;g.lineWidth=1.2;g.beginPath();pts.forEach((p,i)=>{const q=proj(...p);i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1])});if(close)g.closePath();g.stroke()}
+function circle3(c,r,z,n=40,alpha=.45){const pts=[];for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;pts.push([c[0]+r*Math.cos(a),c[1]+r*Math.sin(a),z])}wire(pts,alpha)}
+function box(x0,x1,y0,y1,z0,z1,a=.4){wire([[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],a,true);wire([[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],a,true);for(const[x,z]of[[x0,z0],[x1,z0],[x1,z1],[x0,z1]])wire([[x,y0,z],[x,y1,z]],a)}
+function equipment(P){
+  if(ex==="run"){
+    box(-.75,.75,-.06,0,-.32,.32,.5);
+    for(let i=0;i<12;i++){const x=.75-((i/12+t*EX.run.cyc*.55)%1)*1.5;wire([[x,0,-.3],[x,0,.3]],.22)}
+    // bungees: from harness at hips to floor at both sides
+    const hz=.16,ten=.35+.25*P.force/EX.run.peak;
+    for(const s of[-1,1]){wire([[P.hip[0],P.hip[1]+.05,s*hz],[P.hip[0]-.05,0,s*.32]],ten);wire([[P.neck[0]-.05,P.neck[1]-.05,s*hz],[P.hip[0]+.1,0,s*.32]],ten*.8)}
+    label(proj(.75,0,.32),"bungee harness ~70% BW");
+  }else if(ex==="bike"){
+    const c=P.crank;box(-.05,.4,-.04,0,-.25,.25,.4);wire([[c[0],c[1],0],[.4,0,0]],.5);wire([[c[0],c[1],0],[.36,1.16,0]],.5);wire([[.36,1.18,-.22],[.36,1.18,.22]],.6);
+    circle3(c,.24,0,48,.35);circle3(c,.06,0,16,.6);
+    for(const s of[-1,1]){const a=P.ang+(s>0?Math.PI:0);wire([[c[0],c[1],0],[c[0]+P.cr*Math.cos(a),c[1]+P.cr*Math.sin(a),s*.12]],.7)}
+    // waist belt, no seat
+    wire([[P.hip[0],P.hip[1],-.2],[P.hip[0]-.25,P.hip[1]-.25,-.25]],.3);wire([[P.hip[0],P.hip[1],.2],[P.hip[0]-.25,P.hip[1]-.25,.25]],.3);
+    label(proj(-.3,.8,.25),"no seat: waist belt + clipped feet");
+  }else{
+    box(-.45,.45,-.06,0,-.5,.5,.5);
+    const bar=[P.neck[0]-.04,P.neck[1]-.02];wire([[bar[0],bar[1],-.6],[bar[0],bar[1],.6]],.9);
+    for(const s of[-1,1]){wire([[bar[0],bar[1],s*.55],[-.55,.15,s*.55]],.5);box(-.75,-.5,0,.35,s*.62-.07,s*.62+.07,.35)}
+    label(proj(-.62,.4,.62),"vacuum cylinders");
+  }
+}
+function label(p,s){g.shadowBlur=0;g.fillStyle="rgba(147,166,143,.95)";g.font="11px 'IBM Plex Mono',monospace";g.fillText(s,p[0]+6,p[1]-4)}
+const hist=[];
+function frame(now){
+  const dt=frame.last?Math.min(.05,(now-frame.last)/1000):0;frame.last=now;
+  if(playing)t+=dt;
+  if(!drag){rotY+=(reduce?0:.05)*dt+vel;vel*=.93}
+  const E=EX[ex],ph=(t/E.cyc)%1,P=pose(ex,ph);
+  const cyc=Math.floor(t/E.cyc*E.perCyc);if(cyc>lastCyc&&playing){count+=cyc-lastCyc;}lastCyc=cyc;
+  if(playing)for(const r of REG)dose[ex][r]=Math.min(1,dose[ex][r]+E.dose[r]*P.load[r]*dt*6);
+  const mob=W<820;view={cx:mob?W/2:W*.42,cy:mob?H*.34:H*.43,s:Math.min(H*(mob?.27:.33),W*(mob?.7:.42))};
+  g.clearRect(0,0,W,H);g.fillStyle="#03060d";g.fillRect(0,0,W,H);
+  for(const s of stars){g.globalAlpha=.2+.5*s[3];g.fillStyle="#e4f2d6";g.fillRect(s[0]*W,s[1]*H,s[2],s[2])}g.globalAlpha=1;
+  g.save();g.lineCap="round";
+  // floor grid
+  for(let i=-4;i<=4;i++){wire([[i*.25,-.06,-1],[i*.25,-.06,1]],.06);wire([[-1,-.06,i*.25],[1,-.06,i*.25]],.06)}
+  equipment(P);
+  // body: draw far side first
+  const zs=s=>s*.11;const order=rotY%(2*Math.PI);
+  const draw=side=>{
+    for(const l of P.legs.filter(l=>l.s===side)){seg(l.hip,l.knee,zs(l.s)*.9,zs(l.s),P.load.thighs*Math.max(.3,l.str??1),6);seg(l.knee,l.foot,zs(l.s),zs(l.s),P.load.shins*Math.max(.3,l.str??1),5);
+      const f=proj(l.foot[0],l.foot[1],zs(l.s));if((l.str||0)>.5&&ex!=="bike"){g.shadowBlur=0;g.strokeStyle=`rgba(255,200,87,${(l.str-.5)*1.2})`;g.lineWidth=1;g.beginPath();g.ellipse(f[0],f[1]+3,18*l.str,5*l.str,0,0,Math.PI*2);g.stroke()}}
+    for(const a of P.arms.filter(a=>a.s===side)){seg(a.sh,a.el,zs(a.s)*1.7,zs(a.s)*1.6,ex==="squat"?.35:.1,4);seg(a.el,a.hand,zs(a.s)*1.6,ex==="squat"?zs(a.s)*2.6:zs(a.s)*1.5,ex==="squat"?.35:.1,3.5)}
+  };
+  const near=Math.sin(rotY)>0?1:-1;draw(-near);
+  seg([P.hip[0],P.hip[1]],[P.hip[0],P.hip[1]],-.12,.12,P.load.hips,9);
+  seg(P.hip,P.mid,0,0,P.load.spine,8);seg(P.mid,P.neck,0,0,P.load.spine*.7,7);
+  seg(P.neck,P.neck,-.19,.19,.2,5);
+  const hd=proj(P.head[0],P.head[1],0);g.shadowColor="rgb(142,224,79)";g.shadowBlur=18;g.strokeStyle="rgba(142,224,79,.9)";g.lineWidth=2;g.beginPath();g.arc(hd[0],hd[1],.1*view.s*hd[2],0,Math.PI*2);g.stroke();
+  draw(near);
+  g.restore();
+  // HUD values
+  hist.push(P.force);if(hist.length>360)hist.shift();
+  $("fV").innerHTML=P.force.toFixed(1)+"<small>×</small>";
+  $("hrV").innerHTML=Math.round(E.hr+Math.sin(t*.7)*3)+"<small>bpm</small>";
+  $("cV").textContent=count;
+  for(const r of REG){const v=dose[ex][r];$("d-"+r).style.width=(v*100)+"%";$("p-"+r).textContent=Math.round(v*100)+"%"}
+  // trace
+  const tw=tr.width/DPR,th=tr.height/DPR;tg.clearRect(0,0,tw,th);
+  tg.strokeStyle="rgba(147,166,143,.25)";tg.setLineDash([3,4]);for(const v of[1,2]){const y=th-6-(v/2.4)*(th-12);tg.beginPath();tg.moveTo(0,y);tg.lineTo(tw,y);tg.stroke();tg.fillStyle="rgba(147,166,143,.8)";tg.font="10px 'IBM Plex Mono',monospace";tg.fillText(v+"× BW",4,y-3)}
+  tg.setLineDash([]);
+  const grad=tg.createLinearGradient(0,th,0,0);grad.addColorStop(0,"#8ee04f");grad.addColorStop(.6,"#ffc857");grad.addColorStop(1,"#ff8a3d");
+  tg.strokeStyle=grad;tg.lineWidth=2;tg.shadowColor="#8ee04f";tg.shadowBlur=8;tg.beginPath();
+  hist.forEach((v,i)=>{const x=tw-(hist.length-1-i)*(tw/360),y=th-6-(v/2.4)*(th-12);i?tg.lineTo(x,y):tg.moveTo(x,y)});tg.stroke();tg.shadowBlur=0;
+  requestAnimationFrame(frame);
+}
+function setEx(e){ex=e;count=0;lastCyc=Math.floor(t/EX[e].cyc*EX[e].perCyc);hist.length=0;
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.e===e));
+  $("exName").textContent=EX[e].name;$("exDev").textContent=EX[e].dev;$("cN").textContent=EX[e].count;$("tip").innerHTML=EX[e].tip}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>setEx(b.dataset.e));
+$("play").onclick=()=>{playing=!playing;$("play").textContent=playing?"❚❚ PAUSE":"▶ PLAY"};
+cv.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY};vel=0;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x;rotY+=dx*.01;vel=dx*.002;rotX=Math.max(-.6,Math.min(.35,rotX+(e.clientY-drag.y)*.004));drag={x:e.clientX,y:e.clientY}});
+cv.addEventListener("pointerup",()=>drag=null);
+addEventListener("resize",size);
+if(new URLSearchParams(location.search).get("embed")==="1")document.body.classList.add("embed");
+function applyHash(){
+  const h=(location.hash||"").replace(/^#/,"").toLowerCase();
+  if(h==="run"||h==="bike"||h==="squat")setEx(h);
+}
+addEventListener("hashchange",applyHash);
+addEventListener("message",e=>{
+  const d=e.data||{};
+  if(d.type==="dosefit-ex"&&(d.ex==="run"||d.ex==="bike"||d.ex==="squat")){
+    setEx(d.ex);playing=true;$("play").textContent="❚❚ PAUSE";
+  }
+});
+size();setEx("run");applyHash();requestAnimationFrame(frame);
+window._sim={set:(e,tt)=>{setEx(e);t=tt;},rot:r=>{rotY=r}};
+})();
+</script>
+
+</body>
+</html>

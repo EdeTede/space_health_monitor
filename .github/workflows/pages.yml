@@ -1,0 +1,59 @@
+# Publish the EVKIWI frontend to GitHub Pages.
+# FastAPI can't run on Pages — this serves frontend/ as a static demo.
+# Client pages use sample data / local models when /api is unreachable.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/**", "pitch/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build static site
+        run: |
+          set -euo pipefail
+          rm -rf _site && cp -R frontend _site
+          cd _site
+          # Match FastAPI routes: "/" → 3D landing, main flow at flow.html
+          mv index.html flow.html
+          cp kiwinaut-eva.html index.html
+          # Project-page base: /<repo>/ — strip leading-slash asset & page links
+          for f in *.html *.js *.css; do
+            [ -f "$f" ] || continue
+            sed -i -E \
+              -e 's#(["'"'"'`])/index\.html#\1flow.html#g' \
+              -e 's#href="/([?"])#href="./\1#g' \
+              -e 's#src="/([?"])#src="./\1#g' \
+              -e 's#(["'"'"'`(])/([A-Za-z][A-Za-z0-9_-]*\.(html|js|css|json|png|glb|gltf|jpg|webp|svg))#\1\2#g' \
+              -e 's#location\.href="/#location.href="./#g' \
+              "$f"
+          done
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><title>EVKIWI</title><meta http-equiv="refresh" content="0;url=./"><p><a href="./">EVKIWI</a></p>' > 404.html
+          touch .nojekyll
+          # Pitch deck (self-contained HTML + PDF) at /pitch/
+          cp -R ../pitch pitch
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

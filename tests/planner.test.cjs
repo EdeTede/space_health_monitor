@@ -1,0 +1,21 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+const path=require('node:path');
+const ctx=vm.createContext({console,crypto:require('node:crypto').webcrypto});
+for(const file of ['model.js','planner-core.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'../frontend',file),'utf8'),ctx);
+const M=ctx.MissionPlanner;
+function setup(){const s=M.seed();return [s,s.events.find(e=>e.id===s.selected)];}
+test('seed has no conflicts and isolates three crew schedules',()=>{const [s,e]=setup();assert.equal(M.conflicts(s.events).length,0);assert.equal(s.crews.length,3);assert.ok(M.calculate(s,e).linked.every(x=>x.crew===e.crew));});
+test('calendar inputs reproduce sequential nitrogen washout',()=>{const [s,e]=setup(),c=M.calculate(s,e);assert.equal(c.total,180);assert.equal(c.p.decompress,30);assert.equal(c.p.prebreathe,150);let n=s.protocol.habP*(1-s.protocol.habFO2);for(const x of c.chain)n*=Math.exp(-ctx.rateConstant(M.task(x.task).vo2)*x.duration);assert.ok(Math.abs(c.result.Rrest-n/s.protocol.suitP)<1e-10);});
+test('a gap prevents credit for earlier oxygen sessions',()=>{const [s,e]=setup();s.events.find(x=>x.link===e.id&&x.task==='isle').duration-=5;const c=M.calculate(s,e);assert.equal(c.total,70);assert.equal(c.ignored,2);});
+test('unlinked exercise or another crew preparation gives no oxygen credit',()=>{const [s,e]=setup(),base=M.calculate(s,e).result.dcs;s.events.push({id:'other',crew:'rivera',task:'pb',start:e.start-500*M.MIN,duration:500,link:e.id});s.events.push({id:'fitness',crew:e.crew,task:'cycle',start:e.start-500*M.MIN,duration:20});assert.equal(M.calculate(s,e).result.dcs,base);});
+test('shortening preserves DCS output but lowers dose and stress',()=>{const [s,e]=setup(),c=M.calculate(s,e),p=M.scenario(s,e,'shorten');assert.equal(p.errors.length,0);assert.equal(p.calculation.result.dcs,c.result.dcs);assert.ok(p.calculation.result.H<c.result.H);assert.ok(p.calculation.stress<c.stress);assert.equal(e.duration,360);});
+test('extra oxygen and light exercise reduce modeled DCS without mutating current plan',()=>{for(const type of ['oxygen','exercise']){const [s,e]=setup(),before=JSON.stringify(s),p=M.scenario(s,e,type);assert.equal(p.errors.length,0);assert.ok(p.calculation.result.dcs<M.calculate(s,e).result.dcs);assert.equal(JSON.stringify(s),before);}});
+test('delay surfaces collisions and preserves linked relative times',()=>{const [s,e]=setup(),p=M.scenario(s,e,'delay');assert.ok(p.errors.length>0);for(const old of M.prep(s.events,e)){const moved=p.events.find(x=>x.id===old.id);assert.equal(moved.start-old.start,M.DAY);}});
+test('history cannot be changed by scenario',()=>{const [s,e]=setup();s.now=e.start;assert.ok(M.scenario(s,e,'oxygen').error);});
+test('task validation rejects overlap, bad duration and cross-crew links',()=>{const [s,e]=setup();const x={id:'new',crew:e.crew,task:'medical',start:e.start,duration:15};assert.match(M.validate(x,s.events,s.crews),/overlaps/);x.duration=NaN;assert.match(M.validate(x,s.events,s.crews),/valid UTC/);x.duration=15;x.crew='rivera';x.start=e.start-900*M.MIN;x.link=e.id;assert.match(M.validate(x,s.events,s.crews),/same crew/);});
+test('monitor timestamps span activity with history/forecast separated by mission clock',()=>{const [s,e]=setup();s.now=e.start+20*M.MIN;const a=M.readings(s,e),b=M.readings(s,e);assert.equal(JSON.stringify(a),JSON.stringify(b));assert.equal(a[0].time,e.start);assert.equal(a.at(-1).time,M.end(e));assert.equal(a[0].kind,'Simulated history');assert.equal(a.at(-1).kind,'Expected · simulation');});
+test('Playbook mock is deterministic and duplicate-safe by stable ID',()=>{const [s]=setup();const first=M.adapters.playbook.pull(s);s.events.push(...first);const second=M.adapters.playbook.pull(s).filter(x=>!s.events.some(y=>y.id===x.id));assert.equal(first.length,6);assert.equal(second.length,0);assert.equal(M.conflicts(s.events).length,0);});
+test('profile edits preserve seeded historical readings but change forecasts',()=>{const [s,e]=setup();s.now=e.start+20*M.MIN;const before=M.readings(s,e);s.crews.find(c=>c.id===e.crew).hr+=10;const after=M.readings(s,e);assert.equal(before[0].hr,after[0].hr);assert.notEqual(before.at(-1).hr,after.at(-1).hr);});

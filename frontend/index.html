@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
+<title>EVKIWI · Decompression gate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#03060d; --hud:rgba(10,22,40,.9); --edge:rgba(142,224,79,.24);
+  --fg:#eef6e8; --dim:#93a68f; --holo:#8ee04f; --kiwi:#c6f27a;
+  --amber:#ffc857; --hot:#ff8a3d; --red:#ff5d6c; --ok:#5ef0c2;
+  --display:"Syne","Chakra Petch",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--void);color:var(--fg);font-family:var(--body)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+a.link{text-decoration:none}
+[hidden]{display:none!important}
+
+.topnav{
+  position:fixed;left:0;right:0;top:0;z-index:20;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:16px clamp(18px,3.2vw,32px);
+  background:rgba(3,6,13,.82);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(142,224,79,.1);
+  pointer-events:none;
+}
+.topnav > *{pointer-events:auto}
+.topnav-brand{display:grid;gap:4px;min-width:0}
+.topnav-lock{display:flex;align-items:center;gap:12px}
+.topnav-lock img{width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(142,224,79,.45))}
+.topnav-lock .name{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.03em}
+.topnav-slogan{
+  margin:0;max-width:32ch;
+  font-family:var(--body);font-weight:400;font-size:13.5px;line-height:1.35;
+  color:rgba(238,246,232,.72);letter-spacing:.01em;
+}
+.topnav-actions{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;justify-content:flex-end}
+.topnav-actions .link{
+  font-family:var(--body);font-size:14px;font-weight:500;letter-spacing:.01em;
+  color:rgba(238,246,232,.58);padding:9px 12px;border-radius:999px;white-space:nowrap;
+  transition:color .25s ease,background .25s ease;
+}
+.topnav-actions .link:hover{color:var(--fg);background:rgba(255,255,255,.04)}
+.topnav-actions .link.on{color:var(--fg)}
+.topnav-actions .pill{
+  margin-left:8px;font-family:var(--body);font-size:14px;font-weight:600;letter-spacing:.01em;
+  color:#02121c;background:var(--holo);padding:10px 16px;border-radius:999px;white-space:nowrap;
+  box-shadow:0 0 22px rgba(142,224,79,.25);
+  transition:filter .2s ease;
+}
+.topnav-actions .pill:hover{filter:brightness(1.06)}
+.topnav[data-role="astronaut"] .topnav-actions .link,
+.topnav[data-role="planner"] .topnav-actions .link{
+  padding:9px 11px;font-size:13.5px;letter-spacing:.02em;
+}
+.nav-role[hidden]{display:none!important}
+@media (max-width:820px){
+  .topnav{flex-wrap:wrap;row-gap:10px}
+  .topnav-brand{width:100%}
+  .topnav-actions{width:100%;justify-content:flex-start;overflow-x:auto;padding-bottom:2px}
+  .topnav-slogan{max-width:none}
+}
+
+.phase{position:fixed;inset:0;display:grid;padding-top:0}
+.phase iframe{border:0;width:100%;height:100%;background:var(--void)}
+#phaseCalc{grid-template-rows:1fr}
+#phaseCalc iframe{min-height:0;height:100%}
+#phaseCalendar{padding-top:102px}
+@media (max-width:820px){#phaseCalendar{padding-top:158px}}
+
+.cta{
+  font:600 13px var(--body);letter-spacing:.02em;
+  border:0;border-radius:999px;padding:10px 16px;cursor:pointer;
+  background:var(--holo);color:#02121c;
+}
+.cta:hover{filter:brightness(1.06)}
+.cta:disabled{opacity:.55;cursor:wait;filter:none}
+.cta.ghost{
+  background:transparent;color:rgba(238,246,232,.7);border:1px solid rgba(142,224,79,.22);
+}
+.cta-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.recs{
+  position:relative;z-index:1;min-height:100%;overflow:auto;
+  padding:clamp(88px,12vh,120px) clamp(16px,3vw,32px) clamp(16px,3vw,32px);
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%,rgba(142,224,79,.12),transparent 55%),
+    var(--void);
+}
+.recs-inner{width:min(1100px,100%);margin:0 auto;display:grid;gap:16px}
+.recs-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.recs-top .brand{display:flex;align-items:center;gap:10px}
+.recs-top .brand img{width:40px;height:40px}
+.recs-top h1{font-family:var(--display);font-size:clamp(22px,3vw,32px);margin:4px 0 0;line-height:1.1}
+.recs-top .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--holo)}
+.verdict{text-align:right}
+.verdict .q{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.verdict .big{font-family:var(--display);font-weight:800;font-size:clamp(40px,7vw,64px);line-height:1;font-variant-numeric:tabular-nums}
+.verdict .tag{font-family:var(--mono);font-size:12px;letter-spacing:.08em;margin-top:4px}
+
+.panel{
+  border:1px solid var(--edge);border-radius:10px;padding:16px 18px;
+  background:rgba(8,18,32,.88);backdrop-filter:blur(12px);
+}
+.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--holo);text-transform:uppercase;margin:0 0 10px;font-weight:500}
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+@media (max-width:820px){.grid2{grid-template-columns:1fr}}
+.chip{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:4px 8px;border:1px solid currentColor;border-radius:3px}
+.chip.green{color:var(--ok)}.chip.yellow{color:var(--amber)}.chip.orange{color:var(--hot)}.chip.red{color:var(--red)}
+.dial-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.dial svg{width:120px;height:120px;display:block}
+.blurb{margin:8px 0 0;color:var(--dim);font-size:13px;line-height:1.45}
+.meta{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.meta b{color:var(--fg);font-weight:500}
+.coach{font-family:var(--mono);font-size:13px;line-height:1.55;min-height:3.2em;border:1px solid rgba(142,224,79,.22);border-radius:4px;padding:12px;background:rgba(0,0,0,.38);color:var(--holo);margin-top:12px}
+.coach .cursor{display:none}
+.why{display:grid;gap:6px}
+.why .hit{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:7px 9px;border-radius:4px;background:rgba(142,224,79,.05);border:1px solid rgba(142,224,79,.1)}
+.why .hit b{font-family:var(--mono);font-weight:500}
+.why .hit.push{border-color:rgba(255,200,87,.35);background:rgba(255,200,87,.08)}
+.plan{margin:0;font-size:13px;line-height:1.5;color:var(--dim)}
+.plan b{color:var(--fg)}
+.cards{display:grid;gap:8px;margin-top:12px}
+.acard{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:start;padding:14px;border:1px solid var(--edge);border-radius:6px;background:rgba(8,18,32,.95);opacity:1;transition:border-color .2s}
+.acard.accepted{border-color:var(--ok);background:rgba(94,240,194,.1)}
+.acard .ico{width:36px;height:36px;border-radius:4px;display:grid;place-items:center;font-family:var(--mono);font-size:11px;border:1px solid currentColor}
+.acard .t{font-family:var(--display);font-size:16px;line-height:1.2}
+.acard .r{font-size:12px;color:var(--dim);margin-top:4px}
+.acard .ops{display:flex;flex-direction:column;gap:6px}
+.acard .ops button{font:600 11px var(--display);letter-spacing:.06em;padding:7px 11px;border-radius:3px;cursor:pointer;border:1px solid var(--edge);background:transparent;color:var(--holo);white-space:nowrap}
+.acard .ops .ok{background:var(--holo);color:#02121c;border:0}
+.api-pill{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border-radius:999px;border:1px solid var(--edge);color:var(--dim)}
+.api-pill.live{color:var(--ok);border-color:rgba(94,240,194,.45)}
+.api-pill.off{color:var(--amber)}
+.foot{margin:8px 0 24px;font-size:11px;color:var(--dim);line-height:1.45}
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.steps span{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);padding:4px 8px;border:1px solid transparent;border-radius:3px}
+.steps span.on{color:var(--holo);border-color:var(--edge)}
+
+.mission-frame{
+  width:100%;height:min(62vh,640px);min-height:360px;border:0;border-radius:8px;
+  background:var(--void);display:block;
+}
+.gate-src{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--dim);margin:0 0 12px}
+.gate-src b{color:var(--fg);font-weight:500}
+.gate-src .tagsrc{padding:3px 8px;border-radius:999px;border:1px solid var(--edge);letter-spacing:.1em;text-transform:uppercase;font-size:10px}
+.gate-src .tagsrc.manual{color:var(--amber);border-color:rgba(255,200,87,.45)}
+.gate-src .tagsrc.calc{color:var(--ok);border-color:rgba(94,240,194,.45)}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.presets button{font-family:var(--mono);font-size:11px;letter-spacing:.12em;padding:7px 12px;border-radius:999px;border:1px solid var(--edge);background:transparent;cursor:pointer}
+.presets button[data-preset="green"]{color:var(--ok)}.presets button[data-preset="yellow"]{color:var(--amber)}.presets button[data-preset="orange"]{color:var(--hot)}.presets button[data-preset="red"]{color:var(--red)}
+.presets button[aria-pressed="true"]{background:currentColor}
+.presets button[aria-pressed="true"] span{color:#02121c}
+.sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px}
+.sliders label{display:grid;grid-template-columns:1fr auto;gap:6px;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.04em}
+.sliders label b{color:var(--fg);font-weight:500}
+.sliders input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--holo);height:24px;cursor:pointer}
+.symptoms{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.symptoms .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-right:4px}
+.symptoms button{font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:6px 11px;border-radius:999px;border:1px solid var(--edge);background:transparent;color:var(--dim);cursor:pointer}
+.symptoms button[aria-pressed="true"]{color:#02121c;background:var(--amber);border-color:var(--amber)}
+.hub{display:grid;grid-template-columns:auto 1fr;gap:16px 24px;align-items:start}
+.hub .big{font-family:var(--display);font-weight:700;font-size:clamp(34px,5vw,48px);line-height:1;color:var(--kiwi);font-variant-numeric:tabular-nums;text-shadow:0 0 22px rgba(142,224,79,.4)}
+.hub .big small{font-size:.45em;color:var(--holo)}
+.hub .cap{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg);margin-top:6px}
+.hub .mini{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:6px}
+.how{display:grid;gap:5px;font-size:12px;color:var(--dim)}
+.how .row{display:grid;grid-template-columns:64px 1fr;gap:8px}
+.how .row b{font-family:var(--mono);font-weight:500;color:var(--kiwi);text-align:right}
+.acard .val{font-family:var(--mono);font-size:11px;color:var(--kiwi);margin-top:5px}
+@media (max-width:820px){.sliders{grid-template-columns:1fr}.hub{grid-template-columns:1fr}}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.section-head .lbl{margin:0}
+
+.login-btns{display:inline-flex;align-items:center;gap:6px;margin-left:6px}
+.astro-btn,.planner-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--body);font-size:14px;font-weight:600;letter-spacing:.01em;
+  color:var(--fg);background:rgba(142,224,79,.08);border:1px solid rgba(142,224,79,.28);
+  padding:9px 14px;border-radius:999px;white-space:nowrap;
+}
+.astro-btn:hover,.planner-btn:hover{background:rgba(142,224,79,.14)}
+.planner-btn{
+  background:rgba(255,200,87,.08);border-color:rgba(255,200,87,.35);
+}
+.planner-btn:hover{background:rgba(255,200,87,.14)}
+.astro-btn .mark,.planner-btn .mark{
+  width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(142,224,79,.18);font-size:12px;line-height:1;font-weight:700;
+}
+.planner-btn .mark{background:rgba(255,200,87,.18);color:var(--amber)}
+.astro-chip{
+  display:none;align-items:center;gap:8px;margin-left:6px;
+  padding:5px 6px 5px 10px;border-radius:999px;
+  border:1px solid rgba(142,224,79,.28);background:rgba(8,18,32,.9);
+}
+.astro-chip.on{display:inline-flex}
+.astro-chip.planner{border-color:rgba(255,200,87,.4)}
+.astro-chip .who{font-size:12.5px;font-weight:500;max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.astro-chip .role{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.astro-chip .out{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);padding:6px 8px;border-radius:999px;
+}
+.astro-chip .out:hover{color:var(--fg);background:rgba(255,255,255,.05)}
+.login-modes{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:3px;border-radius:10px;background:rgba(0,0,0,.35);border:1px solid rgba(142,224,79,.12)}
+.login-modes button{
+  padding:9px 10px;border-radius:8px;font-size:13px;font-weight:600;color:var(--dim);
+}
+.login-modes button.on{background:rgba(142,224,79,.16);color:var(--fg)}
+.login-modes button[data-mode="planner"].on{background:rgba(255,200,87,.16)}
+
+.lab-wrap{position:relative;margin-left:2px}
+.lab-toggle{
+  width:38px;height:38px;border-radius:999px;color:rgba(238,246,232,.35);
+  font-size:18px;line-height:1;display:grid;place-items:center;
+}
+.lab-toggle:hover,.lab-toggle[aria-expanded="true"]{color:var(--fg);background:rgba(255,255,255,.05)}
+.lab-menu{
+  position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:220px;
+  padding:8px;border-radius:10px;border:1px solid var(--edge);
+  background:rgba(8,18,32,.96);backdrop-filter:blur(14px);
+  box-shadow:0 16px 40px rgba(0,0,0,.45);
+  display:none;
+}
+.lab-menu.open{display:grid;gap:2px}
+.lab-menu .lab-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim);padding:6px 10px 8px;
+}
+.lab-menu a{
+  display:block;padding:9px 10px;border-radius:6px;color:var(--fg);text-decoration:none;
+  font-size:13px;
+}
+.lab-menu a:hover{background:rgba(142,224,79,.1);color:var(--holo)}
+.lab-menu .hint{font-size:11px;color:var(--dim);padding:6px 10px 4px;line-height:1.4}
+
+.login-dialog{
+  border:1px solid var(--edge);border-radius:14px;padding:0;max-width:min(420px,92vw);
+  background:rgba(8,18,32,.98);color:var(--fg);box-shadow:0 24px 60px rgba(0,0,0,.55);
+}
+.login-dialog::backdrop{background:rgba(3,6,13,.72);backdrop-filter:blur(6px)}
+.login-inner{padding:22px 22px 18px;display:grid;gap:14px}
+.login-inner h2{margin:0;font-family:var(--display);font-size:22px}
+.login-inner p{margin:0;color:var(--dim);font-size:13px;line-height:1.45}
+.crew-picks{display:grid;gap:8px}
+.crew-pick{
+  display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;text-align:left;
+  width:100%;padding:12px;border-radius:10px;border:1px solid var(--edge);
+  background:rgba(0,0,0,.28);cursor:pointer;
+}
+.crew-pick:hover,.crew-pick:focus-visible{border-color:rgba(142,224,79,.55);background:rgba(142,224,79,.08)}
+.crew-pick .av{
+  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(142,224,79,.15);font-family:var(--display);font-weight:700;color:var(--holo);
+}
+.crew-pick .meta{display:grid;gap:2px;min-width:0}
+.crew-pick .n{font-weight:600;font-size:14px;display:block}
+.crew-pick .r{font-family:var(--mono);font-size:11px;color:var(--dim);display:block}
+.login-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+</style>
+</head>
+<body>
+
+<header class="topnav" id="topnav">
+  <div class="topnav-brand">
+    <div class="topnav-lock">
+      <img src="brand/kiwinaut-mark.png" width="34" height="34" alt="">
+      <span class="name">EVKIWI</span>
+    </div>
+    <p class="topnav-slogan">Small test for extra spacewalk time.</p>
+  </div>
+  <nav class="topnav-actions" aria-label="Primary">
+    <button type="button" class="link nav-role" data-roles="guest,astronaut" id="navSpace" data-go="entry">Spacewalk</button>
+    <button type="button" class="link nav-role" data-roles="astronaut" id="navDlco" data-go="calc">DLCO test</button>
+    <button type="button" class="link nav-role" data-roles="astronaut,planner" id="navCalendar" data-go="calendar">Calendar</button>
+    <button type="button" class="link nav-role" data-roles="astronaut" id="navRecs" data-go="recs">Recommendations</button>
+    <a class="link nav-role" data-roles="planner" id="navDash" href="/dosefit.html" title="Bone twin, training bay and recommendations hub">Mission dashboard</a>
+    <button type="button" class="pill nav-role" data-roles="astronaut" id="navEnter" data-go="calc">Enter DRI</button>
+    <div class="login-btns" id="loginBtns">
+      <button type="button" class="astro-btn" id="astroLogin" aria-haspopup="dialog">
+        <span class="mark" aria-hidden="true">A</span>
+        Astronaut
+      </button>
+      <button type="button" class="planner-btn" id="plannerLogin" aria-haspopup="dialog">
+        <span class="mark" aria-hidden="true">P</span>
+        Planner
+      </button>
+    </div>
+    <div class="astro-chip" id="astroChip" aria-live="polite">
+      <div>
+        <div class="who" id="astroName">—</div>
+        <div class="role" id="astroRole">Crew</div>
+      </div>
+      <button type="button" class="out" id="astroOut">Sign out</button>
+    </div>
+    <div class="lab-wrap">
+      <button type="button" class="lab-toggle" id="labToggle" aria-expanded="false" aria-controls="labMenu" title="Lab tools">⋯</button>
+      <div class="lab-menu" id="labMenu" role="menu" hidden>
+        <div class="lab-label">Developer lab</div>
+        <a href="/risk-methods.html" target="_blank" rel="noopener" role="menuitem">Compare risk methods</a>
+        <a href="/developer-tasks.html" target="_blank" rel="noopener" role="menuitem">Task specifications</a>
+        <a href="/developer-calculator.html" target="_blank" rel="noopener" role="menuitem">Calculator lab</a>
+        <a href="/developer-nasa.html" target="_blank" rel="noopener" role="menuitem">NASA model lab</a>
+        <p class="hint">Hidden from the main flow · demo tooling only.</p>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<dialog class="login-dialog" id="loginDialog" aria-labelledby="loginTitle">
+  <form method="dialog" class="login-inner">
+    <div>
+      <h2 id="loginTitle">Sign in</h2>
+      <p id="loginBlurb">Demo sign-in only — no password, no real credentials.</p>
+    </div>
+    <div class="login-modes" role="tablist" aria-label="Login type">
+      <button type="button" id="modeAstro" data-mode="astronaut" class="on" role="tab" aria-selected="true">Astronaut</button>
+      <button type="button" id="modePlanner" data-mode="planner" role="tab" aria-selected="false">Planner</button>
+    </div>
+    <div class="crew-picks" id="crewPicks" role="listbox" aria-label="Profiles"></div>
+    <div class="login-actions">
+      <button type="submit" class="cta ghost" value="cancel">Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<section class="phase" id="phaseEntry" aria-label="Spacewalk entry">
+  <iframe id="entryFrame" title="" src="/kiwinaut-eva.html?embed=1&auto=1&v=13" allow="fullscreen"></iframe>
+</section>
+
+<section class="phase" id="phaseCalc" hidden aria-label="EVA calculator">
+  <iframe id="calcFrame" title="EVA Decompression Risk Calculator" src="about:blank"></iframe>
+</section>
+
+<section class="phase" id="phaseCalendar" hidden aria-label="Mission calendar">
+  <iframe id="calendarFrame" title="Crew calendar" src="about:blank"></iframe>
+</section>
+
+<section class="phase recs" id="phaseRecs" hidden aria-label="Recommendations">
+  <div class="recs-inner">
+    <div class="steps" aria-hidden="true">
+      <span>1 Spacewalk</span>
+      <span>2 Calculator</span>
+      <span>3 Calendar</span>
+      <span class="on">4 Recommendations</span>
+    </div>
+    <div class="recs-top">
+      <div class="brand">
+        <img src="brand/kiwinaut-mark.png" width="40" height="40" alt="EVKIWI">
+        <div>
+          <div class="k">EVKIWI · mission plan + DLCO gate</div>
+          <h1>Recommendations</h1>
+        </div>
+      </div>
+      <div class="verdict">
+        <div class="q" id="verdictQ">Pressure risk · from EVA model</div>
+        <div class="big" id="ready">--</div>
+        <div class="tag" id="readyTag">—</div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:12px">
+      <div class="section-head">
+        <div class="lbl">Mission recommendations</div>
+        <button type="button" class="cta ghost" id="openCalendar">Open full calendar</button>
+      </div>
+      <iframe id="recsPlannerFrame" class="mission-frame" title="Mission EVA recommendations" src="about:blank"></iframe>
+    </div>
+
+    <div class="panel" id="gateInputs">
+      <div class="section-head">
+        <div class="lbl">Crew member today · DRI inputs</div>
+        <button type="button" class="cta ghost" id="useCalc">Use calculator result</button>
+      </div>
+      <p class="gate-src" id="gateSrc"></p>
+      <div class="presets" role="group" aria-label="Preset">
+        <button type="button" data-preset="green" aria-pressed="false"><span>GREEN</span></button>
+        <button type="button" data-preset="yellow" aria-pressed="false"><span>YELLOW · DLCO −8%</span></button>
+        <button type="button" data-preset="orange" aria-pressed="false"><span>ORANGE · DLCO −13%</span></button>
+        <button type="button" data-preset="red" aria-pressed="false"><span>RED · symptoms</span></button>
+      </div>
+      <div class="sliders">
+        <label>DLCO vs personal baseline <b id="gDlcoV">−1.2%</b><input type="range" id="gDlco" min="-20" max="5" step="0.5" value="-1" aria-label="DLCO change versus personal baseline, percent"></label>
+        <label>Hydration <b id="gHydV">70 · adequate</b><input type="range" id="gHyd" min="0" max="100" step="1" value="70" aria-label="Hydration"></label>
+        <label>Bubble grade (Doppler) <b id="gBubV">G0</b><input type="range" id="gBub" min="0" max="4" step="1" value="0" aria-label="Bubble grade"></label>
+      </div>
+      <div class="symptoms" role="group" aria-label="Symptoms">
+        <span class="k">Symptoms</span>
+        <button type="button" data-sym="joint" aria-pressed="false">Joint pain</button>
+        <button type="button" data-sym="itch" aria-pressed="false">Itch · skin</button>
+        <button type="button" data-sym="fatigue" aria-pressed="false">Fatigue</button>
+        <button type="button" data-sym="chokes" aria-pressed="false">Chokes</button>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
+          <div class="lbl" style="margin:0">DLCO gate · pressure risk</div>
+          <span class="api-pill off" id="apiPill">API · idle</span>
+        </div>
+        <div class="dial-wrap">
+          <div class="dial" aria-hidden="true">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(142,224,79,.12)" stroke-width="10"/>
+              <circle id="dialArc" cx="60" cy="60" r="48" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"
+                stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 60 60)"/>
+              <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#5ef0c2"/><stop offset="45%" stop-color="#ffc857"/><stop offset="75%" stop-color="#ff8a3d"/><stop offset="100%" stop-color="#ff5d6c"/>
+              </linearGradient></defs>
+              <text x="60" y="58" text-anchor="middle" fill="#eef6e8" font-family="Chakra Petch,sans-serif" font-size="28" font-weight="700" id="dialScore">0</text>
+              <text x="60" y="76" text-anchor="middle" fill="#93a68f" font-family="IBM Plex Mono,monospace" font-size="8" letter-spacing="1">0–100 RISK</text>
+            </svg>
+          </div>
+          <div>
+            <div class="chip green" id="levelChip">GREEN · LOW</div>
+            <p class="blurb" id="levelBlurb">Run Enter DRI from the calculator to score this gate from measured DLCO.</p>
+            <div class="meta" id="meta"></div>
+          </div>
+        </div>
+        <div class="coach" aria-live="polite"><span id="coachText"></span><span class="cursor" aria-hidden="true"></span></div>
+      </div>
+      <div class="panel">
+        <div class="lbl">Why this score</div>
+        <div class="why" id="whyBox"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="lbl">DLCO gate actions · accept to lock the plan</div>
+      <p class="plan" id="planLine"><b>Live plan</b> — accept cards to lock actions into the EVA timeline.</p>
+      <div class="cards" id="cards"></div>
+      <div class="cta-row" style="margin-top:16px;justify-content:flex-start">
+        <button type="button" class="cta ghost" id="backCalc">Back to calculator</button>
+        <button type="button" class="cta ghost" id="restartFlow">Restart from spacewalk</button>
+      </div>
+    </div>
+
+    <div class="panel" id="hubPanel">
+      <div class="section-head">
+        <div class="lbl">Safe EVA time · this mission</div>
+        <button type="button" class="cta ghost" id="hubReset">Reset hours</button>
+      </div>
+      <div class="hub">
+        <div>
+          <div class="big"><span id="hubHours">+0.0</span><small> h</small></div>
+          <div class="cap">safe EVA time this mission</div>
+          <div class="mini"><b id="hubScrubs">0</b> scrubbed EVAs avoided · <b id="hubAcc">0</b> accepted</div>
+        </div>
+        <div class="how" id="hubHow"></div>
+      </div>
+      <p class="foot" style="margin:12px 0 0">Illustrative model, sample data. Each accepted action adds the safe EVA time it protects; hours add up across the mission. Decision support, confirmed by the crew medical officer.</p>
+    </div>
+
+    <p class="foot">EVKIWI · NASA Space Apps Challenge 2026 · sample thresholds only. Not an official NASA product · not clinical advice. Confirmed by the crew medical officer. Open <button type="button" class="link" id="footLab" style="padding:0;color:var(--dim);text-decoration:underline">lab tools</button> for developer pages.</p>
+  </div>
+</section>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const COLOR={ok:"var(--ok)",holo:"var(--holo)",amber:"var(--amber)",hot:"var(--hot)",red:"var(--red)"};
+const DAYS={150:{name:"EVA week",note:"Airlock window. DLCO gate is prime. Exercise prebreathe preferred."}};
+const ENTRY_SRC="/kiwinaut-eva.html?embed=1&auto=1&v=13";
+const SESSION_KEY="evkiwi-session";
+const CREW=[
+  {id:"lee",name:"Jiaqi Chen",role:"Commander",initials:"JC",kind:"astronaut"},
+  {id:"rivera",name:"Marco Duchamp",role:"Flight engineer",initials:"MD",kind:"astronaut"},
+  {id:"chen",name:"Eduard Dante",role:"Science officer",initials:"ED",kind:"astronaut"}
+];
+const PLANNERS=[
+  {id:"morgan",name:"Morgan Bettre",role:"Mission planner",initials:"MB",kind:"planner",crew:"lee"},
+  {id:"riley",name:"Med Evikiwi",role:"Mission ops",initials:"ME",kind:"planner",crew:"lee"}
+];
+const ALL_PROFILES=[...CREW,...PLANNERS];
+
+let phase="entry";
+let day=150, dlco=-1.22, dlcoPre=32, dlcoPost=31.61, hb=13.3, hyd=70, bub=0, sym=0;
+let prebreatheMin=null, suitP=null;
+let accepted=new Set(), snoozed=new Set(), coachTimer=null, cardTimers=[], risk={level:"green",s:0};
+let lastApi=null;
+let session=null;
+let loginMode="astronaut";
+/* crew inputs: "calc" = scored from the calculator readings by the EVA model API; "manual" = DRI presets/sliders scored with the Decompress rules */
+let gateMode="calc",symSet=new Set(),presetOn=null;
+const PRESETS={green:{dlco:-1,hyd:80,bub:0,sym:[]},yellow:{dlco:-8,hyd:48,bub:1,sym:[]},orange:{dlco:-13,hyd:40,bub:2,sym:[]},red:{dlco:-12,hyd:35,bub:3,sym:["joint","fatigue"]}};
+const SYM_NAMES={joint:"joint pain",itch:"itch / skin",fatigue:"fatigue",chokes:"chokes"};
+/* illustrative hours of safe EVA time each accepted action protects (same model as the mission dashboard hub) */
+const HOURS={go:{h:.5,why:"standard prebreathe on schedule, so no EVA time is lost waiting"},p3:{h:.5,why:"each retest sharpens the personal DLCO baseline"},p24:{h:.5,why:"each retest sharpens the personal DLCO baseline"},
+  pb:{h:6.5,scrub:1,why:"a timely longer prebreathe avoids scrubbing a 6.5 h EVA"},h2o:{h:1,why:"good hydration lowers bubble risk and keeps the EVA on its full timeline"},
+  ared:{h:1,why:"no heavy loading near the pressure drop keeps bubble risk down"},lite:{h:2,why:"lighter tasks keep the crew outside instead of ending early"},
+  delay:{h:6.5,scrub:1,why:"moving the EVA 24–48 h turns a likely abort into a full EVA later"},mo:{h:.5,why:"medical confirms early, before the airlock schedule slips"},
+  rest:{h:1,why:"recovery today protects tomorrow’s EVA window"},stop:{h:0,why:"protects health first: a DCS case avoided"},o2:{h:0,why:"treats bubbles before they become injury"}};
+const hoursLog=new Map();
+
+function loadSession(){
+  try{
+    let raw=JSON.parse(sessionStorage.getItem(SESSION_KEY));
+    if(!raw){const r=JSON.parse(localStorage.getItem("evkiwi-role")||"null");if(r)raw={id:r.id,name:r.name,role:r.role,kind:r.kind,crew:r.kind==="planner"?(r.crew||"lee"):r.id}}
+    session=ALL_PROFILES.some(c=>c.id===raw?.id&&c.kind===(raw?.kind||"astronaut"))?raw:null;
+  }catch{session=null}
+}
+function saveSession(profile){
+  if(!profile){session=null;sessionStorage.removeItem(SESSION_KEY)}
+  else{
+    session={
+      id:profile.id,
+      name:profile.name,
+      role:profile.role,
+      kind:profile.kind||"astronaut",
+      crew:profile.kind==="planner"?(profile.crew||"lee"):profile.id
+    };
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify(session));
+    try{localStorage.setItem("evkiwi-role",JSON.stringify({kind:session.kind,id:session.id,name:session.name,role:session.role,crew:session.crew}))}catch{}
+  }
+  paintSession();
+  pushCrewToPlanners();
+}
+function roleKey(){
+  if(!session)return"guest";
+  return session.kind==="planner"?"planner":"astronaut";
+}
+function paintNavForRole(){
+  const role=roleKey();
+  $("topnav").dataset.role=role;
+  document.querySelectorAll(".nav-role").forEach(el=>{
+    const roles=(el.dataset.roles||"").split(",").map(s=>s.trim());
+    el.hidden=!roles.includes(role);
+  });
+  $("navCalendar").textContent=role==="planner"?"Calendar optimization":"Calendar";
+  // Planners get every phase (full view); astronauts have their own home at /astronaut.html.
+  if(role==="astronaut"&&phase==="entry"&&session){/* stay */}
+}
+function paintSession(){
+  const on=!!session;
+  $("loginBtns").hidden=on;
+  $("astroChip").classList.toggle("on",on);
+  $("astroChip").classList.toggle("planner",on&&session.kind==="planner");
+  if(on){
+    $("astroName").textContent=session.name;
+    $("astroRole").textContent=(session.kind==="planner"?"Planner · ":"Astronaut · ")+session.role;
+  }
+  paintNavForRole();
+}
+function plannerUrl(view){
+  const q=new URLSearchParams({view,v:"4"});
+  if(session?.crew)q.set("crew",session.crew);
+  if(session?.kind)q.set("mode",session.kind);
+  return "/planner.html?"+q.toString();
+}
+function pushCrewToPlanners(){
+  ["calendarFrame","recsPlannerFrame"].forEach(id=>{
+    const frame=$(id);
+    if(!frame.contentWindow||!frame.src.includes("planner.html"))return;
+    frame.contentWindow.postMessage({
+      type:"kiwinaut-planner-session",
+      crew:session?.crew||null,
+      name:session?.name||null,
+      kind:session?.kind||null
+    },location.origin);
+  });
+}
+
+function syncNav(name){
+  $("navSpace").classList.toggle("on",name==="entry");
+  $("navDlco").classList.toggle("on",name==="calc");
+  $("navCalendar").classList.toggle("on",name==="calendar");
+  $("navRecs").classList.toggle("on",name==="recs");
+  $("navEnter").textContent=name==="calc"?"Get recommendations":"Enter DRI";
+}
+
+function ensurePlanner(frame, view){
+  const next=plannerUrl(view);
+  if(!frame.src.includes("planner.html")){
+    frame.src=next;
+    return;
+  }
+  // Already loaded — quiet view/crew sync (no parent echo).
+  if(frame.contentWindow){
+    frame.contentWindow.postMessage({type:"kiwinaut-planner-navigate",view},location.origin);
+    pushCrewToPlanners();
+  }
+}
+
+function showPhase(name){
+  const same=phase===name;
+  phase=name;
+  $("phaseEntry").hidden=name!=="entry";
+  $("phaseCalc").hidden=name!=="calc";
+  $("phaseCalendar").hidden=name!=="calendar";
+  $("phaseRecs").hidden=name!=="recs";
+  syncNav(name);
+  if(same&&(name==="calendar"||name==="recs"))return;
+
+  if(name!=="entry"){
+    if($("entryFrame").src && !$("entryFrame").src.endsWith("about:blank")){
+      $("entryFrame").src="about:blank";
+    }
+  }else if(!$("entryFrame").src.includes("kiwinaut-eva")){
+    $("entryFrame").src=ENTRY_SRC;
+  }
+
+  if(name==="calc" && !$("calcFrame").src.includes("eva-calc")){
+    $("calcFrame").src="/eva-calc.html";
+  }
+  if(name==="calendar")ensurePlanner($("calendarFrame"),"calendar");
+  if(name==="recs"){ensurePlanner($("recsPlannerFrame"),"recs");if(!lastApi&&gateMode==="calc"&&!risk.s)runDecompressTest()}
+}
+
+async function goRecsFromCalc(){
+  try{
+    const msg=await requestReadings();
+    applyReadings(msg);
+  }catch(err){/* use last / defaults */}
+  accepted.clear();snoozed.clear();gateMode="calc";presetOn=null;
+  showPhase("recs");
+  await runDecompressTest();
+}
+
+function setApiPill(live,label){
+  const p=$("apiPill");
+  p.className="api-pill "+(live?"live":"off");
+  p.textContent=label||(live?"API · live":"API · offline fallback");
+}
+
+function localScore(){
+  const drop=Math.max(0,-dlco);const parts=[];let s=6;
+  const add=(label,v,push)=>{s+=v;parts.push({label,v:Math.round(v),push:!!push||v>=8})};
+  if(drop<=0)add("DLCO at/above personal baseline",0,false);
+  else if(drop<5)add(`DLCO −${drop.toFixed(2)}% (mild)`,drop*2.4,false);
+  else if(drop<=10)add(`DLCO −${drop.toFixed(2)}% (moderate)`,20+(drop-5)*3.2,true);
+  else add(`DLCO −${drop.toFixed(2)}% (high)`,42+(drop-10)*3.8,true);
+  add(`Bubble grade ${bub}`,bub*9,bub>=2);
+  add(hyd>=70?"Hydration adequate":"Hydration low",hyd>=70?0:(70-hyd)*.5,hyd<55);
+  if(sym){s=Math.max(s,90);add("Symptoms reported",28,true)}
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  let level="green",name="GREEN · LOW",blurb="Cleared for the EVA and normal training.",band="green";
+  if(sym&&drop>0){level="red";name="RED · SYMPTOMS";blurb="Stop the EVA. DCS protocol: 100% O₂, repressurize.";band="red"}
+  else if(drop>10){level="orange";name="ORANGE · HIGH";blurb="Postpone the EVA 24–48 h.";band="orange"}
+  else if(drop>=5){level="yellow";name="YELLOW · MODERATE";blurb="Extend exercise prebreathe.";band="yellow"}
+  return{score:s,s,level,name,blurb,parts,drop:Math.round(drop),band,coach:null,cards:null,day_note:DAYS[150].note,source:"local"};
+}
+
+function manualScore(){
+  const drop=Math.max(0,-dlco),parts=[];let s=8;
+  const add=(label,v,push)=>{s+=v;parts.push({label,v:Math.round(v),push:!!push||v>=8})};
+  if(drop<=0)add("DLCO at/above personal baseline",0,false);
+  else if(drop<5)add(`DLCO −${drop.toFixed(1)}% (mild)`,drop*2.2,false);
+  else if(drop<=10)add(`DLCO −${drop.toFixed(1)}% (moderate)`,18+(drop-5)*3.5,true);
+  else if(drop<=15)add(`DLCO −${drop.toFixed(1)}% (high)`,40+(drop-10)*4,true);
+  else add(`DLCO −${drop.toFixed(1)}% (severe)`,62+(drop-15)*2.5,true);
+  add(`Bubble grade ${bub}`,bub*10,bub>=2);
+  const hr=hyd>=70?0:hyd>=45?(70-hyd)*.45:12+(45-hyd)*.7;
+  add(hyd>=70?"Hydration adequate":hyd>=45?"Hydration low":"Hydration critical",hr,hyd<55);
+  add("EVA-day load + sleep/HRV (sample)",12,true);
+  if(sym){s=Math.max(s,88);add(`Symptoms: ${[...symSet].map(k=>SYM_NAMES[k]).join(", ")}`,25,true)}
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  let level="green",name="GREEN · LOW",blurb="Cleared for the EVA and normal training.";
+  if(sym&&drop>0){level="red";name="RED · SYMPTOMS";blurb="Stop the EVA. DCS protocol: 100% O₂, repressurize. No EVA until DLCO back to baseline."}
+  else if(drop>10||s>=75){level="orange";name="ORANGE · HIGH";blurb="Postpone the EVA 24–48 h. Rest day. Log symptoms. Alert the medical officer."}
+  else if(drop>=5||s>=50){level="yellow";name="YELLOW · MODERATE";blurb="Extend prebreathe 30–60 min. Drink more. No heavy ARED 24 h before/after. Lighter EVA tasks."}
+  return{score:s,s,level,name,blurb,parts:parts.sort((a,b)=>b.v-a.v),drop:Math.round(drop),band:level,coach:null,cards:null,day_note:DAYS[150].note,source:"manual"};
+}
+function paintInputs(){
+  $("gDlco").value=Math.max(-20,Math.min(5,dlco));$("gDlcoV").textContent=`${dlco>0?"+":""}${Number(dlco).toFixed(1)}%`;
+  $("gHyd").value=hyd;$("gHydV").textContent=`${hyd} · ${hyd>=70?"adequate":hyd>=45?"low":"critical"}`;
+  $("gBub").value=bub;$("gBubV").textContent=`G${bub}`;
+  document.querySelectorAll("[data-sym]").forEach(b=>b.setAttribute("aria-pressed",symSet.has(b.dataset.sym)));
+  document.querySelectorAll("[data-preset]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.preset===presetOn));
+  const calc=`calculator DLCO pre <b>${dlcoPre}</b> → post <b>${dlcoPost}</b>`;
+  $("gateSrc").innerHTML=gateMode==="calc"
+    ?`<span class="tagsrc calc">Source · calculator + EVA model API</span><span>${calc}</span><span>Move a slider or pick a preset to override.</span>`
+    :`<span class="tagsrc manual">Source · DRI inputs (Decompress rules)</span><span>Baseline was ${calc}</span><span>Same thresholds as the mission dashboard’s Decompress view.</span>`;
+}
+function rescore(){paintInputs();if(gateMode==="manual"){setApiPill(false,"DRI inputs · local rules");applyResult(manualScore())}else runDecompressTest()}
+function goManual(){gateMode="manual";accepted.clear();snoozed.clear()}
+
+function applyReadings(msg){
+  if(msg.pre!=null)dlcoPre=+msg.pre;
+  if(msg.post!=null)dlcoPost=+msg.post;
+  if(msg.hb!=null)hb=+msg.hb;
+  if(msg.pb!=null)prebreatheMin=+msg.pb;
+  if(msg.sp!=null)suitP=+msg.sp;
+  if(Number.isFinite(dlcoPre)&&dlcoPre>0)dlco=100*(dlcoPost-dlcoPre)/dlcoPre;
+}
+
+async function runDecompressTest(){
+  const body={
+    day,
+    dlco_pre:dlcoPre,
+    dlco_post:dlcoPost,
+    hb,
+    hydration:hyd,
+    bubble_grade:bub,
+    symptoms:!!sym
+  };
+  if(prebreatheMin!=null)body.prebreathe_min=prebreatheMin;
+  if(suitP!=null)body.suit_p=suitP;
+  try{
+    const r=await fetch("/api/decompress/test",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error("bad status");
+    const data=await r.json();
+    if(gateMode!=="calc")return;   // crew switched to DRI inputs while the API was answering
+    lastApi=data;
+    dlco=data.dlco_pct;
+    setApiPill(true,"API · EVA model");
+    applyResult({
+      s:data.score,score:data.score,level:data.level,band:data.band,name:data.name,blurb:data.blurb,
+      drop:data.drop,parts:data.parts,coach:data.coach,cards:data.cards,day_note:data.day_note,
+      vge:data.vge,dcs:data.dcs,model_vge:data.model_vge,model_dcs:data.model_dcs,
+      personal_factor:data.personal_factor,oxygen_time_min:data.oxygen_time_min,source:data.source||"eva-model"
+    });
+  }catch(err){
+    if(gateMode!=="calc")return;
+    setApiPill(false,"API · offline fallback");
+    applyResult(localScore());
+  }
+}
+
+function cardsFrom(res){
+  const palette=c=>COLOR[c]||c||"var(--holo)";
+  if(res.cards&&res.cards.length){
+    return res.cards.filter(c=>!snoozed.has(c.id)).map(c=>({
+      id:c.id,ico:c.ico,t:c.title,r:c.reason,c:palette(c.color),ok:accepted.has(c.id)
+    }));
+  }
+  const out=[];const push=(id,ico,t,r,c)=>{if(!snoozed.has(id))out.push({id,ico,t,r,c,ok:accepted.has(id)})};
+  if(res.level==="green"){
+    push("go","GO","Proceed with standard exercise prebreathe",`because DLCO ${dlco>0?"+"+Number(dlco).toFixed(2):Number(dlco).toFixed(2)}% · GREEN`,"var(--ok)");
+    push("p3","+3h","Schedule DLCO retest +3 h after ingress","because learn personal post-EVA pattern","var(--holo)");
+  }else{
+    push("pb","+45","Extend exercise prebreathe",`because DLCO −${res.drop}%`,"var(--amber)");
+    if(hyd<70)push("h2o","H₂O","Hydrate +500 ml before airlock",`because hydration ${hyd}/100`,"var(--amber)");
+    push("ared","HOLD","Hold heavy ARED 24 h before/after EVA","because loading near pressure drop","var(--hot)");
+  }
+  if(res.level==="yellow")push("lite","EVA","Assign lighter EVA tasks",`because DLCO −${res.drop}%`,"var(--amber)");
+  if(res.level==="orange"){push("delay","+24h","Postpone EVA 24–48 hours",`because DLCO −${res.drop}%`,"var(--hot)");push("mo","MO","Alert crew medical officer","because ORANGE","var(--hot)")}
+  if(res.level==="red"){push("stop","STOP","Abort / do not start EVA","because symptoms + DLCO drop","var(--red)");push("o2","O₂","DCS protocol: 100% O₂ + repressurize","because RED","var(--red)")}
+  push("p24","+24h","Retest DLCO at +24 h","because close the personal pattern loop","var(--holo)");
+  return out;
+}
+function coachText(res){
+  if(res.coach)return res.coach;
+  if(res.level==="red")return "CDR Chen: STOP · 100% O₂ · repressurize · notify MO.";
+  if(res.level==="orange")return `CDR Chen: delay EVA 24–48 h · MO alert · DLCO −${res.drop}%.`;
+  if(res.level==="yellow")return `CDR Chen: extend prebreathe · no heavy ARED · DLCO −${res.drop}%.`;
+  return "CDR Chen: GREEN · standard exercise prebreathe · DLCO +3 h / +24 h after ingress.";
+}
+function typeCoach(text){
+  clearInterval(coachTimer);
+  $("coachText").textContent=text;
+}
+function sweep(score){
+  const arc=$("dialArc"),circ=2*Math.PI*48,target=circ*(1-score/100);
+  arc.style.transition="none";
+  arc.style.strokeDashoffset=String(target);
+  $("dialScore").textContent=score;
+  $("dialScore").dataset.prev=String(score);
+}
+function renderCards(res){
+  cardTimers.forEach(clearTimeout);cardTimers=[];
+  const box=$("cards");box.innerHTML="";
+  cardsFrom(res).forEach(c=>{
+    const el=document.createElement("div");
+    el.className="acard"+(c.ok?" accepted":"");el.dataset.id=c.id;
+    const ops=c.ok?'<span class="r">Accepted</span>':'<button type="button" class="ok" data-act="accept">Accept</button><button type="button" data-act="snooze">Snooze</button>';
+    const hv=HOURS[c.id];const val=hv?`<div class="val">${hv.h>0?"+"+hv.h.toFixed(1)+" h":"Safety"} · ${hv.why}</div>`:"";
+    el.innerHTML=`<div class="ico" style="color:${c.c}">${c.ico}</div><div><div class="t">${c.t}</div><div class="r">${c.r}</div>${val}</div><div class="ops">${ops}</div>`;
+    box.appendChild(el);
+  });
+}
+function planText(res){
+  const notes=[...accepted].map(id=>({pb:"prebreathe +45",h2o:"+500 ml",ared:"ARED hold",delay:"EVA +24–48h",stop:"ABORT",o2:"DCS O₂",lite:"lighter EVA",go:"standard prebreathe"}[id]||id));
+  const base={green:"Standard EVA timeline.",yellow:"Modified: longer prebreathe, lighter tasks.",orange:"Hold: EVA delayed pending medical review.",red:"Emergency: DCS protocol active."}[res.level];
+  const note=res.day_note||DAYS[150].note;
+  const src=res.source==="manual"?' <span style="color:var(--amber)">· DRI inputs, Decompress rules</span>':res.source==="local"?' <span style="color:var(--amber)">· local fallback</span>':' <span style="color:var(--ok)">· scored by EVA model API</span>';
+  return `<b>${res.name}</b> — ${base}${notes.length?` Accepted: ${notes.join(", ")}.`:" Accept cards to lock actions."} <span style="color:var(--dim)">${note}</span>${src}`;
+}
+function applyResult(res){
+  risk=res;
+  const pct=Number(dlco);
+  $("levelChip").className="chip "+res.level;$("levelChip").textContent=res.name;
+  $("levelBlurb").textContent=res.blurb;
+  $("ready").textContent=res.s;
+  $("ready").style.color=({green:"var(--ok)",yellow:"var(--amber)",orange:"var(--hot)",red:"var(--red)"})[res.level];
+  $("readyTag").textContent=res.name;$("readyTag").style.color=$("ready").style.color;
+  $("verdictQ").textContent=`Pressure risk · DLCO ${pct>0?"+"+pct.toFixed(2):pct.toFixed(2)}%`;
+  const dcs=res.dcs!=null?Number(res.dcs).toFixed(2)+"%":"—";
+  const vge=res.vge!=null?Number(res.vge).toFixed(0):"—";
+  const fac=res.personal_factor!=null&&res.personal_factor===res.personal_factor?Number(res.personal_factor).toFixed(2)+"×":"—";
+  $("meta").innerHTML=`<span>DLCO <b>${pct.toFixed(2)}%</b></span><span>DCS <b>${dcs}</b></span><span>VGE <b>${vge}</b></span><span>Factor <b>${fac}</b></span><span>Pre <b>${dlcoPre}</b></span><span>Post <b>${dlcoPost}</b></span>`;
+  $("whyBox").innerHTML=(res.parts||[]).map(p=>`<div class="hit${p.push?" push":""}"><span>${p.label}</span><b>${p.v>=0?"+"+p.v:p.v}</b></div>`).join("");
+  $("planLine").innerHTML=planText(res);
+  sweep(res.s);typeCoach(coachText(res));renderCards(res);paintInputs();renderHub();
+}
+function renderHub(){
+  let h=0;const days=new Set();
+  for(const v of hoursLog.values()){if(v.scrub){if(days.has("x"))continue;days.add("x")}h+=v.h}
+  $("hubHours").textContent=(h>=0?"+":"")+h.toFixed(1);$("hubScrubs").textContent=days.size;$("hubAcc").textContent=hoursLog.size;
+  const rows=[...hoursLog.entries()].sort((a,b)=>b[1].h-a[1].h);
+  $("hubHow").innerHTML=`<div class="lbl" style="margin:0 0 4px">How the hours add up</div>`+(rows.length?rows.map(([id,v])=>`<div class="row"><b>${v.h>0?"+"+v.h.toFixed(1)+" h":"safety"}</b><span><span style="color:var(--fg)">${v.title}</span> · ${v.level} · ${v.why}</span></div>`).join(""):`<div>Nothing accepted yet. Each card shows the safe EVA time it protects; accepted cards add up here for the whole mission.</div>`);
+}
+
+function requestReadings(){
+  return new Promise((resolve,reject)=>{
+    const frame=$("calcFrame");
+    if(!frame.contentWindow){reject(new Error("no frame"));return}
+    const t=setTimeout(()=>{cleanup();reject(new Error("timeout"))},2500);
+    function onMsg(e){
+      if(e.origin!==location.origin)return;
+      if(!e.data||e.data.type!=="kiwinaut-eva-readings")return;
+      cleanup();resolve(e.data);
+    }
+    function cleanup(){clearTimeout(t);removeEventListener("message",onMsg)}
+    addEventListener("message",onMsg);
+    frame.contentWindow.postMessage({type:"kiwinaut-request-readings"},location.origin);
+  });
+}
+
+$("cards").addEventListener("click",e=>{
+  const btn=e.target.closest("button[data-act]");if(!btn)return;
+  const card=btn.closest(".acard");if(!card)return;
+  if(btn.dataset.act==="accept"){accepted.add(card.dataset.id);snoozed.delete(card.dataset.id);
+    const hv=HOURS[card.dataset.id]||{h:0,why:"decision support action"};hoursLog.set(card.dataset.id,{h:hv.h,scrub:!!hv.scrub,why:hv.why,title:card.querySelector(".t")?.textContent||card.dataset.id,level:risk.name||""})}
+  else{snoozed.add(card.dataset.id);accepted.delete(card.dataset.id)}
+  if(gateMode==="manual")applyResult(manualScore());
+  else if(lastApi)applyResult({
+    s:lastApi.score,score:lastApi.score,level:lastApi.level,band:lastApi.band,name:lastApi.name,blurb:lastApi.blurb,
+    drop:lastApi.drop,parts:lastApi.parts,coach:lastApi.coach,cards:lastApi.cards,day_note:lastApi.day_note,
+    vge:lastApi.vge,dcs:lastApi.dcs,model_vge:lastApi.model_vge,model_dcs:lastApi.model_dcs,
+    personal_factor:lastApi.personal_factor,oxygen_time_min:lastApi.oxygen_time_min,source:lastApi.source||"eva-model"
+  });
+  else applyResult(gateMode==="manual"?manualScore():localScore());
+});
+/* DRI inputs: presets, sliders, symptoms */
+document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>{const p=PRESETS[b.dataset.preset];presetOn=b.dataset.preset;goManual();
+  dlco=p.dlco;hyd=p.hyd;bub=p.bub;symSet=new Set(p.sym);sym=symSet.size?1:0;rescore()});
+$("gDlco").oninput=e=>{dlco=+e.target.value;presetOn=null;goManual();rescore()};
+$("gHyd").oninput=e=>{hyd=+e.target.value;presetOn=null;goManual();rescore()};
+$("gBub").oninput=e=>{bub=+e.target.value;presetOn=null;goManual();rescore()};
+document.querySelectorAll("[data-sym]").forEach(b=>b.onclick=()=>{const k=b.dataset.sym;symSet.has(k)?symSet.delete(k):symSet.add(k);sym=symSet.size?1:0;presetOn=null;goManual();rescore()});
+$("useCalc").onclick=()=>{gateMode="calc";presetOn=null;symSet.clear();sym=0;hyd=70;bub=0;
+  if(Number.isFinite(dlcoPre)&&dlcoPre>0)dlco=100*(dlcoPost-dlcoPre)/dlcoPre;accepted.clear();snoozed.clear();rescore()};
+$("hubReset").onclick=()=>{hoursLog.clear();renderHub()};
+paintInputs();renderHub();
+
+addEventListener("message",e=>{
+  if(e.origin!==location.origin)return;
+  if(e.data&&e.data.type==="kiwinaut-start-spacewalk")showPhase("entry");
+  if(e.data&&e.data.type==="kiwinaut-start-dlco")showPhase("calc");
+  if(e.data&&e.data.type==="kiwinaut-start-recs")goRecsFromCalc();
+  if(e.data&&e.data.type==="kiwinaut-planner-view"){
+    const view=e.data.view==="recs"?"recs":"calendar";
+    // Sync shell nav only — never bounce showPhase back into the iframe (that caused flashing).
+    if(view!==phase){
+      phase=view;
+      $("phaseEntry").hidden=true;
+      $("phaseCalc").hidden=true;
+      $("phaseCalendar").hidden=view!=="calendar";
+      $("phaseRecs").hidden=view!=="recs";
+      syncNav(view);
+      if(view==="calendar")ensurePlanner($("calendarFrame"),"calendar");
+      else ensurePlanner($("recsPlannerFrame"),"recs");
+    }else syncNav(view);
+  }
+});
+
+async function handleNav(go){
+  if(go==="entry"){showPhase("entry");return}
+  if(go==="calc"){showPhase("calc");return}
+  if(go==="calendar"){showPhase("calendar");return}
+  if(go==="recs"){
+    showPhase("recs");
+    if(phase==="recs" && ($("calcFrame").src.includes("eva-calc") || lastApi)){
+      if($("calcFrame").src.includes("eva-calc") && !lastApi){
+        $("navEnter").disabled=true;
+        try{
+          try{const msg=await requestReadings();applyReadings(msg)}catch(_){}
+          await runDecompressTest();
+        }finally{$("navEnter").disabled=false;syncNav(phase)}
+      }
+    }
+  }
+}
+
+$("navEnter").onclick=async()=>{
+  if(phase==="calc"){
+    $("navEnter").disabled=true;
+    try{await goRecsFromCalc()}finally{$("navEnter").disabled=false;syncNav(phase)}
+  }else showPhase("calc");
+};
+["navSpace","navDlco","navCalendar","navRecs"].forEach(id=>{
+  $(id).onclick=()=>handleNav($(id).dataset.go);
+});
+
+$("backCalc").onclick=()=>showPhase("calc");
+$("openCalendar").onclick=()=>showPhase("calendar");
+$("restartFlow").onclick=()=>{
+  accepted.clear();snoozed.clear();lastApi=null;
+  $("calcFrame").src="about:blank";
+  $("calendarFrame").src="about:blank";
+  $("recsPlannerFrame").src="about:blank";
+  showPhase("entry");
+};
+
+/* —— Dual demo login: astronaut + planner —— */
+const picks=$("crewPicks");
+function renderLoginPicks(){
+  const list=loginMode==="planner"?PLANNERS:CREW;
+  const blurb=loginMode==="planner"
+    ?"Mission planner sign-in — schedule EVAs, prep blocks and recommendations across the crew calendar."
+    :"Astronaut sign-in — open your personal calendar, DLCO gate and EVA recommendations.";
+  $("loginTitle").textContent=loginMode==="planner"?"Planner login":"Astronaut login";
+  $("loginBlurb").textContent=blurb+" Demo only — no password, no real credentials.";
+  $("modeAstro").classList.toggle("on",loginMode==="astronaut");
+  $("modePlanner").classList.toggle("on",loginMode==="planner");
+  $("modeAstro").setAttribute("aria-selected",loginMode==="astronaut"?"true":"false");
+  $("modePlanner").setAttribute("aria-selected",loginMode==="planner"?"true":"false");
+  picks.innerHTML=list.map(c=>`<button type="button" class="crew-pick" data-id="${c.id}" role="option">
+    <span class="av" aria-hidden="true">${c.initials}</span>
+    <span class="meta"><span class="n">${c.name}</span><span class="r">${c.role} · demo profile</span></span>
+  </button>`).join("");
+}
+function openLogin(mode){
+  loginMode=mode==="planner"?"planner":"astronaut";
+  renderLoginPicks();
+  $("loginDialog").showModal();
+}
+picks.onclick=e=>{
+  const btn=e.target.closest("[data-id]");if(!btn)return;
+  const profile=ALL_PROFILES.find(c=>c.id===btn.dataset.id);if(!profile)return;
+  saveSession(profile);
+  $("loginDialog").close();
+  $("calendarFrame").src="about:blank";
+  $("recsPlannerFrame").src="about:blank";
+  showPhase("calendar");
+  location.hash="calendar";
+};
+$("modeAstro").onclick=()=>{loginMode="astronaut";renderLoginPicks()};
+$("modePlanner").onclick=()=>{loginMode="planner";renderLoginPicks()};
+$("astroLogin").onclick=()=>openLogin("astronaut");
+$("plannerLogin").onclick=()=>openLogin("planner");
+$("astroOut").onclick=()=>{
+  saveSession(null);
+  try{localStorage.removeItem("evkiwi-role")}catch{}
+  $("calendarFrame").src="about:blank";
+  $("recsPlannerFrame").src="about:blank";
+  location.hash="";
+  showPhase("entry");
+};
+
+/* —— Hidden lab tools —— */
+function setLabOpen(open){
+  $("labMenu").classList.toggle("open",open);
+  $("labMenu").hidden=!open;
+  $("labToggle").setAttribute("aria-expanded",open?"true":"false");
+}
+$("labToggle").onclick=e=>{
+  e.stopPropagation();
+  setLabOpen(!$("labMenu").classList.contains("open"));
+};
+$("footLab").onclick=()=>{
+  setLabOpen(true);
+  $("labToggle").focus();
+};
+addEventListener("click",e=>{
+  if(!$("labMenu").classList.contains("open"))return;
+  if(e.target.closest(".lab-wrap"))return;
+  setLabOpen(false);
+});
+addEventListener("keydown",e=>{
+  if(e.key==="Escape")setLabOpen(false);
+});
+
+loadSession();
+paintSession();
+const hash=location.hash.replace("#","");
+const role=roleKey();
+// Guest home = 3D Spacewalk landing. Role tools unlock after Astronaut / Planner sign-in.
+if(role==="guest"||new URLSearchParams(location.search).has("logout")){
+  showPhase("entry");
+}else if(role==="planner"){
+  showPhase(hash==="calendar"||hash==="entry"?hash:"calendar");
+  $("navCalendar").textContent="Calendar optimization";
+}else if(hash==="recs"||hash==="calc"||hash==="calendar"||hash==="entry"){
+  showPhase(hash);
+}else{
+  showPhase("entry");
+}
+})();
+</script>
+</body>
+</html>

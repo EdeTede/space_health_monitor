@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EVKIWI · Mission control</title>
+<link rel="icon" type="image/png" href="brand/kiwinaut-mark.png">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="evkiwi.css">
+<style>
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:-6px 0 20px}
+.tools a{font-size:13px;padding:7px 12px;border-radius:999px;border:1px solid var(--edge);text-decoration:none;color:var(--dim);transition:all .3s var(--ease)}
+.tools a:hover{color:var(--fg);border-color:var(--edge2);background:rgba(142,224,79,.06)}
+.alerts{display:grid;gap:8px;margin-bottom:16px}
+.alert{display:flex;gap:12px;align-items:center;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,93,108,.45);background:rgba(255,93,108,.08)}
+.alert.orange{border-color:rgba(255,138,61,.45);background:rgba(255,138,61,.08)}
+.alert b{font-family:var(--mono);font-size:11px;letter-spacing:.14em}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi .v{font-family:var(--display);font-size:30px;font-weight:700}
+.kpi .k{font-size:12.5px;color:var(--dim)}
+h2.h{font-family:var(--display);font-size:20px;margin:26px 0 12px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);text-align:left;padding:10px 10px;border-bottom:1px solid var(--edge);cursor:pointer;white-space:nowrap;user-select:none}
+th[aria-sort="ascending"]::after{content:" ▲"}th[aria-sort="descending"]::after{content:" ▼"}
+td{padding:12px 10px;border-bottom:1px solid rgba(147,166,143,.1);vertical-align:middle;white-space:nowrap}
+tbody tr{cursor:pointer;transition:background .25s var(--ease)}
+tbody tr:hover,tbody tr.sel{background:rgba(142,224,79,.06)}
+.lvl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:3px 8px;border-radius:999px;border:1px solid currentColor}
+.spark{width:90px;height:26px;vertical-align:middle}
+.detail{display:none;margin-top:14px}
+.detail.on{display:grid;gap:14px}
+.dgraphs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.dgraphs .panel{padding:12px}
+.dgraphs .big{font-size:20px}
+.gantt{display:grid;grid-template-columns:120px repeat(7,minmax(0,1fr));border:1px solid var(--edge);border-radius:14px;overflow:hidden}
+.gantt .gh{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--edge);text-align:center}
+.gantt .gh.today{color:var(--kiwi)}
+.gantt .gn{padding:10px;border-top:1px solid rgba(147,166,143,.1);font-weight:600;font-size:13px}
+.gantt .gc{position:relative;height:58px;border-top:1px solid rgba(147,166,143,.1);border-left:1px solid rgba(147,166,143,.08)}
+.gantt .gc.today{background:rgba(142,224,79,.04)}
+.gantt .gb{position:absolute;height:16px;border-radius:4px;border-left:3px solid;font-size:9.5px;line-height:16px;padding:0 4px;overflow:hidden;white-space:nowrap}
+.gantt .gb.conflict{box-shadow:0 0 0 1.5px var(--red) inset}
+.gantt .gb.cancelled{opacity:.35;text-decoration:line-through}
+.conflicts{display:grid;gap:6px;margin-top:10px;font-size:13px}
+.conflicts div{color:var(--red)}
+.pending{display:grid;gap:8px}
+.prow{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-radius:12px;border:1px solid var(--edge);background:rgba(8,18,32,.6)}
+.prow .ops{display:flex;gap:6px}
+@media (max-width:980px){.kpis{grid-template-columns:1fr 1fr}.dgraphs{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.dgraphs{grid-template-columns:1fr}.prow{grid-template-columns:1fr}.gantt{grid-template-columns:70px repeat(7,minmax(0,1fr))}.gantt .gb{font-size:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/mission-control.html"><img src="brand/kiwinaut-mark.png" alt=""><span><b>EVKIWI</b><small>Mission control</small></span></a>
+    <div class="who">
+      <span class="avatar planner" id="av">MO</span>
+      <span><span class="n" id="nm">—</span><br><span class="r">Planner</span></span>
+      <a class="btn small" href="/?switch=1">Switch user</a>
+      <a class="btn small" href="/?logout=1">Log out</a>
+    </div>
+  </header>
+  <nav class="tools" aria-label="Full tools">
+    <a href="/index.html">Main flow</a><a href="/eva-calc.html">EVA calculator</a><a href="/index.html#recs" id="toolRecs">DLCO gate · DRI inputs</a><a href="/planner.html?view=calendar&mode=planner">Crew calendar planner</a><a href="/dosefit.html">Mission dashboard</a><a href="/kiwinaut-eva.html">3D spacewalk</a><a href="/risk-methods.html">Risk methods</a>
+  </nav>
+
+  <div class="alerts" id="alerts"></div>
+  <div class="kpis" id="kpis"></div>
+
+  <h2 class="h">Crew overview <span class="lbl">click a crew member for detail · sort by any column</span></h2>
+  <div class="panel tablewrap"><table id="crewTable"><thead><tr>
+    <th data-k="name">Crew</th><th data-k="ready">Readiness</th><th data-k="s">DRI</th><th data-k="dlco">DLCO trend</th><th data-k="bone">Bone</th><th data-k="rad">Radiation</th><th data-k="eva">Next EVA</th><th data-k="open">Open recs</th><th data-k="hrs">Safe EVA h</th>
+  </tr></thead><tbody></tbody></table></div>
+  <div class="detail" id="detail"></div>
+
+  <h2 class="h">Mission timeline · next 7 days <span class="lbl">EVA · prebreathe · training · tests</span></h2>
+  <div class="panel" style="padding:12px"><div class="gantt" id="gantt"></div><div class="conflicts" id="conflicts"></div></div>
+
+  <h2 class="h">Pending recommendations <span class="lbl" id="pendLbl"></span></h2>
+  <div class="pending" id="pending"></div>
+
+  <p class="foot">Sample crew and readings, illustrative model. Decision support only; ORANGE and RED go to the crew medical officer. Not an official NASA product. <button class="btn small" id="resetDemo" type="button" style="margin-left:8px">Reset demo data</button></p>
+</div>
+<script src="evkiwi-core.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),E=EVK,esc=E.esc;
+const sess=E.getSession();if(!sess||sess.kind!=='planner'){location.replace('/');return}
+$('nm').textContent=sess.name;$('av').textContent=E.PLANNER.initials;
+let sortK='s',sortDir=-1,sel=null;
+const LV={green:0,yellow:1,orange:2,red:3};
+function rows(){return E.CREW.map(c=>{const sc=E.score(c.id),m=E.metrics(c.id),nx=E.nextEva(c.id),recs=E.recList(c.id);
+  return{c,sc,m,nx,open:recs.filter(r=>r.status==='open').length,hrs:E.hours(c.id),name:c.name,ready:LV[sc.level],s:sc.s,dlco:m.dlcoNow,bone:m.bone.landing,rad:m.rad,eva:nx?nx.day*24+nx.start:999}})}
+function spark(vals){const w=90,h=26,mn=-16,mx=1,X=i=>4+i/(vals.length-1)*(w-8),Y=v=>3+(1-(v-mn)/(mx-mn))*(h-6);
+  return`<svg class="spark" viewBox="0 0 ${w} ${h}"><path d="${vals.map((v,i)=>`${i?'L':'M'}${X(i)} ${Y(v)}`).join('')}" fill="none" stroke="${vals.at(-1)>-5?'#5ef0c2':vals.at(-1)>-10?'#ffc857':'#ff8a3d'}" stroke-width="2"/><circle cx="${X(vals.length-1)}" cy="${Y(vals.at(-1))}" r="2.5" fill="#eef6e8"/></svg>`}
+function render(){
+  const R=rows();
+  // alerts for the medical officer
+  $('alerts').innerHTML=R.filter(r=>r.sc.level==='orange'||r.sc.level==='red').map(r=>`<div class="alert ${r.sc.level}"><b style="color:${r.sc.color}">${r.sc.name}</b><span><strong>${r.c.name}</strong> · DRI ${r.s} · ${esc(r.sc.parts.slice(0,2).map(p=>p.label).join(' · '))}. Medical officer review needed before the next EVA.</span></div>`).join('');
+  const conf=E.CREW.flatMap(c=>E.conflicts(E.plan(c.id)).map(x=>({c,...x})));
+  const pend=R.reduce((n,r)=>n+r.open,0),hrs=R.reduce((n,r)=>n+r.hrs,0);
+  $('kpis').innerHTML=[[R.filter(r=>r.sc.level==='green').length+' / '+R.length,'crew ready for EVA'],[pend,'recommendations pending'],[conf.length,'schedule conflicts'],['+'+hrs.toFixed(1)+' h','safe EVA time protected']].map(([v,k])=>`<div class="panel kpi"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('');
+  R.sort((a,b)=>{const x=a[sortK],y=b[sortK];return(typeof x==='string'?x.localeCompare(y):x-y)*sortDir});
+  document.querySelectorAll('th[data-k]').forEach(th=>th.setAttribute('aria-sort',th.dataset.k===sortK?(sortDir>0?'ascending':'descending'):'none'));
+  $('crewTable').tBodies[0].innerHTML=R.map(r=>`<tr data-id="${r.c.id}" class="${sel===r.c.id?'sel':''}"><td><span class="who"><span class="avatar">${r.c.initials}</span><span><span class="n">${r.c.name}</span><br><span class="r">${r.c.role}</span></span></span></td>
+    <td><b style="color:${r.sc.color}">${r.sc.word}</b></td><td><span class="lvl" style="color:${r.sc.color}">${r.sc.name} ${r.s}</span></td><td>${spark(r.m.dlco)} ${r.dlco}%</td>
+    <td>${r.m.bone.now}% <span class="muted">→ ${r.m.bone.landing}%</span></td><td>${r.rad} mSv</td><td>${r.nx?r.nx.label:'<span class="muted">none</span>'}</td><td>${r.open||'<span class="muted">0</span>'}</td><td style="color:var(--kiwi)">+${r.hrs.toFixed(1)}</td></tr>`).join('');
+  // detail for the selected crew member
+  if(sel){const c=E.CREW.find(x=>x.id===sel),sc=E.score(sel);
+    $('detail').innerHTML=`<div class="panel" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><span class="who"><span class="avatar">${c.initials}</span><span><span class="n">${c.name}</span><br><span class="r">${c.role} · <span style="color:${sc.color}">${sc.word} · ${sc.name} ${sc.s}</span></span></span></span><span style="display:flex;gap:8px"><a class="btn small" href="/astronaut.html?crew=${c.id}">Open ${c.first}’s view</a><button class="btn small" type="button" data-close>Close</button></span></div>
+      <div class="dgraphs">${E.graphs(sel).map(g=>`<div class="panel gcard"><div class="gt"><span class="lbl">${g.title}</span><span class="flag ${g.ok?'ok':'watch'}">${g.ok?'ok':'watch'}</span></div><div class="big">${g.big}</div>${g.svg}</div>`).join('')}</div>
+      <div class="panel" style="overflow-x:auto"><div class="lbl" style="margin-bottom:10px">${c.first}’s week · dashed = suggested</div><div style="min-width:640px">${E.weekHtml(sel,{interactive:false,compact:true})}</div></div>`;
+    $('detail').classList.add('on')}else{$('detail').classList.remove('on');$('detail').innerHTML=''}
+  // timeline across crew
+  const confIds=new Set(conf.map(x=>x.ared.id));
+  let g=`<div class="gh"></div>${Array.from({length:7},(_,d)=>`<div class="gh${d===0?' today':''}">${d===0?'Today':E.dayName(d)}</div>`).join('')}`;
+  for(const c of E.CREW){g+=`<div class="gn">${c.name}</div>`;const P=E.plan(c.id).filter(e=>['eva','pre','ared','t2','cevis','dlco','med','rest'].includes(e.type));
+    for(let d=0;d<7;d++){const L=P.filter(e=>e.day===d);g+=`<div class="gc${d===0?' today':''}">${L.map((e,i)=>{const left=Math.max(0,(e.start-6)/16*100),w=Math.max(6,e.dur/16*100),row=e.type==='eva'||e.type==='pre'?0:e.type==='ared'||e.type==='t2'||e.type==='cevis'?1:2;
+      return`<span class="gb t-${e.type}${confIds.has(e.id)?' conflict':''}${e.cancelled?' cancelled':''}" style="left:${left}%;width:${Math.min(w,100-left)}%;top:${4+row*18}px" title="${esc(c.first)} · ${esc(e.title)} · ${E.fmtTime(e.start)}">${esc(e.title)}</span>`}).join('')}</div>`}}
+  $('gantt').innerHTML=g;
+  $('conflicts').innerHTML=conf.length?conf.map(x=>`<div>⚠ ${x.c.name}: ${esc(x.ared.title)} ${E.dayName(x.ared.day)} ${E.fmtTime(x.ared.start)} is ${x.gap.toFixed(1)} h before the EVA (needs ≥ 24 h)</div>`).join(''):'<span class="muted">No conflicts. Heavy loading is at least 24 h from every EVA.</span>';
+  // pending recommendations with planner approval
+  const P=E.CREW.flatMap(c=>E.recList(c.id).filter(r=>r.status==='open'||r.status==='snoozed').map(r=>({c,r})));
+  $('pendLbl').textContent=`${P.length} waiting · approving applies the change to the crew calendar`;
+  $('pending').innerHTML=P.length?P.map(({c,r})=>`<div class="prow"><span class="who"><span class="avatar">${c.initials}</span><span class="n">${c.first}</span></span><span><b>${esc(r.title)}</b>${r.status==='snoozed'?' <span class="muted">(snoozed by crew)</span>':''}<br><span class="muted" style="font-size:13px">because ${esc(r.reason)} · ${r.h>0?'+'+r.h.toFixed(1)+' h':'safety'}</span></span><span class="ops"><button class="btn primary small" data-crew="${c.id}" data-op="${r.op}" data-act="accept">Approve</button><button class="btn small" data-crew="${c.id}" data-op="${r.op}" data-act="reject">Reject</button></span></div>`).join(''):'<div class="panel muted">Nothing waiting. Every recommendation has been handled.</div>';
+}
+document.querySelector('#crewTable thead').onclick=e=>{const th=e.target.closest('th[data-k]');if(!th)return;if(sortK===th.dataset.k)sortDir*=-1;else{sortK=th.dataset.k;sortDir=th.dataset.k==='name'?1:-1}render()};
+$('crewTable').tBodies[0].onclick=e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;sel=sel===tr.dataset.id?null:tr.dataset.id;render();if(sel)$('detail').scrollIntoView({behavior:'smooth',block:'start'})};
+document.addEventListener('click',e=>{if(e.target.closest('[data-close]')){sel=null;render();return}
+  const b=e.target.closest('[data-act][data-crew]');if(b){E.act(b.dataset.crew,b.dataset.op,b.dataset.act,'planner');render()}});
+$('resetDemo').onclick=()=>{E.reset();render()};
+addEventListener('storage',e=>{if(e.key==='evkiwi-crew-v1')location.reload()});
+render();
+})();
+</script>
+</body>
+</html>

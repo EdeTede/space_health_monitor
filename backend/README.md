@@ -1,8 +1,8 @@
-# DoseFit backend
+# EVKIWI backend
 
-Python FastAPI + SQLite service for the NASA Space Apps DoseFit demo.
+FastAPI service for the EVKIWI demo.
 
-**Sense → Score → Adapt** loop powers the bone-twin scan in `../dosefit.html`.
+Serves the `../frontend` app and powers **Decompression Test** via the EVA DLCO model (`eva_model.py`, ported from `frontend/model.js`).
 
 ## Run
 
@@ -14,26 +14,21 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8791
 ```
 
-If `venv` creation is blocked, install into a local vendor folder instead:
+Vendor fallback (no venv):
 
 ```bash
-cd backend
 python3 -m pip install --target ./.vendor -r requirements.txt
 PYTHONPATH="./.vendor:$PYTHONPATH" python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8791
 ```
 
-Open http://127.0.0.1:8791/
-
-## Key endpoints
+## API
 
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/api/health` | Liveness |
-| GET | `/api/twin?day=&mode=&scan=` | Bone twin snapshot for the scan HUD |
-| GET | `/api/score?day=&mode=` | Two-dose dashboard |
-| POST | `/api/sense` | Ingest wearable / dosimeter / HRV / EVA events |
-| GET | `/api/adapt/next` | Next workout plan |
-| POST | `/api/scenarios/{id}/activate` | Activate demo scenario |
-| GET | `/api/eva/prebreathe` | DCS risk + exercise prebreathe |
+| POST | `/api/decompress/test` | DLCO → VGE / DCS + recommendation cards |
+| GET | `/api/decompress/test` | Query-string convenience |
 
-Sample data only — not clinical or operational advice.
+Static UI routes: `/`, `/kiwinaut-eva.html`, `/eva-calc.html`, `/brand/*`, `/models/*`, `/vendor/*`.
+
+Sample data only — not clinical advice.
